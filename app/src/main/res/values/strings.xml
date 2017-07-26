@@ -1,3 +1,122 @@
 <resources>
-    <string name="app_name">videoshotpro</string>
+    <string name="app_name">视频截图Pro</string>
+    <string name="main_information_title">说明</string>
+    <string name="main_information_content">
+        经常在网上看到别人制作的电影台词的长截图？想要自己制作一张？一张一张截图后剪切再拼接很麻烦？ \n
+        有了视频截取，你就可以边看视频边将想要截图的位置标记下来，当视频播放完后忙你的截图也已经处理完毕。\n
+        可用于制作电影图解 or 电影台词截图 or 精彩画面合集。 \n
+        还支持自定义裁剪范围，甚至是保留整张截图。\n\n\n
+        重要提示：\n
+        有很多应用平台出现了本app的二次打包版本，且被添加了强制下载的广告，虽然我一直在努力和平台交涉，但是始终无法让官方将其下架，所以，只能提醒各位用户，本app正版没有任何的广告，并且只用了 读取/写入储存卡 权限，如果你下载的版本有广告且权限不止上述两个，那么就是盗版了。别问我哪里能下到正版，我也无法！（目前发现的有盗版且经过交涉不下架甚至不回复的较大的平台有 百度的几个平台（手机助手，安卓市场，91）、应用汇。另外，我只在 魅族应用市场，百度开放平台，腾讯应用宝，酷安 上传了本应用。）\n
+        \t默认合成图片保存目录在 %1$s \n
+        \t但是我推荐直接在图库里面找，不过由于有时候图库刷新很慢，甚至某些ROM的图库直接不显示系统默认图片目录中的图片，所以如果在图库里找不到图片，请前往上述目录查找。\n
+        \n\n\n
+        联系我： admin@likehide.com
+    </string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="main_mail_title">《视频截图》意见反馈</string>
+    <string name="main_mail_content">请在此描述您遇到的问题。
+
+        ---------请勿删除下面的内容------
+        应用版本：%1$s
+        系统版本：%2$s
+        手机型号：%3$s
+    </string>
+
+    <string name="main_dialog_btn_cancel">取消</string>
+    <string name="main_dialog_btn_ok">确定</string>
+    <string name="main_dialog_disablePermission_content">请在-应用设置-权限-中，允许 %1$s 使用存储权限来保存图片</string>
+    <string name="main_dialog_disablePermission_title">存储权限不可用</string>
+    <string name="main_dialog_noPermission_title">未授予读写储存权限</string>
+    <string name="main_dialog_noPermission_content">请授予 读取/写入储存 权限来保存您制作的作品</string>
+
+    <string name="main_snackbar_loadSo_fail">加载FFmpeg失败</string>
+    <string name="main_snackbar_btn_retry">重试</string>
+    <string name="main_snackbar_btn_contact">联系开发者</string>
+    <string name="main_snackbar_so_notAble">很抱歉，无兼容您手机的so库</string>
+    <string name="main_snackbar_isPiracy">您下载的是非法打包版本，建议您前往正规渠道重新下载"</string>
+
+    <string name="main_toast_chooseFile_fail">未选择文件！</string>
+    <string name="main_toast_getPermission_success">权限获取成功！</string>
+
+    <string name="player_toast_needMoreShot">至少需要截取两张图片！</string>
+
+    <string name="player_text_rotationScreen">翻转</string>
+    <string name="player_text_shotStatus">标记/已截取：%1$d/%2$d</string>
+    <string name="player_text_replay">重新播放</string>
+    <string name="player_text_savePicture_fail">保存截图失败</string>
+    <string name="player_text_start_play">开始播放</string>
+    <string name="player_text_done">完成</string>
+    <string name="player_text_shot">截取</string>
+
+    <string name="action_settings">设置</string>
+    <string name="title_activity_settings">设置</string>
+
+    <string name="pref_header_general">通用</string>
+
+    <string name="pref_title_watermark">添加水印</string>
+    <string name="pref_description_watermark">选择是否在图片合成后添加水印
+    </string>
+
+    <string name="pref_title_shot_jpg">截取为jpg</string>
+    <string name="pref_description_shot_jpg">选择是否在截取图片时保存为jpg（使用jpg能大幅减少图片大小，但是质量会略微有所降低）</string>
+
+    <string name="pref_title_hide_btn">单击隐藏按钮</string>
+    <string name="pref_description_hide_btn">选择是否在全屏播放时单击屏幕显示/隐藏按钮</string>
+
+    <string name="pref_title_monitored_show">实时预览</string>
+    <string name="pref_description_monitored_show">选择是否在合成图片时实时预览（开启后可能会内存溢出闪退，建议关闭）</string>
+
+    <string name="pref_title_reduce">压缩图片</string>
+    <string name="pref_description_reduce">选择是否在导出时压缩图片（仅降低质量，不改变分辨率）
+    </string>
+
+    <string name="pref_title_display_watermark">水印文字</string>
+    <string name="pref_default_display_watermark">Made by equationl</string>
+
+    <string name="pref_title_reduce_value">图片质量</string>
+    <string-array name="pref_reduce_list_titles">
+        <item>原图</item>
+        <item>9</item>
+        <item>8</item>
+        <item>7</item>
+        <item>6</item>
+        <item>5</item>
+        <item>4</item>
+        <item>3</item>
+        <item>2</item>
+        <item>1</item>
+        <item>最小</item>
+    </string-array>
+    <string-array name="pref_reduce_list_values">
+        <item>100</item>
+        <item>90</item>
+        <item>80</item>
+        <item>70</item>
+        <item>60</item>
+        <item>50</item>
+        <item>40</item>
+        <item>30</item>
+        <item>20</item>
+        <item>10</item>
+        <item>0</item>
+    </string-array>
+
+    <string name="pref_title_watermark_position">水印位置</string>
+    <string-array name="pref_watermark_position_titles">
+        <item>左上</item>
+        <item>中间</item>
+        <item>左下</item>
+    </string-array>
+    <string-array name="pref_watermark_position_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+
+    <string name="title_activity_command">自定义FFmpeg命令</string>
 </resources>

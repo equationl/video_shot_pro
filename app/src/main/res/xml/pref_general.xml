@@ -1,0 +1,62 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="isAddWatermark_switch"
+        android:summary="@string/pref_description_watermark"
+        android:title="@string/pref_title_watermark" />
+    <EditTextPreference
+        android:capitalize="words"
+        android:defaultValue="@string/pref_default_display_watermark"
+        android:inputType="text"
+        android:key="watermark_text"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_display_watermark"
+        android:dependency="isAddWatermark_switch"/>
+    <ListPreference
+        android:defaultValue="1"
+        android:entries="@array/pref_watermark_position_titles"
+        android:entryValues="@array/pref_watermark_position_values"
+        android:key="watermark_position_value"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_watermark_position"
+        android:dependency="isAddWatermark_switch"/>
+
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="isReduce_switch"
+        android:summary="@string/pref_description_reduce"
+        android:title="@string/pref_title_reduce" />
+    <ListPreference
+        android:defaultValue="1"
+        android:entries="@array/pref_reduce_list_titles"
+        android:entryValues="@array/pref_reduce_list_values"
+        android:key="reduce_value"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_reduce_value"
+        android:dependency="isReduce_switch"/>
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="isHideButton"
+        android:summary="@string/pref_description_hide_btn"
+        android:title="@string/pref_title_hide_btn" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="isMonitoredShow"
+        android:summary="@string/pref_description_monitored_show"
+        android:title="@string/pref_title_monitored_show" />
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="isShotToJpg"
+        android:summary="@string/pref_description_shot_jpg"
+        android:title="@string/pref_title_shot_jpg" />
+
+</PreferenceScreen>

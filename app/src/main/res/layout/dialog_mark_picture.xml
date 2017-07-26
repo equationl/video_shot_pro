@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="1">
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/input_text"
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="0.16"
+            android:maxHeight="80dp"
+            android:hint="请输入文字" />
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:ems="10"
+            android:id="@+id/input_size"
+            android:hint="请输入文字大小"
+            android:layout_gravity="right" />
+    </android.support.design.widget.TextInputLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="请选择文字颜色："
+        android:id="@+id/textView4"
+        android:layout_weight="0.05"
+        android:textColor="#000000" />
+
+        <RadioGroup
+            android:id="@+id/color"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <RadioButton
+                android:id="@+id/radiobutton_black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="黑"
+                android:checked="true" />
+
+            <RadioButton
+                android:id="@+id/radiobutton_red"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="红"
+                android:checked="false" />
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="蓝"
+                android:id="@+id/radioButton_blue"
+                android:checked="false" />
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="绿"
+                android:id="@+id/radioButton_green"
+                android:checked="false" />
+
+        </RadioGroup>
+
+</LinearLayout>
