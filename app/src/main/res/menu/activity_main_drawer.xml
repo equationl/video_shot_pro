@@ -3,25 +3,29 @@
 
     <group android:checkableBehavior="single">
         <item
+            android:id="@+id/nav_splicing"
+            android:icon="?android:attr/actionModeCopyDrawable"
+            android:title="@string/main_nav_text_splicing" />
+        <item
             android:id="@+id/nav_setting"
             android:icon="@android:drawable/ic_menu_manage"
-            android:title="设置" />
+            android:title="@string/main_nav_text_setting" />
         <item
             android:id="@+id/nav_more"
             android:icon="@android:drawable/ic_menu_view"
-            android:title="更多..." />
+            android:title="@string/main_nav_text_more" />
     </group>
 
-    <item android:title="反馈与帮助">
+    <item android:title="@string/main_nav_title_info">
         <menu>
             <item
                 android:id="@+id/nav_help"
                 android:icon="@android:drawable/ic_menu_help"
-                android:title="使用说明" />
+                android:title="@string/main_nav_text_help" />
             <item
                 android:id="@+id/nav_feedback"
                 android:icon="@android:drawable/sym_action_email"
-                android:title="反馈意见" />
+                android:title="@string/main_nav_text_feedback" />
         </menu>
     </item>
 

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -14,12 +15,14 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -35,6 +38,11 @@ import com.equationl.videoshotpro.Image.Tools;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
+import com.yancy.gallerypick.config.GalleryConfig;
+import com.yancy.gallerypick.config.GalleryPick;
+import com.yancy.gallerypick.inter.IHandlerCallBack;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -44,12 +52,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     android.support.design.widget.CoordinatorLayout container;
     Tools tool;
     Resources res;
+    GalleryConfig galleryConfig;
+    SharedPreferences settings;
 
     public static MainActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
 
     private static final int HandlerStatusLoadLibsFailure = 0;
     private static final int HandlerStatusFFmpegNotSupported = 1;
     private static final int HandlerStatusPackageNameNotRight = 2;
+    private static final String TAG = "In MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +68,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
 
         instance = this;
+
+        settings = PreferenceManager.getDefaultSharedPreferences(this);
 
         container =  (android.support.design.widget.CoordinatorLayout)findViewById(R.id.container);
 
@@ -88,6 +101,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         Thread t = new Thread(new MainActivity.MyThread());
         t.start();
+
+        galleryConfig = new GalleryConfig.Builder()
+                .imageLoader(new GlideImageLoader())
+                .iHandlerCallBack(iHandlerCallBack)
+                .provider("com.equationl.videoshotpro.fileprovider")
+                .multiSelect(true, 100)
+                .build();
 
         button_user.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -182,6 +202,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.nav_setting) {
             Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
             startActivity(intent);
+        } else if (id == R.id.nav_splicing) {
+            GalleryPick.getInstance().setGalleryConfig(galleryConfig).open(MainActivity.this);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -342,5 +364,38 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
     }
+
+    IHandlerCallBack iHandlerCallBack = new IHandlerCallBack() {
+        @Override
+        public void onStart() {
+            Log.i(TAG, "onStart: 开启");
+        }
+
+        @Override
+        public void onSuccess(List<String> photoList) {
+            Log.i(TAG, "onSuccess: 返回数据");
+            tool.cleanExternalCache(MainActivity.this);
+            String extension = settings.getBoolean("isShotToJpg", true) ? "jpg":"png";
+            tool.copyFileToCahe(photoList, getExternalCacheDir().toString(), extension);
+            Intent intent = new Intent(MainActivity.this, MarkPictureActivity.class);
+            startActivity(intent);
+        }
+
+        @Override
+        public void onCancel() {
+            Log.i(TAG, "onCancel: 取消");
+        }
+
+        @Override
+        public void onFinish() {
+            Log.i(TAG, "onFinish: 结束");
+        }
+
+        @Override
+        public void onError() {
+            Log.i(TAG, "onError: 出错");
+            Toast.makeText(MainActivity.this, R.string.main_toast_choosePictures_fail, Toast.LENGTH_SHORT).show();
+        }
+    };
 }
 

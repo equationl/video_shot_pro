@@ -92,6 +92,11 @@ public class MarkPictureActivity extends AppCompatActivity {
         fileList = filepath.list();
         pic_num = fileList.length;
 
+        if (pic_num < 1) {
+            Toast.makeText(this, R.string.markPicture_toast_readFile_fail, Toast.LENGTH_SHORT).show();
+            finish();
+        }
+
         nums_tip_text.setText("0/"+pic_num);
 
         Log.i("cao",pic_num+"");
@@ -290,29 +295,8 @@ public class MarkPictureActivity extends AppCompatActivity {
     }
 
     private Bitmap getBitmapFromFile(String no) {
-        /*File path = new File(getExternalCacheDir(), +no+""+".png");
-        FileInputStream f;
         Bitmap bm = null;
-        try {
-            f = new FileInputStream(path);
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inSampleSize = 1;
-            BufferedInputStream bis = new BufferedInputStream(f);
-            bm = BitmapFactory.decodeStream(bis, null, options);
-        } catch (FileNotFoundException e) {
-            Toast.makeText(getApplicationContext(),"获取截图失败"+e,Toast.LENGTH_LONG).show();
-        }
-
-        return bm; */
-
-        Bitmap bm = null;
-        String extension;
-        if (settings.getBoolean("isShotToJpg", true)) {
-            extension = "jpg";
-        }
-        else {
-            extension = "png";
-        }
+        String extension = settings.getBoolean("isShotToJpg", true) ? "jpg":"png";
 
         try {
             bm = tool.getBitmapFromFile(no, getExternalCacheDir(),extension);
@@ -372,41 +356,10 @@ public class MarkPictureActivity extends AppCompatActivity {
     }
 
     private Bitmap addBitmap(Bitmap first, Bitmap second) {
-        /*int width = Math.max(first.getWidth(),second.getWidth());
-        int height = first.getHeight() + second.getHeight();
-        Bitmap result = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(result);
-        canvas.drawBitmap(first, 0, 0, null);
-        canvas.drawBitmap(second, 0, first.getHeight(), null);
-        return result;  */
-
         return tool.jointBitmap(first, second);
     }
 
     public boolean saveMyBitmap(Bitmap bmp, String bitName) throws IOException {
-        /*File f = new File(getExternalCacheDir(),bitName + ".png");
-        boolean flag = false;
-        f.createNewFile();
-        FileOutputStream fOut = null;
-        try {
-            fOut = new FileOutputStream(f);
-            bmp.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-            flag = true;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        try {
-            fOut.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            fOut.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return flag;   */
-
         boolean flag;
         try {
             if (settings.getBoolean("isShotToJpg", true)) {
@@ -446,18 +399,6 @@ public class MarkPictureActivity extends AppCompatActivity {
             handler.removeMessages(HandlerStatusIsLongPress);
             isLongPress = false;
         }
-        /*else if (longPress == null && pic_no!=0) {
-            Log.i("el_test", "创建 checkIsLongPress");
-            longPress = new Timer();
-            longPress.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    //长按生效
-                    Log.i("el_test", "运行 checkIsLongPress");
-                    handler.sendEmptyMessage(HandlerStatusLongIsWorking);
-                }
-            }, 2000);
-        }  */
         else if (pic_no > 0){
             if (!isLongPress) {
                 isLongPress = true;

@@ -19,6 +19,9 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.List;
+
 public class Tools{
     /**
      * 将 bitmap 保存为png
@@ -138,7 +141,7 @@ public class Tools{
         return null;
     }
 
-    public static String getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs) {
+    private static String getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs) {
         Cursor cursor = null;
         String column = MediaStore.Images.Media.DATA;
         String[] projection = { column };
@@ -159,7 +162,7 @@ public class Tools{
      * @param uri The Uri to check.
      * @return Whether the Uri authority is ExternalStorageProvider.
      */
-    public static boolean isExternalStorageDocument(Uri uri) {
+    private static boolean isExternalStorageDocument(Uri uri) {
         return "com.android.externalstorage.documents".equals(uri.getAuthority());
     }
 
@@ -167,7 +170,7 @@ public class Tools{
      * @param uri The Uri to check.
      * @return Whether the Uri authority is DownloadsProvider.
      */
-    public static boolean isDownloadsDocument(Uri uri) {
+    private static boolean isDownloadsDocument(Uri uri) {
         return "com.android.providers.downloads.documents".equals(uri.getAuthority());
     }
 
@@ -175,7 +178,7 @@ public class Tools{
      * @param uri The Uri to check.
      * @return Whether the Uri authority is MediaProvider.
      */
-    public static boolean isMediaDocument(Uri uri) {
+    private static boolean isMediaDocument(Uri uri) {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
 
@@ -183,9 +186,50 @@ public class Tools{
      * @param uri The Uri to check.
      * @return Whether the Uri authority is Google Photos.
      */
-    public static boolean isGooglePhotosUri(Uri uri) {
+    private static boolean isGooglePhotosUri(Uri uri) {
         return "com.google.android.apps.photos.content".equals(uri.getAuthority());
     }
 
+
+    public Boolean copyFileToCahe(List <String> files, String save_path, String extension) {
+        int i = 0;
+        for (String path : files) {
+            try {
+                copyFile(new File(path), new File(save_path + "/" + + i + "." + extension));
+            } catch (IOException e) {
+                return false;
+            }
+            i++;
+        }
+        return true;
+    }
+
+    public void copyFile(File fromFile,File toFile) throws IOException {
+        FileInputStream ins = new FileInputStream(fromFile);
+        FileOutputStream out = new FileOutputStream(toFile);
+        byte[] b = new byte[1024];
+        int n=0;
+        while((n=ins.read(b))!=-1){
+            out.write(b, 0, b.length);
+        }
+
+        ins.close();
+        out.close();
+    }
+
+    public static void cleanExternalCache(Context context) {
+        if (Environment.getExternalStorageState().equals(
+                Environment.MEDIA_MOUNTED)) {
+            deleteFilesByDirectory(context.getExternalCacheDir());
+        }
+    }
+
+    private static void deleteFilesByDirectory(File directory) {
+        if (directory != null && directory.exists() && directory.isDirectory()) {
+            for (File item : directory.listFiles()) {
+                item.delete();
+            }
+        }
+    }
 
 }

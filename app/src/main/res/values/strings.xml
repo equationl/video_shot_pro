@@ -41,6 +41,14 @@
 
     <string name="main_toast_chooseFile_fail">未选择文件！</string>
     <string name="main_toast_getPermission_success">权限获取成功！</string>
+    <string name="main_toast_choosePictures_fail">选择图片出错！</string>
+
+    <string name="main_nav_text_setting">设置</string>
+    <string name="main_nav_text_more">更多&#8230;</string>
+    <string name="main_nav_text_help">使用说明</string>
+    <string name="main_nav_text_feedback">反馈意见</string>
+    <string name="main_nav_text_splicing">已有截图合成</string>
+    <string name="main_nav_title_info">反馈与帮助</string>
 
     <string name="player_toast_needMoreShot">至少需要截取两张图片！</string>
 
@@ -51,6 +59,8 @@
     <string name="player_text_start_play">开始播放</string>
     <string name="player_text_done">完成</string>
     <string name="player_text_shot">截取</string>
+
+    <string name="markPicture_toast_readFile_fail">读取图片列表出错！</string>
 
     <string name="action_settings">设置</string>
     <string name="title_activity_settings">设置</string>

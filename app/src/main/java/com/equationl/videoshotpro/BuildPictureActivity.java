@@ -18,6 +18,7 @@ import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
@@ -99,9 +100,11 @@ public class BuildPictureActivity extends AppCompatActivity {
                     imageTest.setImageBitmap(bm_test);
                 }
                 else {
-                    PlayerActivity.instance.finish();
-                    MarkPictureActivity.instance.finish();
-                    MainActivity.instance.finish();
+                    try {
+                        PlayerActivity.instance.finish();
+                        MarkPictureActivity.instance.finish();
+                        MainActivity.instance.finish();
+                    } catch (NullPointerException e) {Log.e("el", e.toString());}
                     Intent intent = new Intent(BuildPictureActivity.this, MainActivity.class);
                     startActivity(intent);
                     finish();

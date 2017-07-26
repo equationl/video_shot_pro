@@ -95,7 +95,7 @@ public class PlayerActivity extends AppCompatActivity {
         res = getResources();
         text_count.setText(String.format(res.getString(R.string.player_text_shotStatus),0, 0));
 
-        cleanExternalCache(this);    //清除上次产生的缓存图片
+        tool.cleanExternalCache(this);    //清除上次产生的缓存图片
 
         Bundle bundle = this.getIntent().getExtras();
         path = bundle.getString("path");
@@ -257,21 +257,6 @@ public class PlayerActivity extends AppCompatActivity {
         }
 
         return flag;
-    }
-
-    private static void deleteFilesByDirectory(File directory) {
-        if (directory != null && directory.exists() && directory.isDirectory()) {
-            for (File item : directory.listFiles()) {
-                item.delete();
-            }
-        }
-    }
-
-    public static void cleanExternalCache(Context context) {
-        if (Environment.getExternalStorageState().equals(
-                Environment.MEDIA_MOUNTED)) {
-            deleteFilesByDirectory(context.getExternalCacheDir());
-        }
     }
 
     private Handler handler = new Handler() {
