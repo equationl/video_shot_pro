@@ -7,6 +7,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
@@ -51,18 +52,20 @@ public class PlayerActivity extends AppCompatActivity {
     LinkedBlockingQueue<Long> mark_time = new LinkedBlockingQueue<Long>();
     int pic_num=0, isFirstPlay=1, shot_num=0;
     GestureDetector mGestureDetector;
-    Thread thread = new Thread(new MyThread());
+    Thread thread = new Thread(new MyThread()), gif_thread = new Thread(new ThreadShotGif());
     Boolean isDone=false;
     SharedPreferences settings;
     Boolean isHideBtn = false;
     Boolean isORIENTATION_LANDSCAPE = false;
+    Boolean isShotGif = false, isShotingGif = false;
     Tools tool = new Tools();
     RelativeLayout.LayoutParams params;
     FFmpeg ffmpeg;
     String path, duration_text;
     Boolean isShowingTime = false;
     Resources res;
-    private boolean isShotFinish=false;
+    int gif_start_time=0, gif_end_time=0;
+    boolean isShotFinish=false;
 
     public static PlayerActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
 
@@ -70,6 +73,12 @@ public class PlayerActivity extends AppCompatActivity {
     private static final int HandlerStatusHideTime = 10010;
     private static final int HandlerStatusShowTime = 10011;
     private static final int HandlerStatusUpdateTime = 10012;
+    private static final int HandlerShotGifFail = 10013;
+    private static final int HandlerShotGifsuccess = 10014;
+    private static final int HandlerShotGifRunning = 10015;
+
+
+    private static final String TAG = "el,In PlayerActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +100,8 @@ public class PlayerActivity extends AppCompatActivity {
         ffmpeg = FFmpeg.getInstance(this);
 
         settings = PreferenceManager.getDefaultSharedPreferences(this);
+
+        isShotGif = settings.getBoolean("isShotGif", false);
 
         res = getResources();
         text_count.setText(String.format(res.getString(R.string.player_text_shotStatus),0, 0));
@@ -165,6 +176,7 @@ public class PlayerActivity extends AppCompatActivity {
         });
         btn_shot   .setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                btn_shot.setBackground(res.getDrawable(R.drawable.button_radius));
                 text_count.setText(String.format(res.getString(R.string.player_text_shotStatus),pic_num+1,shot_num));
                 mark_time.offer((long)videoview.getCurrentPosition());
                 pic_num++;
@@ -172,6 +184,36 @@ public class PlayerActivity extends AppCompatActivity {
                     thread = new Thread(new MyThread());
                     thread.start();
                 }
+            }
+        });
+
+        btn_shot.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                Log.i(TAG, "on btn_shot.onTouch");
+                if (isShotingGif) {
+                    Log.i(TAG, "on btn_shot.onTouch, and is shotting gif");
+                    return false;
+                }
+                if(motionEvent.getAction() == MotionEvent.ACTION_UP && isShotGif){
+                    Log.d(TAG, "shot button ---> up");
+                    gif_end_time = videoview.getCurrentPosition();
+                    if (gif_end_time-gif_start_time > 3000) {
+                        btn_shot.setBackground(res.getDrawable(R.drawable.button_radius_up));
+                        isShotingGif = true;
+                        if (!gif_thread.isAlive()) {
+                            gif_thread = new Thread(new ThreadShotGif());
+                            gif_thread.start();
+                        }
+                        return true;
+                    }
+                }
+                if(motionEvent.getAction() == MotionEvent.ACTION_DOWN && isShotGif){
+                    Log.d(TAG, "shot button ---> down");
+                    btn_shot.setBackground(res.getDrawable(R.drawable.button_radius));
+                    gif_start_time = videoview.getCurrentPosition();
+                }
+                return false;
             }
         });
 
@@ -308,16 +350,26 @@ public class PlayerActivity extends AppCompatActivity {
                         handler.sendEmptyMessageDelayed(HandlerStatusUpdateTime, 200);
                     }
                     break;
+                case HandlerShotGifsuccess:
+                    isShotingGif = false;
+                    Toast.makeText(PlayerActivity.this, R.string.player_toast_shotGif_success, Toast.LENGTH_SHORT).show();
+                    break;
+                case HandlerShotGifFail:
+                    Toast.makeText(PlayerActivity.this, R.string.player_toast_shotGif_fail, Toast.LENGTH_SHORT).show();
+                    break;
+                case HandlerShotGifRunning:
+                    Toast.makeText(PlayerActivity.this, R.string.player_toast_shotGif_start, Toast.LENGTH_SHORT).show();
+                    break;
             }
 
         }
     };
 
-    public class MyThread implements Runnable {
+    private class MyThread implements Runnable {
         @Override
         public void run() {
             Long time;
-            while ((time = mark_time.poll()) != null) {
+            while ((time = mark_time.peek()) != null) {
                 if (!ffmpeg.isFFmpegCommandRunning()) {
                     isShotFinish = false;
                     Log.i("el_test", "time="+time);
@@ -344,7 +396,7 @@ public class PlayerActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess(String message) {
                                 shot_num++;
-                                //mark_time.poll();
+                                mark_time.poll();
                                 Log.i("el_test:", "onSuccess");
                                 Message msg = Message.obtain();
                                 msg.obj = String.format(res.getString(R.string.player_text_shotStatus),pic_num,shot_num);
@@ -379,6 +431,62 @@ public class PlayerActivity extends AppCompatActivity {
                 msg.obj = "";
                 msg.what = 3;
                 handler.sendMessage(msg);
+            }
+        }
+    }
+
+    private class ThreadShotGif implements Runnable {
+        @Override
+        public void run() {
+            String gif_RP = settings.getString("gifRP_value", "320x240");
+            String gif_frameRate = settings.getString("gifFrameRate_value", "14");
+            String video_path = tool.getImageAbsolutePath(PlayerActivity.this,uri);
+            SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
+            String date    =    sDateFormat.format(new    java.util.Date());
+            date += "-by_EL.gif";
+            String save_path =  Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_PICTURES).getPath() + "/" + date;
+            String cmd = "-ss "+(gif_start_time/1000)+" -t "+((gif_end_time-gif_start_time)/1000)+" -i "+video_path;
+            cmd += gif_RP.equals("-1")?"":" -s "+gif_RP;
+            cmd += " -f gif";
+            cmd += gif_frameRate.equals("-1")?"":" -r "+gif_frameRate;
+            cmd += " "+save_path;
+            Log.i(TAG, "cmd = "+cmd);
+            String gif_cmd[] = cmd.split(" ");
+
+            while (ffmpeg.isFFmpegCommandRunning()) {
+                //阻塞等待执行结束
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e){}
+            }
+            try {
+                ffmpeg.execute(gif_cmd, new ExecuteBinaryResponseHandler() {
+
+                    @Override
+                    public void onStart() {
+                        handler.sendEmptyMessage(HandlerShotGifRunning);
+                    }
+
+                    @Override
+                    public void onProgress(String message) {}
+
+                    @Override
+                    public void onFailure(String message) {
+                        Log.e(TAG, "截取GIF失败："+message);
+                        handler.sendEmptyMessage(HandlerShotGifFail);
+                    }
+
+                    @Override
+                    public void onSuccess(String message) {
+                        handler.sendEmptyMessage(HandlerShotGifsuccess);
+                    }
+
+                    @Override
+                    public void onFinish() {}
+                });
+            } catch (FFmpegCommandAlreadyRunningException e) {
+                handler.sendEmptyMessage(HandlerShotGifFail);
             }
         }
     }

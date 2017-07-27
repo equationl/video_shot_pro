@@ -96,7 +96,7 @@ public class Tools{
      * @author yaoxing
      * @date 2014-10-12
      */
-    public static String getImageAbsolutePath(Activity context, Uri imageUri) {
+    public String getImageAbsolutePath(Activity context, Uri imageUri) {
         if (context == null || imageUri == null)
             return null;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT && DocumentsContract.isDocumentUri(context, imageUri)) {

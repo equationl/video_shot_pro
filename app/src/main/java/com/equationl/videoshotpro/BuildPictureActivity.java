@@ -168,20 +168,6 @@ public class BuildPictureActivity extends AppCompatActivity {
     }
 
     private Bitmap getBitmap(String no) {
-        /*File path = new File(getExternalCacheDir(), no+".png");
-        FileInputStream f;
-        Bitmap bm = null;
-        try {
-            f = new FileInputStream(path);
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inSampleSize = 1;
-            BufferedInputStream bis = new BufferedInputStream(f);
-            bm = BitmapFactory.decodeStream(bis, null, options);
-        } catch (FileNotFoundException e) {
-            Toast.makeText(getApplicationContext(),"获取截图失败"+e,Toast.LENGTH_LONG).show();
-        }
-
-        return bm;  */
         Bitmap bm = null;
         String extension;
         if (settings.getBoolean("isShotToJpg", true)) {
@@ -258,7 +244,7 @@ public class BuildPictureActivity extends AppCompatActivity {
         }
     };
 
-    public class MyThread implements Runnable {
+    private class MyThread implements Runnable {
         int delete_nums=0;
         @Override
         public void run() {
@@ -270,12 +256,6 @@ public class BuildPictureActivity extends AppCompatActivity {
                 msg.obj = "处理第"+i+"张图片";
                 msg.what = 1;
                 handler.sendMessage(msg);
-               /* Log.i("test,soure file width:",getBitmap(i+"").getWidth()+"");
-                Log.i("test,soure file height:",getBitmap(i+"").getHeight()+"");
-                Log.i("test,cut file width:",cutBimap(getBitmap(i+"")).getWidth()+"");
-                Log.i("test,cut file height:",cutBimap(getBitmap(i+"")).getHeight()+"");
-                Log.i("test,final file width:",final_bitmap.getWidth()+"");
-                Log.i("test,final file height:",final_bitmap.getHeight()+"");  */
                 if (fileList[i].equals("cut")) {
                     final_bitmap = addBitmap(final_bitmap,cutBimap(getBitmap(i+"")));
                     msg = Message.obtain();
@@ -369,52 +349,10 @@ public class BuildPictureActivity extends AppCompatActivity {
     }
 
     private Bitmap addBitmap(Bitmap first, Bitmap second) {
-        /*int width = Math.max(first.getWidth(),second.getWidth());
-        int height = first.getHeight() + second.getHeight();
-        Bitmap result = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(result);
-        canvas.drawBitmap(first, 0, 0, null);
-        canvas.drawBitmap(second, 0, first.getHeight(), null);
-        return result;*/
         return tool.jointBitmap(first, second);
     }
 
     private boolean saveMyBitmap(Bitmap bmp, String bitName, boolean isReduce) throws IOException {
-       /* File f = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES),bitName + ".png");
-
-        Log.i("cao",f.toString());
-        int quality = 100;
-        Bitmap.CompressFormat imgFormat = Bitmap.CompressFormat.PNG;
-        if (isReduce) {
-            quality = Integer.parseInt(settings.getString("reduce_value","100"));
-            imgFormat = Bitmap.CompressFormat.JPEG;
-            Log.i("test","is Reduced, quality="+quality);
-        }
-        savePath = f;
-        boolean flag = false;
-        f.createNewFile();
-        FileOutputStream fOut = null;
-        try {
-            fOut = new FileOutputStream(f);
-            bmp.compress(imgFormat, quality, fOut);
-            flag = true;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        try {
-            fOut.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            fOut.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return flag;  */
-
-
         boolean flag;
         try {
             if (isReduce) {

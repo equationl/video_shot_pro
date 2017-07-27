@@ -51,6 +51,9 @@
     <string name="main_nav_title_info">反馈与帮助</string>
 
     <string name="player_toast_needMoreShot">至少需要截取两张图片！</string>
+    <string name="player_toast_shotGif_fail">截取动图失败！</string>
+    <string name="player_toast_shotGif_success">动图已保存</string>
+    <string name="player_toast_shotGif_start">开始截取动图</string>
 
     <string name="player_text_rotationScreen">翻转</string>
     <string name="player_text_shotStatus">标记/已截取：%1$d/%2$d</string>
@@ -125,6 +128,41 @@
         <item>1</item>
         <item>2</item>
         <item>3</item>
+    </string-array>
+
+    <string name="pref_title_isShotGif">长按截取动图</string>
+    <string name="pref_description_isShotGif">选择是否在截取图片时长按 截取按钮 截取GIF动图</string>
+    <string name="pref_title_gif_RP">动图分辨率</string>
+    <string-array name="pref_gif_RP_titles">
+        <item>128*160</item>
+        <item>320*240</item>
+        <item>640*480</item>
+        <item>720*480</item>
+        <item>640*360</item>
+        <item>原图</item>
+    </string-array>
+    <string-array name="pref_gif_RP_values">
+        <item>128x160</item>
+        <item>320x240</item>
+        <item>640x480</item>
+        <item>720x480</item>
+        <item>640x360</item>
+        <item>-1</item>
+    </string-array>
+    <string name="pref_title_gif_frameRate">动图帧率</string>
+    <string-array name="pref_gif_frameRate_titles">
+        <item>1</item>
+        <item>14</item>
+        <item>20</item>
+        <item>24</item>
+        <item>原帧率</item>
+    </string-array>
+    <string-array name="pref_gif_frameRate_values">
+        <item>1</item>
+        <item>14</item>
+        <item>20</item>
+        <item>24</item>
+        <item>-1</item>
     </string-array>
 
 

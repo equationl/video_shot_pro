@@ -91,6 +91,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         bindPreferenceSummaryToValue(findPreference("watermark_text"));
         bindPreferenceSummaryToValue(findPreference("reduce_value"));
         bindPreferenceSummaryToValue(findPreference("watermark_position_value"));
+        bindPreferenceSummaryToValue(findPreference("gifRP_value"));
+        bindPreferenceSummaryToValue(findPreference("gifFrameRate_value"));
     }
 
     /**
