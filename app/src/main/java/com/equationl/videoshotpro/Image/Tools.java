@@ -9,6 +9,8 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -204,7 +206,7 @@ public class Tools{
         return true;
     }
 
-    public void copyFile(File fromFile,File toFile) throws IOException {
+    private void copyFile(File fromFile,File toFile) throws IOException {
         FileInputStream ins = new FileInputStream(fromFile);
         FileOutputStream out = new FileOutputStream(toFile);
         byte[] b = new byte[1024];
@@ -230,6 +232,103 @@ public class Tools{
                 item.delete();
             }
         }
+    }
+
+    public int getInverseColorCode(int source) {
+        if (source>=0 && source<64) {
+            return source+192;
+        }
+        else if (source>=64 && source<128) {
+            return source+64;
+        }
+        else if (source>=128 && source<192) {
+            return source-64;
+        }
+        else if (source>=192 && source<=255) {
+            return  source-192;
+        }
+        return -1;
+    }
+
+    public int getInverseColor(int source) {
+        return Color.rgb(
+                getInverseColorCode(Color.red(source)),
+                getInverseColorCode(Color.green(source)),
+                getInverseColorCode(Color.blue(source))
+                );
+    }
+
+    public Bitmap addRight(Bitmap base) {
+        Canvas canvas = new Canvas(base);
+        Paint paint= new Paint();
+        int width = base.getWidth();
+        int height = base.getHeight();
+
+        paint.setColor(base.getPixel(1,0));
+        canvas.drawPoint(0, 0, paint);   //0
+
+        paint.setColor(getInverseColor(base.getPixel(1,1)));
+        canvas.drawPoint(0, 1, paint);   //1
+
+        paint.setColor(base.getPixel(width-2, height-2));
+        canvas.drawPoint(width-2, height-1, paint);   //0
+
+        paint.setColor(base.getPixel(width-1, height-2));
+        canvas.drawPoint(width-1, height-1, paint);   //0
+
+        paint.setColor(base.getPixel(width-2, 1));
+        canvas.drawPoint(width-2, 0, paint);   //0
+
+        paint.setColor(getInverseColor(base.getPixel(width-1, 1)));
+        canvas.drawPoint(width-1, 0, paint);   //1
+
+        paint.setColor(base.getPixel(0, height-2));
+        canvas.drawPoint(0, height-1, paint);   //0
+
+        paint.setColor(getInverseColor(base.getPixel(1, height-2)));
+        canvas.drawPoint(1, height-1, paint);   //1
+
+        return base;
+    }
+
+    public Boolean checkRight(Bitmap base) {
+        int width = base.getWidth();
+        int height = base.getHeight();
+
+
+        if (base.getPixel(1,0) != base.getPixel(0,0)) {
+            return false;
+        }
+
+        else if (base.getPixel(1,1) != getInverseColor(base.getPixel(0,1))) {
+            return false;
+        }
+
+        else if (base.getPixel(width-2, height-1) != base.getPixel(width-2, height-2)) {
+            return false;
+        }
+
+        else if (base.getPixel(width-1, height-1) != base.getPixel(width-1, height-2)) {
+            return false;
+        }
+
+        else if (base.getPixel(width-2, 0) != base.getPixel(width-2, 1)) {
+            return false;
+        }
+
+        else if (base.getPixel(width-1, 0) != getInverseColor(base.getPixel(width-1, 1))) {
+            return false;
+        }
+
+        else if (base.getPixel(0, height-1) != base.getPixel(0, height-2)) {
+            return false;
+        }
+
+        else if (base.getPixel(1, height-1) != getInverseColor(base.getPixel(1, height-2))) {
+            return false;
+        }
+
+        return true;
     }
 
 }

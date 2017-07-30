@@ -323,6 +323,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                 msg.obj = "导出图片";
                 msg.what = 1;
                 handler.sendMessage(msg);
+                final_bitmap = tool.addRight(final_bitmap);
                 SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
                 String date    =    sDateFormat.format(new    java.util.Date());
                 try {
