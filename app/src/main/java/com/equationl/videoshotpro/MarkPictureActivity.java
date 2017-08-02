@@ -86,6 +86,18 @@ public class MarkPictureActivity extends AppCompatActivity {
         tip_text = (TextView) findViewById(R.id.make_picture_tip);
         nums_tip_text  = (TextView) findViewById(R.id.make_picture_nums_tip);
 
+        Boolean isFromExtra = this.getIntent().getBooleanExtra("isFromExtra", false);
+        if (isFromExtra) {
+            Intent service = new Intent(MarkPictureActivity.this, FloatWindowsService.class);
+            stopService(service);
+            tool.MakeCacheToStandard(this);  //FIXME 未找到文件名不规范的原因，此为临时解决方案
+            tool.MakeCacheToStandard(this);   //FIXME 我也不知道为毛线会一直说文件名重复？？？？？老子改两次行了吧？
+            try {
+                BuildPictureActivity.instance.finish();
+            } catch (NullPointerException e) {}
+
+        }
+
         settings = PreferenceManager.getDefaultSharedPreferences(this);
 
         final File filepath = new File(getExternalCacheDir().toString());

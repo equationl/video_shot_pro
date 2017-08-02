@@ -16,6 +16,7 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -219,7 +220,7 @@ public class Tools{
         out.close();
     }
 
-    public static void cleanExternalCache(Context context) {
+    public void cleanExternalCache(Context context) {
         if (Environment.getExternalStorageState().equals(
                 Environment.MEDIA_MOUNTED)) {
             deleteFilesByDirectory(context.getExternalCacheDir());
@@ -326,6 +327,44 @@ public class Tools{
 
         else if (base.getPixel(1, height-1) != getInverseColor(base.getPixel(1, height-2))) {
             return false;
+        }
+
+        return true;
+    }
+
+    public void MakeCacheToStandard(Context context) {
+        File path = new File(context.getExternalCacheDir().toString());
+        String files[] = path.list();
+
+        for (String file:files) {
+            Log.i("EL", "file="+file);
+            if (file.contains("_")) {
+                String NewName = file.split("_")[0]+"."+file.split("\\.")[1];
+                Log.i("EL", file+" rename to "+NewName);
+                renameFile(path.getPath(), file, NewName);
+            }
+        }
+    }
+
+    private Boolean renameFile(String path,String oldname,String newname) {
+        if(!oldname.equals(newname)){
+            File oldfile=new File(path+"/"+oldname);
+            File newfile=new File(path+"/"+newname);
+            oldfile.renameTo(newfile);
+            /*if(!oldfile.exists()){
+                Log.i("EL", "wrong in rename: 文件不存在");
+                return false;
+            }
+            if(newfile.exists()) {//若在该目录下已经有一个文件和新文件名相同，则不允许重命名
+                Log.i("EL", "wrong in rename: 文件名已存在");
+                return false;
+            }
+            else{
+                oldfile.renameTo(newfile);
+            }
+        }else{
+            Log.i("EL", "wrong in rename: 文件名相同");
+            return false;   */
         }
 
         return true;

@@ -11,6 +11,10 @@
             android:icon="@android:drawable/ic_menu_manage"
             android:title="@string/main_nav_text_setting" />
         <item
+            android:id="@+id/nav_floatBtn"
+            android:icon="@android:drawable/ic_menu_crop"
+            android:title="@string/main_nav_text_floatBtn" />
+        <item
             android:id="@+id/nav_more"
             android:icon="@android:drawable/ic_menu_view"
             android:title="@string/main_nav_text_more" />

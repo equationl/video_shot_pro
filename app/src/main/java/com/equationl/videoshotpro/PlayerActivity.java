@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -352,6 +353,7 @@ public class PlayerActivity extends AppCompatActivity {
                     break;
                 case HandlerShotGifsuccess:
                     isShotingGif = false;
+                    MediaScannerConnection.scanFile(PlayerActivity.this, new String[]{msg.obj.toString()}, null, null);
                     Toast.makeText(PlayerActivity.this, R.string.player_toast_shotGif_success, Toast.LENGTH_SHORT).show();
                     break;
                 case HandlerShotGifFail:
@@ -444,7 +446,7 @@ public class PlayerActivity extends AppCompatActivity {
             SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
             String date    =    sDateFormat.format(new    java.util.Date());
             date += "-by_EL.gif";
-            String save_path =  Environment.getExternalStoragePublicDirectory(
+            final String save_path =  Environment.getExternalStoragePublicDirectory(
                     Environment.DIRECTORY_PICTURES).getPath() + "/" + date;
             String cmd = "-ss "+(gif_start_time/1000)+" -t "+((gif_end_time-gif_start_time)/1000)+" -i "+video_path;
             cmd += gif_RP.equals("-1")?"":" -s "+gif_RP;
@@ -479,7 +481,10 @@ public class PlayerActivity extends AppCompatActivity {
 
                     @Override
                     public void onSuccess(String message) {
-                        handler.sendEmptyMessage(HandlerShotGifsuccess);
+                        Message msg = Message.obtain();
+                        msg.obj = save_path;
+                        msg.what = HandlerShotGifsuccess;
+                        handler.sendMessage(msg);
                     }
 
                     @Override

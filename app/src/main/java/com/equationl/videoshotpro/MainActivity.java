@@ -1,7 +1,12 @@
 package com.equationl.videoshotpro;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AppOpsManager;
+import android.app.Dialog;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,7 +14,9 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -35,6 +42,11 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.equationl.videoshotpro.Image.Tools;
+import com.equationl.videoshotpro.rom.HuaweiUtils;
+import com.equationl.videoshotpro.rom.MeizuUtils;
+import com.equationl.videoshotpro.rom.MiuiUtils;
+import com.equationl.videoshotpro.rom.QikuUtils;
+import com.equationl.videoshotpro.rom.RomUtils;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
@@ -42,6 +54,8 @@ import com.yancy.gallerypick.config.GalleryConfig;
 import com.yancy.gallerypick.config.GalleryPick;
 import com.yancy.gallerypick.inter.IHandlerCallBack;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -54,12 +68,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Resources res;
     GalleryConfig galleryConfig;
     SharedPreferences settings;
+    Dialog dialog_permission;
 
     public static MainActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
 
     private static final int HandlerStatusLoadLibsFailure = 0;
     private static final int HandlerStatusFFmpegNotSupported = 1;
     private static final int HandlerStatusPackageNameNotRight = 2;
+    private static final int IntentResultCodeMediaProjection = 10;
+
     private static final String TAG = "In MainActivity";
 
     @Override
@@ -123,15 +140,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
-            Uri uri = data.getData();
-            //String path = uri.getPath();
-            String path = tool.getImageAbsolutePath(this, uri);
-            Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
-            Bundle bundle = new Bundle();
-            bundle.putString("path", path);
-            intent.putExtras(bundle);
-            intent.setData(uri);
-            startActivity(intent);
+            if (requestCode == IntentResultCodeMediaProjection) {
+                Toast.makeText(this, "kaishi", Toast.LENGTH_SHORT).show();
+                Log.i("EL", "try Start Service");
+                FloatWindowsService.setResultData(data);
+                Intent startService = new Intent(this, FloatWindowsService.class);
+                startService(startService);
+            }
+            else {
+                Uri uri = data.getData();
+                //String path = uri.getPath();
+                String path = tool.getImageAbsolutePath(this, uri);
+                Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("path", path);
+                intent.putExtras(bundle);
+                intent.setData(uri);
+                startActivity(intent);
+            }
         }
 
         //权限判断
@@ -165,7 +191,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -204,6 +229,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(intent);
         } else if (id == R.id.nav_splicing) {
             GalleryPick.getInstance().setGalleryConfig(galleryConfig).open(MainActivity.this);
+        } else if (id == R.id.nav_floatBtn) {
+            showFloatBtn();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -397,5 +424,219 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Toast.makeText(MainActivity.this, R.string.main_toast_choosePictures_fail, Toast.LENGTH_SHORT).show();
         }
     };
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void showFloatBtn() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            Toast.makeText(this, R.string.main_toast_unSupportFloatBtn, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (checkPermission(this)) {
+            MediaProjectionManager mediaProjectionManager = (MediaProjectionManager)
+                    getSystemService(this.MEDIA_PROJECTION_SERVICE);
+            startActivityForResult(
+                    mediaProjectionManager.createScreenCaptureIntent(),
+                    IntentResultCodeMediaProjection);
+        } else {
+            applyPermission(this);
+        }
+    }
+
+    private boolean checkPermission(Context context) {
+        //6.0 版本之后由于 google 增加了对悬浮窗权限的管理，所以方式就统一了
+        if (Build.VERSION.SDK_INT < 23) {
+            if (RomUtils.checkIsMiuiRom()) {
+                return miuiPermissionCheck(context);
+            } else if (RomUtils.checkIsMeizuRom()) {
+                return meizuPermissionCheck(context);
+            } else if (RomUtils.checkIsHuaweiRom()) {
+                return huaweiPermissionCheck(context);
+            } else if (RomUtils.checkIs360Rom()) {
+                return qikuPermissionCheck(context);
+            }
+        }
+        return commonROMPermissionCheck(context);
+    }
+
+    private boolean huaweiPermissionCheck(Context context) {
+        return HuaweiUtils.checkFloatWindowPermission(context);
+    }
+
+    private boolean miuiPermissionCheck(Context context) {
+        return MiuiUtils.checkFloatWindowPermission(context);
+    }
+
+    private boolean meizuPermissionCheck(Context context) {
+        return MeizuUtils.checkFloatWindowPermission(context);
+    }
+
+    private boolean qikuPermissionCheck(Context context) {
+        return QikuUtils.checkFloatWindowPermission(context);
+    }
+
+    private boolean commonROMPermissionCheck(Context context) {
+        //最新发现魅族6.0的系统这种方式不好用，天杀的，只有你是奇葩，没办法，单独适配一下
+        if (RomUtils.checkIsMeizuRom()) {
+            return meizuPermissionCheck(context);
+        }
+        else if (RomUtils.checkIsMiuiRom()) {
+            return miuiPermissionCheck(context);
+        }
+
+        else {
+            Boolean result = true;
+            if (Build.VERSION.SDK_INT >= 23) {
+                try {
+                    Class clazz = Settings.class;
+                    Method canDrawOverlays = clazz.getDeclaredMethod("canDrawOverlays", Context.class);
+                    result = (Boolean) canDrawOverlays.invoke(null, context);
+                } catch (Exception e) {
+                    Log.e(TAG, Log.getStackTraceString(e));
+                }
+            }
+            return result;
+        }
+    }
+
+    private void applyPermission(Context context) {
+        if (Build.VERSION.SDK_INT < 23) {
+            if (RomUtils.checkIsMiuiRom()) {
+                miuiROMPermissionApply(context);
+            } else if (RomUtils.checkIsMeizuRom()) {
+                meizuROMPermissionApply(context);
+            } else if (RomUtils.checkIsHuaweiRom()) {
+                huaweiROMPermissionApply(context);
+            } else if (RomUtils.checkIs360Rom()) {
+                ROM360PermissionApply(context);
+            }
+        }
+        commonROMPermissionApply(context);
+    }
+
+    private void ROM360PermissionApply(final Context context) {
+        showConfirmDialog(context, new OnConfirmResult() {
+            @Override
+            public void confirmResult(boolean confirm) {
+                if (confirm) {
+                    QikuUtils.applyPermission(context);
+                } else {
+                    Log.e(TAG, "ROM:360, user manually refuse OVERLAY_PERMISSION");
+                }
+            }
+        });
+    }
+
+    private void huaweiROMPermissionApply(final Context context) {
+        showConfirmDialog(context, new OnConfirmResult() {
+            @Override
+            public void confirmResult(boolean confirm) {
+                if (confirm) {
+                    HuaweiUtils.applyPermission(context);
+                } else {
+                    Log.e(TAG, "ROM:huawei, user manually refuse OVERLAY_PERMISSION");
+                }
+            }
+        });
+    }
+
+    private void meizuROMPermissionApply(final Context context) {
+        showConfirmDialog(context, new OnConfirmResult() {
+            @Override
+            public void confirmResult(boolean confirm) {
+                if (confirm) {
+                    MeizuUtils.applyPermission(context);
+                } else {
+                    Log.e(TAG, "ROM:meizu, user manually refuse OVERLAY_PERMISSION");
+                }
+            }
+        });
+    }
+
+    private void miuiROMPermissionApply(final Context context) {
+        showConfirmDialog(context, new OnConfirmResult() {
+            @Override
+            public void confirmResult(boolean confirm) {
+                if (confirm) {
+                    MiuiUtils.applyMiuiPermission(context);
+                } else {
+                    Log.e(TAG, "ROM:miui, user manually refuse OVERLAY_PERMISSION");
+                }
+            }
+        });
+    }
+
+    /**
+     * 通用 rom 权限申请
+     */
+    private void commonROMPermissionApply(final Context context) {
+        //这里也一样，魅族系统需要单独适配
+        if (RomUtils.checkIsMeizuRom()) {
+            meizuROMPermissionApply(context);
+        }
+        else if (RomUtils.checkIsMiuiRom()) {
+            miuiROMPermissionApply(context);
+        }
+        else {
+            if (Build.VERSION.SDK_INT >= 23) {
+                showConfirmDialog(context, new OnConfirmResult() {
+                    @Override
+                    public void confirmResult(boolean confirm) {
+                        if (confirm) {
+                            try {
+                                Class clazz = Settings.class;
+                                Field field = clazz.getDeclaredField("ACTION_MANAGE_OVERLAY_PERMISSION");
+
+                                Intent intent = new Intent(field.get(null).toString());
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                intent.setData(Uri.parse("package:" + context.getPackageName()));
+                                context.startActivity(intent);
+                            } catch (Exception e) {
+                                Log.e(TAG, Log.getStackTraceString(e));
+                            }
+                        } else {
+                            Log.d(TAG, "user manually refuse OVERLAY_PERMISSION");
+                            //需要做统计效果
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    private void showConfirmDialog(Context context, OnConfirmResult result) {
+        showConfirmDialog(context, res.getString(R.string.main_dialog_needFloatPermission_content), result);
+    }
+
+    private void showConfirmDialog(Context context, String message, final OnConfirmResult result) {
+        if (dialog_permission != null && dialog_permission.isShowing()) {
+            dialog_permission.dismiss();
+        }
+
+        dialog_permission = new AlertDialog.Builder(context).setCancelable(true).setTitle("")
+                .setMessage(message)
+                .setPositiveButton(res.getString(R.string.main_dialog_btn_ok),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                result.confirmResult(true);
+                                dialog.dismiss();
+                            }
+                        }).setNegativeButton(res.getString(R.string.main_dialog_btn_cancel),
+                        new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                result.confirmResult(false);
+                                dialog.dismiss();
+                            }
+                        }).create();
+        dialog_permission.show();
+    }
+
+    private interface OnConfirmResult {
+        void confirmResult(boolean confirm);
+    }
+
 }
 

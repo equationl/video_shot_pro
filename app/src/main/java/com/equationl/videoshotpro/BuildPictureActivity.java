@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -45,11 +46,14 @@ public class BuildPictureActivity extends AppCompatActivity {
     File savePath=null;
     SharedPreferences settings;
     Tools tool = new Tools();
+    public static BuildPictureActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_build_picture);
+
+        instance = this;
 
         btn_up    = (Button)   findViewById(R.id.button_up);
         btn_down  = (Button)    findViewById(R.id.button_down);
@@ -71,7 +75,7 @@ public class BuildPictureActivity extends AppCompatActivity {
         dialog.setTitle("请稍等");
         dialog.setMax(fileList.length+1);
 
-        Toast.makeText(getApplicationContext(),"请调整剪切字幕的位置", Toast.LENGTH_LONG).show();
+        Toast.makeText(this,"请调整剪切字幕的位置", Toast.LENGTH_LONG).show();
 
         bm_test = getCutImg().copy(Bitmap.Config.ARGB_8888,true);
 
@@ -180,7 +184,8 @@ public class BuildPictureActivity extends AppCompatActivity {
         try {
             bm = tool.getBitmapFromFile(no, getExternalCacheDir(),extension);
         }  catch (Exception e) {
-            Toast.makeText(getApplicationContext(),"获取截图失败"+e, Toast.LENGTH_LONG).show();
+            //Toast.makeText(getApplicationContext(),"获取截图失败"+e, Toast.LENGTH_LONG).show();
+            Log.e("EL", "获取截图失败："+e.toString());
         }
 
         return bm;
@@ -210,8 +215,11 @@ public class BuildPictureActivity extends AppCompatActivity {
                 btn_done.setText("分享");
                 btn_down.setVisibility(View.INVISIBLE);
                 isDone=1;
-                Toast.makeText(getApplicationContext(),"处理完成！图片已保存至 "+ Environment.getExternalStoragePublicDirectory(
-                        Environment.DIRECTORY_PICTURES)+"/"+msg.obj.toString()+" 请进入图库查看", Toast.LENGTH_LONG).show();
+                String temp_path = Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_PICTURES)+"/"+msg.obj.toString();
+                temp_path += settings.getBoolean("isReduce_switch", false) ? ".jpg":".png";
+                MediaScannerConnection.scanFile(BuildPictureActivity.this, new String[]{temp_path}, null, null);
+                Toast.makeText(getApplicationContext(),"处理完成！图片已保存至 "+ temp_path +" 请进入图库查看", Toast.LENGTH_LONG).show();
             }
             else if (msg.what == 3) {
                 Boolean isShow = settings.getBoolean("isMonitoredShow", false);

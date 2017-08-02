@@ -3,15 +3,32 @@
     <string name="main_information_title">说明</string>
     <string name="main_information_content">
         经常在网上看到别人制作的电影台词的长截图？想要自己制作一张？一张一张截图后剪切再拼接很麻烦？ \n
-        有了视频截取，你就可以边看视频边将想要截图的位置标记下来，当视频播放完后忙你的截图也已经处理完毕。\n
+        有了视频截取，你就可以边看视频边将想要截图的位置标记下来，当视频播放完后你的截图也已经处理完毕。\n
         可用于制作电影图解 or 电影台词截图 or 精彩画面合集。 \n
         还支持自定义裁剪范围，甚至是保留整张截图。\n\n\n
+        联系我： admin@likehide.com  \n
+        \n
+        pro版本和普通版本的区别：\n
+        \t*增加截取GIF动图功能\n
+        \t*增加合成已有截图功能\n
+        \t*更自由的截取方式（作者：扯淡的，还在开发中）\n
+        \t*支持截取在线观看的视频（作者：又开始扯淡了）\n
+        \t*更高端的分享方式（作者：能不能别立Flag了？）\n
+        \t*更便捷丰富的文字添加方式（作者：这辈子都填不完这坑了）\n
+        \t*优化手势操作\n
+        \t*更高的开发优先级\n
+        \t*高端定制的屎黄色图标\n
         重要提示：\n
-        有很多应用平台出现了本app的二次打包版本，且被添加了强制下载的广告，虽然我一直在努力和平台交涉，但是始终无法让官方将其下架，所以，只能提醒各位用户，本app正版没有任何的广告，并且只用了 读取/写入储存卡 权限，如果你下载的版本有广告且权限不止上述两个，那么就是盗版了。别问我哪里能下到正版，我也无法！（目前发现的有盗版且经过交涉不下架甚至不回复的较大的平台有 百度的几个平台（手机助手，安卓市场，91）、应用汇。另外，我只在 魅族应用市场，百度开放平台，腾讯应用宝，酷安 上传了本应用。）\n
+        有很多应用平台出现了本app的二次打包版本，且被添加了强制下载的广告，虽然我一直在努力和平台交涉，但是始终无法让官方将其下架，所以，只能提醒各位用户，本app正版没有任何的广告，并且只用了 读取/写入储存卡 权限，如果你下载的版本有广告且权限不止上述两个，那么就是盗版了。\n
         \t默认合成图片保存目录在 %1$s \n
         \t但是我推荐直接在图库里面找，不过由于有时候图库刷新很慢，甚至某些ROM的图库直接不显示系统默认图片目录中的图片，所以如果在图库里找不到图片，请前往上述目录查找。\n
         \n\n\n
-        联系我： admin@likehide.com
+    </string>
+
+    <string name="main_right_text">
+
+        悬浮窗权限适配来自：http://blog.csdn.net/self_study/article/details/52859790 https://github.com/zhaozepeng/FloatWindowPermission  \n
+        截图及其悬浮按钮来自： https://github.com/goodbranch/ScreenCapture  \n
     </string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -32,6 +49,7 @@
     <string name="main_dialog_disablePermission_title">存储权限不可用</string>
     <string name="main_dialog_noPermission_title">未授予读写储存权限</string>
     <string name="main_dialog_noPermission_content">请授予 读取/写入储存 权限来保存您制作的作品</string>
+    <string name="main_dialog_needFloatPermission_content">使用该功能需要开启悬浮窗权限，是否开启？</string>
 
     <string name="main_snackbar_loadSo_fail">加载FFmpeg失败</string>
     <string name="main_snackbar_btn_retry">重试</string>
@@ -42,12 +60,15 @@
     <string name="main_toast_chooseFile_fail">未选择文件！</string>
     <string name="main_toast_getPermission_success">权限获取成功！</string>
     <string name="main_toast_choosePictures_fail">选择图片出错！</string>
+    <string name="main_toast_unSupportFloatBtn">当前系统版本过低，无法使用该功能！</string>
+    <string name="main_toast_getPermission_fail">获取权限失败！</string>
 
     <string name="main_nav_text_setting">设置</string>
     <string name="main_nav_text_more">更多&#8230;</string>
     <string name="main_nav_text_help">使用说明</string>
     <string name="main_nav_text_feedback">反馈意见</string>
     <string name="main_nav_text_splicing">已有截图合成</string>
+    <string name="main_nav_text_floatBtn">外部程序截图</string>
     <string name="main_nav_title_info">反馈与帮助</string>
 
     <string name="player_toast_needMoreShot">至少需要截取两张图片！</string>
