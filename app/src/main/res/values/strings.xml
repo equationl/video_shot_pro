@@ -85,6 +85,14 @@
     <string name="player_text_shot">截取</string>
 
     <string name="markPicture_toast_readFile_fail">读取图片列表出错！</string>
+    <string name="markPicture_ProgressDialog_msg">请稍候</string>
+    <string name="markPicture_ProgressDialog_title">正在处理图片中&#8230;</string>
+    <string name="markPicture_ProgressDialog_msgOnRunning">正在处理第%1$s张图片&#8230;</string>
+
+
+    <string name="floatWindowsService_notice_ticker_text">启动通知</string>
+    <string name="floatWindowsService_notice_content">点击开始制作</string>
+    <string name="floatWindowsService_notice_title">程序运行中</string>
 
     <string name="action_settings">设置</string>
     <string name="title_activity_settings">设置</string>

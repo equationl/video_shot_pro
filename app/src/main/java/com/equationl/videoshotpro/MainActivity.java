@@ -143,6 +143,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (requestCode == IntentResultCodeMediaProjection) {
                 Toast.makeText(this, "kaishi", Toast.LENGTH_SHORT).show();
                 Log.i("EL", "try Start Service");
+
+                try {
+                    BuildPictureActivity.instance.finish();
+                } catch (NullPointerException e){
+                    Log.i("EL", "try to finish BuildPictureActivity fail");
+                }
+
                 FloatWindowsService.setResultData(data);
                 Intent startService = new Intent(this, FloatWindowsService.class);
                 startService(startService);

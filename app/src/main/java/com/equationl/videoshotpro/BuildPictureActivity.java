@@ -46,12 +46,15 @@ public class BuildPictureActivity extends AppCompatActivity {
     File savePath=null;
     SharedPreferences settings;
     Tools tool = new Tools();
+    Boolean isFromExtra;
     public static BuildPictureActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_build_picture);
+
+        Log.i("cao", "In BuildPictureActivity onCreate");
 
         instance = this;
 
@@ -64,6 +67,7 @@ public class BuildPictureActivity extends AppCompatActivity {
 
         Bundle bundle = this.getIntent().getExtras();
         fileList = bundle.getStringArray("fileList");
+        isFromExtra = bundle.getBoolean("isFromExtra");
 
         //Log.i("filelist", fileList.toString());
 
@@ -157,9 +161,11 @@ public class BuildPictureActivity extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK)) {
             if (isDone == 1) {
-                PlayerActivity.instance.finish();
-                MarkPictureActivity.instance.finish();
-                MainActivity.instance.finish();
+                try {
+                    PlayerActivity.instance.finish();
+                    MarkPictureActivity.instance.finish();
+                    MainActivity.instance.finish();
+                } catch (NullPointerException e){}
                 Intent intent = new Intent(BuildPictureActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
@@ -379,5 +385,43 @@ public class BuildPictureActivity extends AppCompatActivity {
         }
 
         return flag;
+    }
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        Log.i("cao", "In BuildPictureActivity onDestroy");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.i("cao", "In BuildPictureActivity onStop");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.i("cao", "In BuildPictureActivity onPause");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.i("cao", "In BuildPictureActivity onResume");
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.i("cao", "In BuildPictureActivity onStart");
+    }
+
+    @Override
+    public void onRestart() {
+        super.onRestart();
+        Log.i("cao", "In BuildPictureActivity onRestart");
     }
 }

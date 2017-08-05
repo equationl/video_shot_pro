@@ -51,8 +51,6 @@
                 android:resource="@xml/filepaths" />
         </provider>
 
-        <activity android:name=".TestActivity"></activity>
-
         <service
             android:name=".FloatWindowsService"
             android:enabled="true"

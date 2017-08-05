@@ -1,9 +1,11 @@
 package com.equationl.videoshotpro;
 
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -50,12 +52,20 @@ public class MarkPictureActivity extends AppCompatActivity {
     SharedPreferences settings;
     TextView tip_text, nums_tip_text;
     boolean isLongPress=false;
+    Boolean isFromExtra;
+    ProgressDialog dialog;
+    Resources res;
 
     Tools tool = new Tools();
 
     private static final int HandlerStatusHideTipText = 10010;
     private static final int HandlerStatusLongIsWorking = 10011;
     private static final int HandlerStatusIsLongPress = 10012;
+    private static final int HandlerCheckImgSaveFail = 10013;
+    private static final int HandlerStatusProgressRunning = 10014;
+    private static final int HandlerStatusProgressDone = 10015;
+    private static final int HandlerStatusGetImgFail = 10016;
+
 
     public static MarkPictureActivity instance = null;   //FIXME  暂时这样吧，实在找不到更好的办法了
 
@@ -86,23 +96,29 @@ public class MarkPictureActivity extends AppCompatActivity {
         tip_text = (TextView) findViewById(R.id.make_picture_tip);
         nums_tip_text  = (TextView) findViewById(R.id.make_picture_nums_tip);
 
-        Boolean isFromExtra = this.getIntent().getBooleanExtra("isFromExtra", false);
-        if (isFromExtra) {
-            Intent service = new Intent(MarkPictureActivity.this, FloatWindowsService.class);
-            stopService(service);
-            tool.MakeCacheToStandard(this);  //FIXME 未找到文件名不规范的原因，此为临时解决方案
-            tool.MakeCacheToStandard(this);   //FIXME 我也不知道为毛线会一直说文件名重复？？？？？老子改两次行了吧？
-            try {
-                BuildPictureActivity.instance.finish();
-            } catch (NullPointerException e) {}
-
-        }
-
         settings = PreferenceManager.getDefaultSharedPreferences(this);
+        res = getResources();
 
         final File filepath = new File(getExternalCacheDir().toString());
         fileList = filepath.list();
         pic_num = fileList.length;
+
+        isFromExtra = this.getIntent().getBooleanExtra("isFromExtra", false);
+        if (isFromExtra) {
+            Intent service = new Intent(MarkPictureActivity.this, FloatWindowsService.class);
+            stopService(service);
+
+            dialog = new ProgressDialog(this);
+            dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            dialog.setIndeterminate(false);
+            dialog.setCancelable(false);
+            dialog.setMessage(res.getString(R.string.markPicture_ProgressDialog_msg));
+            dialog.setTitle(res.getString(R.string.markPicture_ProgressDialog_title));
+            dialog.setMax(fileList.length);
+            dialog.show();
+            dialog.setProgress(0);
+            new Thread(new MyThread()).start();
+        }
 
         if (pic_num < 1) {
             Toast.makeText(this, R.string.markPicture_toast_readFile_fail, Toast.LENGTH_SHORT).show();
@@ -284,6 +300,7 @@ public class MarkPictureActivity extends AppCompatActivity {
                     Intent intent = new Intent(MarkPictureActivity.this, BuildPictureActivity.class);
                     Bundle bundle = new Bundle();
                     bundle.putStringArray("fileList",fileList);
+                    bundle.putBoolean("isFromExtra", isFromExtra);
                     intent.putExtras(bundle);
                     startActivity(intent);
                 }
@@ -313,7 +330,11 @@ public class MarkPictureActivity extends AppCompatActivity {
         try {
             bm = tool.getBitmapFromFile(no, getExternalCacheDir(),extension);
         }  catch (Exception e) {
-            Toast.makeText(getApplicationContext(),"获取截图失败"+e, Toast.LENGTH_LONG).show();
+            Message msg;
+            msg = Message.obtain();
+            msg.obj = e;
+            msg.what = HandlerStatusGetImgFail;
+            handler.sendMessage(msg);
         }
 
         return bm;
@@ -468,8 +489,61 @@ public class MarkPictureActivity extends AppCompatActivity {
                 case HandlerStatusIsLongPress:
                     isLongPress = false;
                     break;
+                case HandlerCheckImgSaveFail:
+                    Toast.makeText(MarkPictureActivity.this, "保存图片失败："+msg.obj, Toast.LENGTH_SHORT).show();
+                    break;
+                case HandlerStatusProgressRunning:
+                    dialog.setProgress(dialog.getProgress()+1);
+                    dialog.setMessage(msg.obj.toString());
+                    break;
+                case HandlerStatusProgressDone:
+                    dialog.dismiss();
+                    break;
+                case HandlerStatusGetImgFail:
+                    Toast.makeText(MarkPictureActivity.this, "获取图片失败："+msg.obj, Toast.LENGTH_SHORT).show();
+                    break;
             }
-
         }
     };
+
+    private class MyThread implements Runnable {
+        @Override
+        public void run() {
+            Message msg;
+            int i = 0;
+            File path = new File(getExternalCacheDir().toString());
+            String extension = settings.getBoolean("isShotToJpg", true) ? "jpg":"png";
+            String [] files = path.list();
+            String name;
+            Bitmap bitmap;
+
+            for (String file:files) {
+                msg = Message.obtain();
+                msg.obj = String.format(res.getString(R.string.markPicture_ProgressDialog_msgOnRunning),
+                        ""+(i+1));
+                msg.what = HandlerStatusProgressRunning;
+                handler.sendMessage(msg);
+
+                if (file.contains("_")) {
+                    name = file.split("_")[0];
+                }
+                else {
+                    name = file.split("\\.")[0];
+                }
+                Log.i("cao", "file= "+file);
+                Log.i("cao", "name= "+name);
+                bitmap = tool.removeImgBlackSide(getBitmapFromFile(name));
+                try {
+                    saveMyBitmap(bitmap, i+"");
+                } catch (IOException e) {
+                    msg = Message.obtain();
+                    msg.obj = e;
+                    msg.what = HandlerCheckImgSaveFail;
+                    handler.sendMessage(msg);
+                }
+                i++;
+            }
+            handler.sendEmptyMessage(HandlerStatusProgressDone);
+        }
+    }
 }

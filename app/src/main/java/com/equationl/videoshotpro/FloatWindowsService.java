@@ -2,6 +2,7 @@ package com.equationl.videoshotpro;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.Instrumentation;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -9,6 +10,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
@@ -16,6 +18,7 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.Image;
 import android.media.ImageReader;
+import android.media.MediaScannerConnection;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
@@ -23,12 +26,14 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v4.os.AsyncTaskCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -61,6 +66,9 @@ public class FloatWindowsService extends Service {
         return intent;
     }
 
+    Resources res;
+
+
     private MediaProjection mMediaProjection;
     private VirtualDisplay mVirtualDisplay;
 
@@ -87,6 +95,7 @@ public class FloatWindowsService extends Service {
         super.onCreate();
 
         Log.i("EL", "in onCreate()");
+        res = getResources();
 
         settings = PreferenceManager.getDefaultSharedPreferences(this);
         tool = new Tools();
@@ -97,13 +106,9 @@ public class FloatWindowsService extends Service {
 
         createImageReader();
 
-        MainActivity.instance.finish();
-        try {
-            BuildPictureActivity.instance.finish();
-        } catch (NullPointerException e) {}
         NotificationManager barmanager=(NotificationManager)this.getSystemService(Context.NOTIFICATION_SERVICE);
         Notification notice;
-        Notification.Builder builder = new Notification.Builder(this).setTicker("启动通知")
+        Notification.Builder builder = new Notification.Builder(this).setTicker(res.getString(R.string.floatWindowsService_notice_ticker_text))
                 .setSmallIcon(R.mipmap.ic_launcher).setWhen(System.currentTimeMillis());
         Intent appIntent=null;
         appIntent = new Intent(this,MarkPictureActivity.class);
@@ -113,7 +118,8 @@ public class FloatWindowsService extends Service {
         appIntent.putExtra("isFromExtra", true);
         PendingIntent contentIntent =PendingIntent.getActivity(this, 0,appIntent,PendingIntent.FLAG_UPDATE_CURRENT);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            notice = builder.setContentIntent(contentIntent).setContentTitle("标题").setContentText("点击开始合成").build();
+            notice = builder.setContentIntent(contentIntent).setContentTitle(res.getString(R.string.floatWindowsService_notice_title))
+                    .setContentText(res.getString(R.string.floatWindowsService_notice_content)).build();
             notice.flags=Notification.FLAG_AUTO_CANCEL | Notification.FLAG_ONGOING_EVENT;
             barmanager.notify(10,notice);
         }
@@ -226,19 +232,19 @@ public class FloatWindowsService extends Service {
         mFloatView.setVisibility(View.GONE);
 
         Handler handler1 = new Handler();
-        handler1.postDelayed(new Runnable() {
+        handler1.post(new Runnable() {
             public void run() {
                 //start virtual
                 startVirtual();
             }
-        }, 5);
+        });
 
-        handler1.postDelayed(new Runnable() {
+        handler1.post(new Runnable() {
             public void run() {
                 //capture the screen
                 startCapture();
             }
-        }, 30);
+        });
     }
 
 
@@ -280,14 +286,23 @@ public class FloatWindowsService extends Service {
 
     private void startCapture() {
 
-        Image image = mImageReader.acquireLatestImage();
+        /*Image image = mImageReader.acquireLatestImage();
 
         if (image == null) {
             startScreenShot();
         } else {
             SaveTask mSaveTask = new SaveTask();
             AsyncTaskCompat.executeParallel(mSaveTask, image);
+        }   */
+        Image image = mImageReader.acquireLatestImage();
+        while (image == null) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {}
+            image = mImageReader.acquireLatestImage();
         }
+        SaveTask mSaveTask = new SaveTask();
+        AsyncTaskCompat.executeParallel(mSaveTask, image);
     }
 
 
@@ -397,6 +412,31 @@ public class FloatWindowsService extends Service {
         stopVirtual();
 
         tearDownMediaProjection();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId)  {
+        MainActivity.instance.finish();
+        try {
+            BuildPictureActivity.instance.finish();
+        } catch (NullPointerException e) {}
+
+
+        new Thread () {
+            public void run () {
+                try{
+                    Thread.sleep(1000);
+                } catch(InterruptedException e){}
+                try {
+                    Instrumentation inst= new Instrumentation();
+                    inst.sendKeyDownUpSync(KeyEvent. KEYCODE_BACK);
+                } catch(Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();    //FIXME 临时解决方案，不靠谱
+
+        return super.onStartCommand(intent, flags, startId);
     }
 
 

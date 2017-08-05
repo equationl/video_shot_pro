@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -26,6 +27,10 @@ import java.io.IOException;
 import java.util.List;
 
 public class Tools{
+
+    public int AllowNotBlackNums = 20;
+    public int AllowCheckBlackLines = 10;
+
     /**
      * 将 bitmap 保存为png
      *
@@ -346,7 +351,7 @@ public class Tools{
         }
     }
 
-    private Boolean renameFile(String path,String oldname,String newname) {
+    public Boolean renameFile(String path,String oldname,String newname) {
         if(!oldname.equals(newname)){
             File oldfile=new File(path+"/"+oldname);
             File newfile=new File(path+"/"+newname);
@@ -368,6 +373,112 @@ public class Tools{
         }
 
         return true;
+    }
+
+    /**
+     * 去除图片中的黑色无内容区域
+     *
+     * @param  bitmap 源图片
+     * @return 处理完成的bitmap
+     *
+    * */
+    public Bitmap removeImgBlackSide(Bitmap bitmap) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+
+        Log.i("cao", "width="+width+" height="+height);
+
+        int[] area = getImgBlackArea(bitmap);
+
+        Log.i("cao", "area="+area[0]+" "+area[1]);
+
+        if (area[0] > 0) {
+            bitmap = Bitmap.createBitmap(bitmap, 0, area[0], width, height-area[0]);
+        }
+        if (area[1] > 0) {
+            bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, area[1]);
+        }
+        return bitmap;
+    }
+
+
+    /**
+    * 检查指定行是否为无内容区域（仅检查横向）
+    *
+    * @param bitmap 源bitmap
+     *@param y 欲检查的行的坐标
+     * @return 是否为无内容区域
+     *
+    * */
+    public boolean checkLineColorIsBlack(Bitmap bitmap, int y) {
+        int len = bitmap.getWidth();
+        int NotBlackNum = 0;
+        int color;
+        for (int i=0;i<len;i+=2) {    //空一个像素检测一次，节省时间
+            color = bitmap.getPixel(i, y);
+            //Log.i("nidaye", "i="+i+" y="+y);
+            //Log.i("nidaye", "color="+color);
+            if (color != Color.BLACK) {
+                NotBlackNum++;
+            }
+        }
+
+        if (NotBlackNum > AllowNotBlackNums) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 获取无内容区域
+     *
+     * @param bitmap 源bitmap
+     * @return 无内容区域的终点坐标
+     * */
+    public int[] getImgBlackArea(Bitmap bitmap) {
+        int i = 0;
+        int temp1, temp2, blackLineNums=0;
+        Boolean lineIsBlack = checkLineColorIsBlack(bitmap,i);
+        while (true) {
+            if (i >= bitmap.getHeight()/2) {
+                i = 0;
+                break;
+            }
+            if (!lineIsBlack) blackLineNums++;
+            else {
+                blackLineNums = 0;
+            }
+            if (blackLineNums >= AllowCheckBlackLines) break;
+            i++;
+            lineIsBlack = checkLineColorIsBlack(bitmap,i);
+        }
+        temp1 = i-AllowCheckBlackLines;
+
+
+        blackLineNums = 0;
+        //i = (int)((bitmap.getHeight())/1.3);
+        Log.i("cao", "i="+i);
+        lineIsBlack = checkLineColorIsBlack(bitmap,i);
+        while (true) {
+            if (i >= (bitmap.getHeight()-1) ) {
+                Log.i("cao", "jiushi ni l ");
+                break;
+            }
+            if (lineIsBlack) {
+                blackLineNums++;
+                Log.i("cao", "lineIsBlack:true");
+            }
+            else {
+                blackLineNums = 0;
+            }
+            if (blackLineNums >= AllowCheckBlackLines) break;
+            i++;
+            lineIsBlack = checkLineColorIsBlack(bitmap,i);
+        }
+        temp2 = i-AllowCheckBlackLines-temp1;
+
+
+        return new int[]{temp1, temp2};
     }
 
 }
