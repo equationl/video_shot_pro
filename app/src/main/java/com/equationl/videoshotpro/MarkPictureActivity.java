@@ -29,11 +29,11 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.dingmouren.colorpicker.ColorPickerDialog;
+import com.dingmouren.colorpicker.OnColorPickerListener;
 import com.equationl.videoshotpro.Image.Tools;
 
 import java.io.File;
@@ -45,6 +45,7 @@ public class MarkPictureActivity extends AppCompatActivity {
     ImageView imagview;
     String[] fileList;
     Button btn_start;
+    Button start_color_picker;
     int pic_num,pic_no=0,flag=0;
     AlertDialog.Builder builder;
     private LayoutInflater mLayoutInflater;
@@ -55,6 +56,7 @@ public class MarkPictureActivity extends AppCompatActivity {
     Boolean isFromExtra;
     ProgressDialog dialog;
     Resources res;
+    int text_color=0;
 
     Tools tool = new Tools();
 
@@ -184,7 +186,7 @@ public class MarkPictureActivity extends AppCompatActivity {
                                 Log.i("pic no", pic_no+"");
                                 if (mCurPosY - mPosY > 0
                                         && (Math.abs(mCurPosY - mPosY) > 200)) {
-                                    //向下滑動
+                                    //向下滑动
                                     //Toast.makeText(getApplicationContext(),"向下滑动",Toast.LENGTH_SHORT).show();
                                     if (fileList[pic_no].equals("text")) {
                                         Toast.makeText(MarkPictureActivity.this, "添加文字后不允许裁切！", Toast.LENGTH_SHORT).show();
@@ -214,63 +216,8 @@ public class MarkPictureActivity extends AppCompatActivity {
                             else {
                                 if (mCurPosX - mPosX < 0
                                         && (Math.abs(mCurPosX - mPosX) > 200)) {
-                                        //向左滑动
-                                    nums_tip_text.setText((pic_no+1+"/")+pic_num);
-                                    DialogInterface.OnClickListener dialogOnclicListener=new DialogInterface.OnClickListener(){
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            switch(which){
-                                                case Dialog.BUTTON_POSITIVE:
-                                                    EditText edit_text = (EditText) view.findViewById(R.id.input_text);
-                                                    EditText edit_size = (EditText) view.findViewById(R.id.input_size);
-                                                    RadioGroup radiogroup = (RadioGroup) view.findViewById(R.id.color);
-                                                    RadioButton radio_color = (RadioButton) view.findViewById(radiogroup.getCheckedRadioButtonId());
-                                                    String text_color = radio_color.getText().toString();
-                                                    String text = edit_text.getText().toString();
-                                                    if (text.equals("")) {
-                                                        break;
-                                                    }
-                                                    int text_size;
-                                                    if (edit_size.getText().toString().equals("")) {
-                                                        text_size = 30;
-                                                    }
-                                                    else {
-                                                        text_size = Integer.parseInt(edit_size.getText().toString());
-                                                    }
-
-                                                    //Log.i("ccccc",text);
-                                                    Bitmap bm;
-                                                    if (pic_no<pic_num && fileList[pic_no].equals("text")) {
-                                                        bm = addBitmap(getBitmapFromFile(pic_no+"_t"),addTextToImage(getBitmapFromFile(pic_no+"_t"),text,text_size,text_color));
-                                                    }
-                                                    else {
-                                                        bm = addBitmap(getBitmapFromFile(pic_no+""),addTextToImage(getBitmapFromFile(pic_no+""),text,text_size,text_color));
-                                                    }
-                                                    try {
-                                                        saveMyBitmap(bm,pic_no+"_t");
-                                                    }
-                                                    catch (IOException e) {
-                                                        Log.i("excuse me?",e.toString());
-                                                        Toast.makeText(getApplicationContext(),"写入缓存失败！"+e.toString(), Toast.LENGTH_LONG).show();
-                                                    }
-                                                    set_image(pic_no, "_t");
-                                                    fileList[pic_no] = "text";
-                                                    break;
-                                                case Dialog.BUTTON_NEGATIVE:
-                                                    break;
-                                            }
-                                        }
-                                    };
-                                        mLayoutInflater= LayoutInflater.from(MarkPictureActivity.this);
-                                        view=mLayoutInflater.inflate(R.layout.dialog_mark_picture, null, false);
-                                        builder = new AlertDialog.Builder(MarkPictureActivity.this);
-                                        builder.setTitle("请输入要添加的文字")
-                                            .setView(view)
-                                            .setPositiveButton("确定",dialogOnclicListener)
-                                            .setNegativeButton("取消", dialogOnclicListener)
-                                            .setCancelable(false)
-                                            .create();
-                                            builder.show();
+                                    //向左滑动
+                                    slideToLeft();
                                 }
                                 else if (mCurPosX - mPosX > 0
                                         && (Math.abs(mCurPosX - mPosX) > 200)) {
@@ -340,19 +287,9 @@ public class MarkPictureActivity extends AppCompatActivity {
         return bm;
     }
 
-    private Bitmap addTextToImage(Bitmap bm, String text, int size, String color) {
+    private Bitmap addTextToImage(Bitmap bm, String text, int size) {
         if (size < 0) {
             size = 30;
-        }
-        int text_color= Color.BLACK;
-        if (color.equals("红")) {
-            text_color= Color.RED;
-        }
-        else if (color.equals("蓝")) {
-            text_color= Color.BLUE;
-        }
-        else if (color.equals("绿")) {
-            text_color= Color.GREEN;
         }
         int width = bm.getWidth();
 
@@ -546,4 +483,94 @@ public class MarkPictureActivity extends AppCompatActivity {
             handler.sendEmptyMessage(HandlerStatusProgressDone);
         }
     }
+
+    private void clickAddTextOkBtn() {
+        EditText edit_text = (EditText) view.findViewById(R.id.input_text);
+        EditText edit_size = (EditText) view.findViewById(R.id.input_size);
+        String text = edit_text.getText().toString();
+        if (text.equals("")) {
+            return;
+        }
+        int text_size;
+        if (edit_size.getText().toString().equals("")) {
+            text_size = 30;
+        }
+        else {
+            text_size = Integer.parseInt(edit_size.getText().toString());
+        }
+
+        //Log.i("ccccc",text);
+        Bitmap bm;
+        if (pic_no<pic_num && fileList[pic_no].equals("text")) {
+            bm = addBitmap(getBitmapFromFile(pic_no+"_t"),addTextToImage(getBitmapFromFile(pic_no+"_t"),text,text_size));
+        }
+        else {
+            bm = addBitmap(getBitmapFromFile(pic_no+""),addTextToImage(getBitmapFromFile(pic_no+""),text,text_size));
+        }
+        try {
+            saveMyBitmap(bm,pic_no+"_t");
+        }
+        catch (IOException e) {
+            Log.i("excuse me?",e.toString());
+            Toast.makeText(getApplicationContext(),"写入缓存失败！"+e.toString(), Toast.LENGTH_LONG).show();
+        }
+        set_image(pic_no, "_t");
+        fileList[pic_no] = "text";
+    }
+
+    private void slideToLeft() {
+        nums_tip_text.setText((pic_no+1+"/")+pic_num);
+        DialogInterface.OnClickListener dialogOnclicListener=new DialogInterface.OnClickListener(){
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch(which){
+                    case Dialog.BUTTON_POSITIVE:
+                        clickAddTextOkBtn();
+                        break;
+                    case Dialog.BUTTON_NEGATIVE:
+                        break;
+                }
+            }
+        };
+        mLayoutInflater= LayoutInflater.from(MarkPictureActivity.this);
+        view=mLayoutInflater.inflate(R.layout.dialog_mark_picture, null, false);
+        builder = new AlertDialog.Builder(MarkPictureActivity.this);
+        builder.setTitle("请输入要添加的文字")
+                .setView(view)
+                .setPositiveButton("确定",dialogOnclicListener)
+                .setNegativeButton("取消", dialogOnclicListener)
+                .setCancelable(false)
+                .create();
+        builder.show();
+        start_color_picker = (Button) view.findViewById(R.id.mark_dialog_chooseColor_btn);
+        start_color_picker.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                ColorPickerDialog mColorPickerDialog = new ColorPickerDialog(
+                        MarkPictureActivity.this,
+                        Color.BLACK,
+                        false,
+                        mOnColorPickerListener
+                ).show();
+            }
+        });
+    }
+
+    private OnColorPickerListener mOnColorPickerListener = new OnColorPickerListener() {
+        @Override
+        public void onColorCancel(ColorPickerDialog dialog) {//取消选择的颜色
+
+        }
+
+        @Override
+        public void onColorChange(ColorPickerDialog dialog, int color) {//实时监听颜色变化
+
+        }
+
+        @Override
+        public void onColorConfirm(ColorPickerDialog dialog, int color) {//确定的颜色
+            text_color = color;
+            start_color_picker.setBackgroundColor(color);
+            start_color_picker.setTextColor(tool.getInverseColor(color));
+        }
+    };
 }

@@ -30,48 +30,13 @@
             android:layout_gravity="right" />
     </android.support.design.widget.TextInputLayout>
 
-    <TextView
-        android:layout_width="match_parent"
+    <Button
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="请选择文字颜色："
-        android:id="@+id/textView4"
+        android:text="请选择文字颜色"
+        android:id="@+id/mark_dialog_chooseColor_btn"
         android:layout_weight="0.05"
         android:textColor="#000000" />
-
-        <RadioGroup
-            android:id="@+id/color"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <RadioButton
-                android:id="@+id/radiobutton_black"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="黑"
-                android:checked="true" />
-
-            <RadioButton
-                android:id="@+id/radiobutton_red"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="红"
-                android:checked="false" />
-
-            <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="蓝"
-                android:id="@+id/radioButton_blue"
-                android:checked="false" />
-
-            <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="绿"
-                android:id="@+id/radioButton_green"
-                android:checked="false" />
-
-        </RadioGroup>
 
 </LinearLayout>

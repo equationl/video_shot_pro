@@ -45,6 +45,8 @@
         Ucrop：https://github.com/jdamcd/android-crop \n
          -------------\n
         glide：https://github.com/bumptech/glide  \n
+        --------------\n
+        ColorPicker：https://github.com/DingMouRen/ColorPicker   \n
     </string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
