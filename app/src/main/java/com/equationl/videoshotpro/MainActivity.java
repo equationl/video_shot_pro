@@ -29,7 +29,9 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.text.Html;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -39,6 +41,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.equationl.videoshotpro.Image.Tools;
@@ -67,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Tools tool;
     Resources res;
     GalleryConfig galleryConfig;
-    SharedPreferences settings;
+    SharedPreferences settings, sp_init;
     Dialog dialog_permission;
 
     public static MainActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
@@ -87,11 +90,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         instance = this;
 
         settings = PreferenceManager.getDefaultSharedPreferences(this);
+        sp_init = getSharedPreferences("init", Context.MODE_PRIVATE);
 
         container =  (android.support.design.widget.CoordinatorLayout)findViewById(R.id.container);
 
         tool = new Tools();
         res = getResources();
+
+        if (sp_init.getBoolean("isFirstBoot", true)) {
+            showAlertDialog();
+            SharedPreferences.Editor editor = sp_init.edit();
+            editor.putBoolean("isFirstBoot", false);
+            editor.apply();
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             int i = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
@@ -141,7 +152,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == IntentResultCodeMediaProjection) {
-                Toast.makeText(this, "kaishi", Toast.LENGTH_SHORT).show();
                 Log.i("EL", "try Start Service");
 
                 try {
@@ -235,9 +245,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_splicing) {
-            GalleryPick.getInstance().setGalleryConfig(galleryConfig).open(MainActivity.this);
+            if (sp_init.getBoolean("isFirstUseSplicing", true)) {
+                showSplicingDialog();
+                SharedPreferences.Editor editor = sp_init.edit();
+                editor.putBoolean("isFirstUseSplicing", false);
+                editor.apply();
+            }
+            else {
+                GalleryPick.getInstance().setGalleryConfig(galleryConfig).open(MainActivity.this);
+            }
         } else if (id == R.id.nav_floatBtn) {
-            showFloatBtn();
+            if (sp_init.getBoolean("isFirstUseFloat", true)) {
+                showFloatDialog();
+                SharedPreferences.Editor editor = sp_init.edit();
+                editor.putBoolean("isFirstUseFloat", false);
+                editor.apply();
+            }
+            else {
+                showFloatBtn();
+            }
+        } else if (id == R.id.nav_support) {
+            showSupportDialog();
+        } else if (id == R.id.nav_about) {
+            showAboutDialog();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -645,5 +675,80 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         void confirmResult(boolean confirm);
     }
 
+    private void showSupportDialog() {
+        LayoutInflater mLayoutInflater= LayoutInflater.from(MainActivity.this);
+        View view=mLayoutInflater.inflate(R.layout.dialog_main_support, null, false);
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle(R.string.main_dialog_support_title)
+                .setView(view)
+                .setCancelable(true)
+                .create();
+        builder.show();
+        TextView bottomText = (TextView) view.findViewById(R.id.main_dialog_support_bottomText);
+        bottomText.setText(Html.fromHtml(getString(R.string.main_dialog_support_bottomText)));
+        bottomText.setTextIsSelectable(true);
+    }
+
+    private void showAlertDialog() {
+        Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
+                .setTitle(R.string.main_dialog_alert_title)
+                .setMessage(R.string.main_dialog_alert_content)
+                .setPositiveButton(res.getString(R.string.main_dialog_btn_ok),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        }).create();
+        dialog.show();
+    }
+
+    private void showSplicingDialog() {
+        Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
+                .setTitle(R.string.main_dialog_splicing_title)
+                .setMessage(R.string.main_dialog_splicing_content)
+                .setPositiveButton(res.getString(R.string.main_dialog_btn_ok),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                GalleryPick.getInstance().setGalleryConfig(galleryConfig).open(MainActivity.this);
+                            }
+                        }).create();
+        dialog.show();
+    }
+
+    private void showFloatDialog() {
+        Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
+                .setTitle(R.string.main_dialog_float_title)
+                .setMessage(R.string.main_dialog_float_content)
+                .setPositiveButton(res.getString(R.string.main_dialog_btn_ok),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                showFloatBtn();
+                            }
+                        }).create();
+        dialog.show();
+    }
+
+    private void showAboutDialog() {
+        String content = String.format(
+                res.getString(R.string.main_dialog_about_content),
+                res.getString(R.string.main_updateHistory_text),
+                res.getString(R.string.main_right_text));
+        Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
+                .setTitle(R.string.main_dialog_about_title)
+                .setMessage(content)
+                .setPositiveButton(res.getString(R.string.main_dialog_btn_ok),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        }).create();
+        dialog.show();
+    }
 }
 

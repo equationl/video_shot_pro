@@ -6,29 +6,45 @@
         有了视频截取，你就可以边看视频边将想要截图的位置标记下来，当视频播放完后你的截图也已经处理完毕。\n
         可用于制作电影图解 or 电影台词截图 or 精彩画面合集。 \n
         还支持自定义裁剪范围，甚至是保留整张截图。\n\n\n
-        联系我： admin@likehide.com  \n
         \n
         pro版本和普通版本的区别：\n
         \t*增加截取GIF动图功能\n
         \t*增加合成已有截图功能\n
+        \t*支持截取在线观看的视频\n
         \t*更自由的截取方式（作者：扯淡的，还在开发中）\n
-        \t*支持截取在线观看的视频（作者：又开始扯淡了）\n
         \t*更高端的分享方式（作者：能不能别立Flag了？）\n
         \t*更便捷丰富的文字添加方式（作者：这辈子都填不完这坑了）\n
         \t*优化手势操作\n
         \t*更高的开发优先级\n
         \t*高端定制的屎黄色图标\n
         重要提示：\n
-        有很多应用平台出现了本app的二次打包版本，且被添加了强制下载的广告，虽然我一直在努力和平台交涉，但是始终无法让官方将其下架，所以，只能提醒各位用户，本app正版没有任何的广告，并且只用了 读取/写入储存卡 权限，如果你下载的版本有广告且权限不止上述两个，那么就是盗版了。\n
+        有很多应用平台出现了本app的二次打包版本，且被添加了强制下载的广告，虽然我一直在努力和平台交涉，但是始终无法让官方将其下架，所以，只能提醒各位用户，本app正版没有任何的广告，并且权限干净，如果你下载的版本有广告且权限过多，那么就是盗版了。\n
         \t默认合成图片保存目录在 %1$s \n
-        \t但是我推荐直接在图库里面找，不过由于有时候图库刷新很慢，甚至某些ROM的图库直接不显示系统默认图片目录中的图片，所以如果在图库里找不到图片，请前往上述目录查找。\n
+        \t推荐直接直接使用系统图库查看\n
         \n\n\n
     </string>
 
-    <string name="main_right_text">
+    <string name="main_updateHistory_text">
+        1.0:\n
+        \t*增加合成已有截图模式\n
+        \t*增加截取在线视频模式\n
+        \t*增加截取gif动图功能\n
+        \t*优化生成图片后系统图库的刷新\n
+        \t*优化部分手势的体验\n
+    </string>
 
-        悬浮窗权限适配来自：http://blog.csdn.net/self_study/article/details/52859790 https://github.com/zhaozepeng/FloatWindowPermission  \n
-        截图及其悬浮按钮来自： https://github.com/goodbranch/ScreenCapture  \n
+    <string name="main_right_text">
+        FloatWindowPermission：https://github.com/zhaozepeng/FloatWindowPermission  \n
+        -------------\n
+        ScreenCapture ： https://github.com/goodbranch/ScreenCapture  \n
+         -------------\n
+        ffmpeg-android-java：https://github.com/writingminds/ffmpeg-android-java \n
+         -------------\n
+        GalleryPick：https://github.com/YancyYe/GalleryPick \n
+         -------------\n
+        Ucrop：https://github.com/jdamcd/android-crop \n
+         -------------\n
+        glide：https://github.com/bumptech/glide  \n
     </string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -50,6 +66,44 @@
     <string name="main_dialog_noPermission_title">未授予读写储存权限</string>
     <string name="main_dialog_noPermission_content">请授予 读取/写入储存 权限来保存您制作的作品</string>
     <string name="main_dialog_needFloatPermission_content">使用该功能需要开启悬浮窗权限，是否开启？</string>
+    <string name="main_dialog_support_topText">如果喜欢本app，欢迎捐赠 。</string>
+    <string name="main_dialog_support_byAlipay_text">使用支付宝捐赠：</string>
+    <string name="main_dialog_support_byWeixin_text">使用微信捐赠：</string>
+    <string name="main_dialog_support_bottomText">
+         <![CDATA[
+         <b>捐赠方法：</b>  <br />
+         选择一个您方便的捐赠方式后在本页面进行截图，并进入 支付宝/微信 -> 扫一扫 -> 相册 选择您的截图即可完成捐赠.  <br />
+        <b><font color="red">重要提示：</font></b><br/>
+        请先确保您的app是在正规渠道下载的再进行捐赠，以免因某些不发分子非法打包本app并替换二维码图片导致捐赠不能到达作者手中。<br />
+        同时请认准收款人： <b><font color="red">equationl</font></b>  <br />
+        本app普通版本已开源，您也可以通过 star 开源项目或为其提交代码，参与讨论，提出您的意见来支持作者<br />
+        项目地址：<a href="https://github.com/equationl/videoshot">https://github.com/equationl/videoshot</a>  <br /><br /><br /><br /><br /><br />
+         ]]>
+    </string>
+    <string name="main_dialog_support_title">支持作者</string>
+    <string name="main_dialog_alert_title">温馨提示</string>
+    <string name="main_dialog_alert_content">请一定确保您下载的app来自正规渠道，并牢记本app权限干净，绝无任何广告，如有广告或申请过多的权限则为盗版，为保护您的安全，建议立即卸载并前往正规渠道下载。</string>
+    <string name="main_dialog_splicing_title">温馨提示</string>
+    <string name="main_dialog_splicing_content">使用本模式可以快速合成用户手机中已有的图片，使用时请确保您需要合成的图片宽度一致，否则容易出现“白边”影响作品的美观。\n\n
+    使用方法：\n
+    根据提示勾选您需要合成的图片，勾选完毕后选择右上角的 “完成” 即可。</string>
+    <string name="main_dialog_float_title">温馨提示</string>
+    <string name="main_dialog_float_content">使用本模式可以在任意位置截图，方便喜欢在线观看视频的用户也能制作属于自己的电影对白字幕。\n\n
+    使用方法：\n
+    \t选择该模式后，本app会显示一个悬浮按钮，此时您可以前往其他app开始在线观看视频，当需要截图时，只需要点击一下悬浮按钮。\n
+    \t当所需图片已经全部截取完毕后，您可以下拉通知栏点击本app发送的通知 “点击开始制作” 。</string>
+    <string name="main_dialog_about_title">关于</string>
+    <string name="main_dialog_about_content">
+        作者：equationl \n
+        联系方式： admin@likehide.com   \n
+        ---------------------\n
+        更新记录：\n\n
+        %1$S \n
+        ----------------------\n
+        本app涉及到的开源项目：\n\n
+        %2$s \n
+    </string>
+
 
     <string name="main_snackbar_loadSo_fail">加载FFmpeg失败</string>
     <string name="main_snackbar_btn_retry">重试</string>
@@ -70,6 +124,8 @@
     <string name="main_nav_text_splicing">已有截图合成</string>
     <string name="main_nav_text_floatBtn">外部程序截图</string>
     <string name="main_nav_title_info">反馈与帮助</string>
+    <string name="main_nav_text_support">支持作者</string>
+    <string name="main_nav_text_about">关于</string>
 
     <string name="player_toast_needMoreShot">至少需要截取两张图片！</string>
     <string name="player_toast_shotGif_fail">截取动图失败！</string>

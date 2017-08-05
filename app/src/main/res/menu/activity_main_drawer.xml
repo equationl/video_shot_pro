@@ -30,6 +30,14 @@
                 android:id="@+id/nav_feedback"
                 android:icon="@android:drawable/sym_action_email"
                 android:title="@string/main_nav_text_feedback" />
+            <item
+                android:id="@+id/nav_support"
+                android:icon="@android:drawable/star_big_on"
+                android:title="@string/main_nav_text_support" />
+            <item
+                android:id="@+id/nav_about"
+                android:icon="@android:drawable/ic_dialog_info"
+                android:title="@string/main_nav_text_about" />
         </menu>
     </item>
 
