@@ -32,7 +32,7 @@
         android:summary="@string/pref_description_reduce"
         android:title="@string/pref_title_reduce" />
     <ListPreference
-        android:defaultValue="1"
+        android:defaultValue="100"
         android:entries="@array/pref_reduce_list_titles"
         android:entryValues="@array/pref_reduce_list_values"
         android:key="reduce_value"
@@ -66,7 +66,17 @@
         android:title="@string/pref_title_isShotGif" />
 
     <ListPreference
-        android:defaultValue="1"
+        android:defaultValue="3"
+        android:entries="@array/pref_gif_MinTime_titles"
+        android:entryValues="@array/pref_gif_MinTime_values"
+        android:key="shotToGifMinTime"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_gif_MinTime"
+        android:dependency="isShotGif"/>
+
+    <ListPreference
+        android:defaultValue="320x240"
         android:entries="@array/pref_gif_RP_titles"
         android:entryValues="@array/pref_gif_RP_values"
         android:key="gifRP_value"
@@ -76,7 +86,7 @@
         android:dependency="isShotGif"/>
 
     <ListPreference
-        android:defaultValue="2"
+        android:defaultValue="14"
         android:entries="@array/pref_gif_frameRate_titles"
         android:entryValues="@array/pref_gif_frameRate_values"
         android:key="gifFrameRate_value"

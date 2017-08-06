@@ -295,10 +295,10 @@ public class BuildPictureActivity extends AppCompatActivity {
                     delete_nums++;
                 }
             }
-            Boolean isAddWatermark = settings.getBoolean("isAddWatermark_switch",false);
+            Boolean isAddWatermark = settings.getBoolean("isAddWatermark_switch",true);
             if (isAddWatermark) {
                 Canvas canvas = new Canvas(final_bitmap);
-                String watermark = settings.getString("watermark_text","NULL");
+                String watermark = settings.getString("watermark_text","Made by videoshot");
                 TextPaint textPaint = new TextPaint();
                 textPaint.setColor(Color.argb(80,150,150,150));
                 textPaint.setTextSize(40);

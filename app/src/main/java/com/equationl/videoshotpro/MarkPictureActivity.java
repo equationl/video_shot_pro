@@ -209,7 +209,9 @@ public class MarkPictureActivity extends AppCompatActivity {
                                     autoHideText();
                                     nums_tip_text.setText((pic_no+1+"/")+pic_num);
                                     set_image(pic_no+1);
-                                    fileList[pic_no] = "all";
+                                    if (!fileList[pic_no].equals("text")) {
+                                        fileList[pic_no] = "all";
+                                    }
                                     pic_no++;
                                 }
                             }
@@ -359,26 +361,6 @@ public class MarkPictureActivity extends AppCompatActivity {
                     tHide = null;
                 }
             }, 1000);
-        }
-    }
-
-    private void checkIsLongPress(boolean isDelete) {
-        Log.i("el_test", "调用 checkIsLongPress  ??");
-        if (isDelete) {
-            Log.i("el_test", "删除 checkIsLongPress   ??");
-            handler.removeMessages(HandlerStatusIsLongPress);
-            isLongPress = false;
-        }
-        else if (pic_no > 0){
-            if (!isLongPress) {
-                isLongPress = true;
-                handler.sendEmptyMessageDelayed(HandlerStatusIsLongPress,1000);
-            }
-            else {
-                Log.i("el_test", "运行 checkIsLongPress  ??");
-                isLongPress = false;
-                handler.sendEmptyMessage(HandlerStatusLongIsWorking);
-            }
         }
     }
 

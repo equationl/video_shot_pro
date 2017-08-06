@@ -67,6 +67,7 @@ public class PlayerActivity extends AppCompatActivity {
     Resources res;
     int gif_start_time=0, gif_end_time=0;
     boolean isShotFinish=false;
+    int shotToGifMinTime;
 
     public static PlayerActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
 
@@ -75,7 +76,7 @@ public class PlayerActivity extends AppCompatActivity {
     private static final int HandlerStatusShowTime = 10011;
     private static final int HandlerStatusUpdateTime = 10012;
     private static final int HandlerShotGifFail = 10013;
-    private static final int HandlerShotGifsuccess = 10014;
+    private static final int HandlerShotGifSuccess = 10014;
     private static final int HandlerShotGifRunning = 10015;
 
 
@@ -199,7 +200,9 @@ public class PlayerActivity extends AppCompatActivity {
                 if(motionEvent.getAction() == MotionEvent.ACTION_UP && isShotGif){
                     Log.d(TAG, "shot button ---> up");
                     gif_end_time = videoview.getCurrentPosition();
-                    if (gif_end_time-gif_start_time > 3000) {
+                    shotToGifMinTime = Integer.valueOf(settings.getString("shotToGifMinTime", "3"));
+                    Log.i(TAG, "shotToGifMinTime="+shotToGifMinTime);
+                    if (gif_end_time-gif_start_time > shotToGifMinTime*1000) {
                         btn_shot.setBackground(res.getDrawable(R.drawable.button_radius_up));
                         isShotingGif = true;
                         if (!gif_thread.isAlive()) {
@@ -351,7 +354,7 @@ public class PlayerActivity extends AppCompatActivity {
                         handler.sendEmptyMessageDelayed(HandlerStatusUpdateTime, 200);
                     }
                     break;
-                case HandlerShotGifsuccess:
+                case HandlerShotGifSuccess:
                     isShotingGif = false;
                     MediaScannerConnection.scanFile(PlayerActivity.this, new String[]{msg.obj.toString()}, null, null);
                     Toast.makeText(PlayerActivity.this, R.string.player_toast_shotGif_success, Toast.LENGTH_SHORT).show();
@@ -442,6 +445,7 @@ public class PlayerActivity extends AppCompatActivity {
         public void run() {
             String gif_RP = settings.getString("gifRP_value", "320x240");
             String gif_frameRate = settings.getString("gifFrameRate_value", "14");
+            Log.i(TAG, "RP="+gif_RP+" fraerate="+gif_frameRate);
             String video_path = tool.getImageAbsolutePath(PlayerActivity.this,uri);
             SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
             String date    =    sDateFormat.format(new    java.util.Date());
@@ -483,7 +487,7 @@ public class PlayerActivity extends AppCompatActivity {
                     public void onSuccess(String message) {
                         Message msg = Message.obtain();
                         msg.obj = save_path;
-                        msg.what = HandlerShotGifsuccess;
+                        msg.what = HandlerShotGifSuccess;
                         handler.sendMessage(msg);
                     }
 
