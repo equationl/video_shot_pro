@@ -7,8 +7,8 @@ android {
         applicationId "com.equationl.videoshotpro"
         minSdkVersion 17
         targetSdkVersion 25
-        versionCode 1
-        versionName "1.0 The origin"
+        versionCode 2
+        versionName "1.0 The origin Fix 01"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

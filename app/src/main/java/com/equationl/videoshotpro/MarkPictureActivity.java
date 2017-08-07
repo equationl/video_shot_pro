@@ -416,6 +416,7 @@ public class MarkPictureActivity extends AppCompatActivity {
                     dialog.setMessage(msg.obj.toString());
                     break;
                 case HandlerStatusProgressDone:
+                    tool.MakeCacheToStandard(MarkPictureActivity.this);
                     dialog.dismiss();
                     break;
                 case HandlerStatusGetImgFail:
@@ -451,9 +452,9 @@ public class MarkPictureActivity extends AppCompatActivity {
                 }
                 Log.i("cao", "file= "+file);
                 Log.i("cao", "name= "+name);
-                bitmap = tool.removeImgBlackSide(getBitmapFromFile(name));
+                bitmap = tool.removeImgBlackSide(getBitmapFromFile(file.split("\\.")[0]));
                 try {
-                    saveMyBitmap(bitmap, i+"");
+                    saveMyBitmap(bitmap, name);
                 } catch (IOException e) {
                     msg = Message.obtain();
                     msg.obj = e;
@@ -555,4 +556,12 @@ public class MarkPictureActivity extends AppCompatActivity {
             start_color_picker.setTextColor(tool.getInverseColor(color));
         }
     };
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (dialog.isShowing()) {
+            dialog.dismiss();
+        }
+    }
 }

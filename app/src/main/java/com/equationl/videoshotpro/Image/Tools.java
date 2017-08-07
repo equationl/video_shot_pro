@@ -49,12 +49,26 @@ public class Tools{
             imgFormat = Bitmap.CompressFormat.PNG;
         }
 
-        f.createNewFile();
+
+        if (!f.createNewFile()) {
+            Log.w("el", "file "+f+"has already exist");
+        }
         FileOutputStream fOut = null;
-        fOut = new FileOutputStream(f);
-        bmp.compress(imgFormat, quality, fOut);
-        fOut.flush();
-        fOut.close();
+        try {
+            fOut = new FileOutputStream(f);
+            bmp.compress(imgFormat, quality, fOut);
+        }  catch (Exception e) {
+            Log.e("el", "save file fail:"+e);
+            throw e;
+        }
+        finally {
+            try {
+                fOut.flush();
+                fOut.close();
+            } catch (Exception e) {
+                Log.e("el", "close file fail"+e);
+            }
+        }
 
         return f;
     }
@@ -344,9 +358,13 @@ public class Tools{
         for (String file:files) {
             Log.i("EL", "file="+file);
             if (file.contains("_")) {
-                String NewName = file.split("_")[0]+"."+file.split("\\.")[1];
+                /*String NewName = file.split("_")[0]+"."+file.split("\\.")[1];
                 Log.i("EL", file+" rename to "+NewName);
-                renameFile(path.getPath(), file, NewName);
+                renameFile(path.getPath(), file, NewName);   */
+                File f = new File(path+"/"+file);
+                if (!f.delete()) {
+                    Log.w("el", "delete file fail"+f);
+                }
             }
         }
     }
