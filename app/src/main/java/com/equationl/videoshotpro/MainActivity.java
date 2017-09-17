@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AppOpsManager;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -72,12 +73,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     GalleryConfig galleryConfig;
     SharedPreferences settings, sp_init;
     Dialog dialog_permission;
+    List<String> FileList;
+    String extension;
+    ProgressDialog dialog_copyFile;
 
     public static MainActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
 
     private static final int HandlerStatusLoadLibsFailure = 0;
     private static final int HandlerStatusFFmpegNotSupported = 1;
     private static final int HandlerStatusPackageNameNotRight = 2;
+    private static final int HandlerStatusCopyFileDone = 3;
     private static final int IntentResultCodeMediaProjection = 10;
 
     private static final String TAG = "In MainActivity";
@@ -88,6 +93,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
 
         instance = this;
+
+        dialog_copyFile = new ProgressDialog(this);
+        dialog_copyFile.setProgressStyle(ProgressDialog.STYLE_SPINNER);// 设置样式
+        dialog_copyFile.setIndeterminate(false);
+        dialog_copyFile.setCancelable(false);
+        dialog_copyFile.setMessage("正在处理...");
+        dialog_copyFile.setTitle("请稍等");
 
         settings = PreferenceManager.getDefaultSharedPreferences(this);
         sp_init = getSharedPreferences("init", Context.MODE_PRIVATE);
@@ -409,12 +421,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Snackbar snackbar3 = Snackbar.make(container, R.string.main_snackbar_isPiracy, Snackbar.LENGTH_LONG);
                     snackbar3.show();
                     break;
+                case HandlerStatusCopyFileDone:
+
+                    Intent intent = new Intent(MainActivity.this, MarkPictureActivity.class);
+                    startActivity(intent);
             }
 
         }
     };
 
-    public class MyThread implements Runnable {
+    private class MyThread implements Runnable {
         @Override
         public void run() {
             loadLib();
@@ -429,6 +445,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    private class MyThreadCopyFile implements Runnable {
+        @Override
+        public  void run() {
+            if (tool.copyFileToCahe(FileList, getExternalCacheDir().toString(), extension)) {
+                handler.sendEmptyMessage(HandlerStatusCopyFileDone);
+            }
+        }
+    }
+
     IHandlerCallBack iHandlerCallBack = new IHandlerCallBack() {
         @Override
         public void onStart() {
@@ -439,10 +464,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         public void onSuccess(List<String> photoList) {
             Log.i(TAG, "onSuccess: 返回数据");
             tool.cleanExternalCache(MainActivity.this);
-            String extension = settings.getBoolean("isShotToJpg", true) ? "jpg":"png";
-            tool.copyFileToCahe(photoList, getExternalCacheDir().toString(), extension);
-            Intent intent = new Intent(MainActivity.this, MarkPictureActivity.class);
-            startActivity(intent);
+            extension = settings.getBoolean("isShotToJpg", true) ? "jpg":"png";
+            FileList = photoList;
+            dialog_copyFile.show();
+            new Thread(new MainActivity.MyThreadCopyFile()).start();
         }
 
         @Override
@@ -749,6 +774,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             }
                         }).create();
         dialog.show();
+    }
+
+    /*@Override
+    public void onResume() {
+        super.onResume();
+        if (dialog_copyFile.isShowing()) {
+            dialog_copyFile.dismiss();
+        }
+    }  */
+
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        dialog_copyFile.dismiss();
     }
 }
 

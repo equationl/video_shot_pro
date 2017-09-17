@@ -560,8 +560,8 @@ public class MarkPictureActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (dialog.isShowing()) {
+        try {
             dialog.dismiss();
-        }
+        } catch (NullPointerException e){}
     }
 }

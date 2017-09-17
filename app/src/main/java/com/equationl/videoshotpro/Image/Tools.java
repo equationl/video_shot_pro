@@ -109,7 +109,15 @@ public class Tools{
      * 裁切图片
      * */
     public Bitmap cutBimap(Bitmap bm, int startY, int width) {
-        return Bitmap.createBitmap(bm, 0, startY, width, bm.getHeight()-startY);
+        int height = bm.getHeight()-startY;
+        if (height <= 0) {
+            height = (int)(bm.getHeight()-bm.getHeight()*0.8);
+            startY = (int)(bm.getHeight()*0.8);
+        }
+        if (width>bm.getWidth()) {
+            width = bm.getWidth();
+        }
+        return Bitmap.createBitmap(bm, 0, startY, width, height);
     }
 
 
