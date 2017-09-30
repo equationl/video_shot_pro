@@ -6,14 +6,22 @@
     android:background="?attr/colorControlHighlight"
     tools:context="com.equationl.videoshotpro.MarkPictureActivity">
 
-        <ImageView
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:scaleType="fitXY"
-            android:id="@+id/imageView"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:src="@drawable/tip"/>
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:scaleType="fitXY"
+        android:id="@+id/imageView"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/tip" />
+
+    <ImageView
+        android:id="@+id/imageViewText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0px"
+        android:layout_marginLeft="0px"
+        android:src="@mipmap/ic_launcher" />
 
         <Button
             android:layout_width="wrap_content"

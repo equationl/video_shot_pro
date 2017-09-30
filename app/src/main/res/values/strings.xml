@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">视频截图Pro</string>
+    <string name="app_name">隐云图解制作</string>
     <string name="main_information_title">说明</string>
     <string name="main_information_content">
         经常在网上看到别人制作的电影台词的长截图？想要自己制作一张？一张一张截图后剪切再拼接很麻烦？ \n
@@ -11,9 +11,9 @@
         \t*增加截取GIF动图功能\n
         \t*增加合成已有截图功能\n
         \t*支持截取在线观看的视频\n
+        \t*更便捷丰富的文字添加方式\n
         \t*更自由的截取方式（作者：扯淡的，还在开发中）\n
         \t*更高端的分享方式（作者：能不能别立Flag了？）\n
-        \t*更便捷丰富的文字添加方式（作者：这辈子都填不完这坑了）\n
         \t*优化手势操作\n
         \t*更高的开发优先级\n
         \t*高端定制的屎黄色图标\n
@@ -25,6 +25,8 @@
     </string>
 
     <string name="main_updateHistory_text">
+        1.1:\n
+        \t*添加文字支持设置文字背景颜色\n
         1.0 Fix 02:\n
         \t*修复使用外部程序截图时出现未响应的BUG\n
         \t*修复在选择图片时闪退的BUG\n

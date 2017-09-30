@@ -9,7 +9,9 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -42,10 +44,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class MarkPictureActivity extends AppCompatActivity {
-    ImageView imagview;
+    ImageView imagview, imageViewText;
     String[] fileList;
     Button btn_start;
-    Button start_color_picker;
+    Button start_color_picker, start_color_picker_bg;
     int pic_num,pic_no=0,flag=0;
     AlertDialog.Builder builder;
     private LayoutInflater mLayoutInflater;
@@ -56,7 +58,8 @@ public class MarkPictureActivity extends AppCompatActivity {
     Boolean isFromExtra;
     ProgressDialog dialog;
     Resources res;
-    int text_color=0;
+    int text_color=Color.BLACK, bg_color = Color.WHITE;
+    boolean isMoveText=false;
 
     Tools tool = new Tools();
 
@@ -94,6 +97,7 @@ public class MarkPictureActivity extends AppCompatActivity {
         instance = this;
 
         imagview = (ImageView) findViewById(R.id.imageView);
+        imageViewText = (ImageView) findViewById(R.id.imageViewText);
         btn_start = (Button) findViewById(R.id.button_start);
         tip_text = (TextView) findViewById(R.id.make_picture_tip);
         nums_tip_text  = (TextView) findViewById(R.id.make_picture_nums_tip);
@@ -170,12 +174,52 @@ public class MarkPictureActivity extends AppCompatActivity {
                             /*if (Math.abs(offsetX)<400 && Math.abs(offsetY)<400) {
                                 checkIsLongPress(true);
                             }*/
+                            if (isMoveText) {
+                                int moveX = //(int)(-offsetX+imageViewText.getPaddingLeft());
+                                        (int)mCurPosX;
+                                int moveY = //(int)(offsetY+imageViewText.getPaddingTop());
+                                        (int)mCurPosY;
+                                int bgRealSize[] = getImageRealSize(imagview);
+                                int bgRealX =  bgRealSize[0];
+                                int bgRealY =  bgRealSize[1];
+                                int relativeX = moveX-(imagview.getWidth()-bgRealX)/2;
+                                int relativeY = moveY-(imagview.getHeight()-bgRealY)/2;
+                                Log.i("EL", relativeX+" "+relativeY);
+                                Bitmap bmTemp = getBitmapFromFile(pic_no+"");
+                                Log.i("EL", moveX+" "+bmTemp.getWidth()+" "+moveY+" "+bmTemp.getHeight());
+                                if (relativeY<bgRealY && relativeY>0) {
+                                    Log.i("EL", "call");
+                                    imageViewText.setPadding(moveX
+                                            ,moveY
+                                            ,imageViewText.getPaddingRight()
+                                            ,imageViewText.getPaddingBottom());
+                                }
+                                /*if (imageViewText.getPaddingTop()<imagview.getHeight()) {
+                                    imageViewText.setPadding(imageViewText.getPaddingTop()
+                                            ,moveY
+                                            ,imageViewText.getPaddingRight()
+                                            ,imageViewText.getPaddingBottom());
+                                }
+                                if (imageViewText.getPaddingLeft()<imagview.getWidth()) {
+                                    imageViewText.setPadding(moveX
+                                            ,imageViewText.getPaddingLeft()
+                                            ,imageViewText.getPaddingRight()
+                                            ,imageViewText.getPaddingBottom());
+                                }*/
+
+                                //Log.i("EL", imageViewText.getPaddingLeft()+" "+imageViewText.getPaddingTop() + " " + offsetX);
+                                break;
+                            }
                             break;
                         case MotionEvent.ACTION_SCROLL:
 
                         case MotionEvent.ACTION_UP:
                             if (pic_no >= pic_num) {
                                 Toast.makeText(getApplicationContext(),"已是最后一张，请点击右上角“开始合成”", Toast.LENGTH_SHORT).show();
+                                break;
+                            }
+
+                            if (isMoveText) {
                                 break;
                             }
 
@@ -242,6 +286,10 @@ public class MarkPictureActivity extends AppCompatActivity {
 
         btn_start.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                if (isMoveText) {
+                    //TODO 文字移动完成后
+                    return;
+                }
                 if (pic_no <= 0) {
                     Toast.makeText(getApplicationContext(),"至少需要选择一张图片", Toast.LENGTH_LONG).show();
                 }
@@ -318,7 +366,7 @@ public class MarkPictureActivity extends AppCompatActivity {
         Bitmap result = Bitmap.createBitmap(width,t_height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(result);
         Paint paint = new Paint();
-        paint.setColor(Color.WHITE);
+        paint.setColor(bg_color);
         canvas.drawRect(0, 0, width, bm.getHeight(), paint);
 
         StaticLayout layout = new StaticLayout(text,textPaint,canvas.getWidth(), Layout.Alignment.ALIGN_NORMAL,1.0F,0.0F,true);
@@ -468,6 +516,9 @@ public class MarkPictureActivity extends AppCompatActivity {
     }
 
     private void clickAddTextOkBtn() {
+        btn_start.setText("确定");
+        isMoveText = true;
+
         EditText edit_text = (EditText) view.findViewById(R.id.input_text);
         EditText edit_size = (EditText) view.findViewById(R.id.input_size);
         String text = edit_text.getText().toString();
@@ -526,6 +577,7 @@ public class MarkPictureActivity extends AppCompatActivity {
                 .create();
         builder.show();
         start_color_picker = (Button) view.findViewById(R.id.mark_dialog_chooseColor_btn);
+        start_color_picker_bg = (Button) view.findViewById(R.id.mark_dialog_chooseColorBg_btn);
         start_color_picker.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 ColorPickerDialog mColorPickerDialog = new ColorPickerDialog(
@@ -533,6 +585,16 @@ public class MarkPictureActivity extends AppCompatActivity {
                         Color.BLACK,
                         false,
                         mOnColorPickerListener
+                ).show();
+            }
+        });
+        start_color_picker_bg.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                ColorPickerDialog mColorPickerDialog = new ColorPickerDialog(
+                        MarkPictureActivity.this,
+                        Color.WHITE,
+                        false,
+                        mOnColorPickerBgListener
                 ).show();
             }
         });
@@ -557,11 +619,56 @@ public class MarkPictureActivity extends AppCompatActivity {
         }
     };
 
+    private OnColorPickerListener mOnColorPickerBgListener = new OnColorPickerListener() {
+        @Override
+        public void onColorCancel(ColorPickerDialog dialog) {//取消选择的颜色
+
+        }
+
+        @Override
+        public void onColorChange(ColorPickerDialog dialog, int color) {//实时监听颜色变化
+
+        }
+
+        @Override
+        public void onColorConfirm(ColorPickerDialog dialog, int color) {//确定的颜色
+            bg_color = color;
+            start_color_picker_bg.setBackgroundColor(color);
+            start_color_picker_bg.setTextColor(tool.getInverseColor(color));
+        }
+    };
+
     @Override
     public void onDestroy() {
         super.onDestroy();
         try {
             dialog.dismiss();
         } catch (NullPointerException e){}
+    }
+
+    private int[] getImageRealSize(ImageView imageview) {
+        int realImgShowWidth=0;
+        int realImgShowHeight=0;
+        Drawable imgDrawable = imageview.getDrawable();
+        if (imgDrawable != null) {
+            //获得ImageView中Image的真实宽高，
+            int dw = imageview.getDrawable().getBounds().width();
+            int dh = imageview.getDrawable().getBounds().height();
+
+            //获得ImageView中Image的变换矩阵
+            Matrix m = imageview.getImageMatrix();
+            float[] values = new float[10];
+            m.getValues(values);
+
+            //Image在绘制过程中的变换矩阵，从中获得x和y方向的缩放系数
+            float sx = values[0];
+            float sy = values[4];
+
+            //计算Image在屏幕上实际绘制的宽高
+            realImgShowWidth = (int) (dw * sx);
+            realImgShowHeight = (int) (dh * sy);
+        }
+        int size[] = {realImgShowWidth, realImgShowHeight};
+        return size;
     }
 }
