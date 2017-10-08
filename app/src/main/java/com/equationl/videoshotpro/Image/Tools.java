@@ -89,6 +89,16 @@ public class Tools{
         return result;
     }
 
+    public Bitmap jointTextImage(Bitmap textImg, Bitmap bgImg, int x, int y) {
+        int width = Math.max(bgImg.getWidth(), textImg.getWidth());  //FIXME 应该修改为保证文字图片不会大于背景图片的宽度
+        int height = Math.max(bgImg.getHeight(), textImg.getHeight());
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        canvas.drawBitmap(bgImg, 0, 0, null);
+        canvas.drawBitmap(textImg, x, y, null);
+        return bitmap;
+    }
+
     /**
      * 从文件获取图片的bitmap
      * */

@@ -60,6 +60,10 @@ public class MarkPictureActivity extends AppCompatActivity {
     Resources res;
     int text_color=Color.BLACK, bg_color = Color.WHITE;
     boolean isMoveText=false;
+    int bgRealWidth, bgRealHeight, relativeX, relativeY;
+    Bitmap TextImgTemp=null;
+    String addTextString;
+    int addTextStringSize;
 
     Tools tool = new Tools();
 
@@ -108,6 +112,8 @@ public class MarkPictureActivity extends AppCompatActivity {
         final File filepath = new File(getExternalCacheDir().toString());
         fileList = filepath.list();
         pic_num = fileList.length;
+
+        imageViewText.setVisibility(View.GONE);
 
         isFromExtra = this.getIntent().getBooleanExtra("isFromExtra", false);
         if (isFromExtra) {
@@ -180,14 +186,14 @@ public class MarkPictureActivity extends AppCompatActivity {
                                 int moveY = //(int)(offsetY+imageViewText.getPaddingTop());
                                         (int)mCurPosY;
                                 int bgRealSize[] = getImageRealSize(imagview);
-                                int bgRealX =  bgRealSize[0];
-                                int bgRealY =  bgRealSize[1];
-                                int relativeX = moveX-(imagview.getWidth()-bgRealX)/2;
-                                int relativeY = moveY-(imagview.getHeight()-bgRealY)/2;
+                                bgRealWidth =  bgRealSize[0];
+                                bgRealHeight =  bgRealSize[1];
+                                relativeX = moveX-(imagview.getWidth()-bgRealWidth)/2;
+                                relativeY = moveY-(imagview.getHeight()-bgRealHeight)/2;
                                 Log.i("EL", relativeX+" "+relativeY);
                                 Bitmap bmTemp = getBitmapFromFile(pic_no+"");
                                 Log.i("EL", moveX+" "+bmTemp.getWidth()+" "+moveY+" "+bmTemp.getHeight());
-                                if (relativeY<bgRealY && relativeY>0) {
+                                if (relativeY<bgRealHeight && relativeY>0) {
                                     Log.i("EL", "call");
                                     imageViewText.setPadding(moveX
                                             ,moveY
@@ -288,6 +294,30 @@ public class MarkPictureActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (isMoveText) {
                     //TODO 文字移动完成后
+                    Bitmap bitmap, bitmapBg;
+                    if (pic_no<pic_num && fileList[pic_no].equals("text")) {
+                        bitmapBg = getBitmapFromFile(pic_no+"_t");
+                    }
+                    else {
+                        bitmapBg = getBitmapFromFile(pic_no+"");
+                    }
+
+                    if (relativeY+TextImgTemp.getHeight()>bitmapBg.getHeight()) {
+                        bitmap = addBitmap(bitmapBg,addTextToImage(bitmapBg,addTextString,addTextStringSize));
+                    }
+                    else {
+                        bitmap = tool.jointTextImage(TextImgTemp,bitmapBg,relativeX,relativeY);
+                    }
+                    try {
+                        saveMyBitmap(bitmap,pic_no+"_t");
+                    }
+                    catch (IOException e) {
+                        Toast.makeText(getApplicationContext(),"写入缓存失败！"+e.toString(), Toast.LENGTH_LONG).show();
+                    }
+                    set_image(pic_no, "_t");
+                    fileList[pic_no] = "text";
+                    imageViewText.setVisibility(View.GONE);
+                    isMoveText = false;
                     return;
                 }
                 if (pic_no <= 0) {
@@ -350,6 +380,49 @@ public class MarkPictureActivity extends AppCompatActivity {
         Paint.FontMetricsInt fmi = textPaint.getFontMetricsInt();
 
         int char_height = fmi.bottom-fmi.top;
+
+        Log.i("text", char_height+" "+fmi.bottom +" " +fmi.top);
+
+        String[] len = text.split("\n");
+        int t_height=0;
+        for (int i=0;i<len.length;i++) {
+            t_height+=char_height;
+            int string_wdith = (int)textPaint.measureText(len[i]);
+            if (string_wdith > width) {
+                t_height+=char_height*(string_wdith/width);
+            }
+        }
+
+        Bitmap result = Bitmap.createBitmap(width,t_height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(result);
+        Paint paint = new Paint();
+        paint.setColor(bg_color);
+        canvas.drawRect(0, 0, width, bm.getHeight(), paint);
+
+        StaticLayout layout = new StaticLayout(text,textPaint,canvas.getWidth(), Layout.Alignment.ALIGN_NORMAL,1.0F,0.0F,true);
+        canvas.translate(5,0);
+        layout.draw(canvas);
+        return result;
+    }
+
+    private Bitmap text2Image(Bitmap bm, String text, int size) {
+        if (size < 0) {
+            size = 30;
+        }
+        int width = bm.getWidth();
+
+        TextPaint textPaint = new TextPaint();
+        textPaint.setColor(text_color);
+        textPaint.setTextSize(size);
+
+        Paint.FontMetricsInt fmi = textPaint.getFontMetricsInt();
+
+        int char_height = fmi.bottom-fmi.top;
+        int char_width = (int)textPaint.measureText(text,0,text.length());
+        if (char_width < width) {
+            width = char_width+10;
+        }
+        Log.i("EL", "width="+width+" char_width="+char_height);
 
         Log.i("text", char_height+" "+fmi.bottom +" " +fmi.top);
 
@@ -518,23 +591,28 @@ public class MarkPictureActivity extends AppCompatActivity {
     private void clickAddTextOkBtn() {
         btn_start.setText("确定");
         isMoveText = true;
+        imageViewText.setVisibility(View.VISIBLE);
 
         EditText edit_text = (EditText) view.findViewById(R.id.input_text);
         EditText edit_size = (EditText) view.findViewById(R.id.input_size);
-        String text = edit_text.getText().toString();
-        if (text.equals("")) {
+        addTextString = edit_text.getText().toString();
+        if (addTextString.equals("")) {
             return;
         }
-        int text_size;
         if (edit_size.getText().toString().equals("")) {
-            text_size = 30;
+            addTextStringSize = 30;
         }
         else {
-            text_size = Integer.parseInt(edit_size.getText().toString());
+            addTextStringSize = Integer.parseInt(edit_size.getText().toString());
         }
 
         //Log.i("ccccc",text);
-        Bitmap bm;
+        //TODO
+        TextImgTemp = text2Image(getBitmapFromFile(pic_no+""),addTextString,addTextStringSize);
+        imageViewText.setImageBitmap(TextImgTemp);
+
+
+        /*Bitmap bm;
         if (pic_no<pic_num && fileList[pic_no].equals("text")) {
             bm = addBitmap(getBitmapFromFile(pic_no+"_t"),addTextToImage(getBitmapFromFile(pic_no+"_t"),text,text_size));
         }
@@ -549,7 +627,7 @@ public class MarkPictureActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(),"写入缓存失败！"+e.toString(), Toast.LENGTH_LONG).show();
         }
         set_image(pic_no, "_t");
-        fileList[pic_no] = "text";
+        fileList[pic_no] = "text";  */
     }
 
     private void slideToLeft() {
