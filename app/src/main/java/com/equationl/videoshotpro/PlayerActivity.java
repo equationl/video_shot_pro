@@ -452,7 +452,8 @@ public class PlayerActivity extends AppCompatActivity {
             date += "-by_EL.gif";
             final String save_path =  Environment.getExternalStoragePublicDirectory(
                     Environment.DIRECTORY_PICTURES).getPath() + "/" + date;
-            String cmd = "-ss "+(gif_start_time/1000)+" -t "+((gif_end_time-gif_start_time)/1000)+" -i "+video_path;
+            String cmd = "-ss "+(gif_start_time/1000.0)+" -t "+((gif_end_time-gif_start_time)/1000.0)+" -i "+video_path;
+            Log.i(TAG, "gif start time(s)="+(gif_start_time/1000.0)+" time(ms)="+gif_start_time+" all="+((gif_end_time-gif_start_time)/1000.0));
             cmd += gif_RP.equals("-1")?"":" -s "+gif_RP;
             cmd += " -f gif";
             cmd += gif_frameRate.equals("-1")?"":" -r "+gif_frameRate;

@@ -294,6 +294,7 @@ public class MarkPictureActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (isMoveText) {
                     //TODO 文字移动完成后
+                    btn_start.setText("开始合成");
                     Bitmap bitmap, bitmapBg;
                     if (pic_no<pic_num && fileList[pic_no].equals("text")) {
                         bitmapBg = getBitmapFromFile(pic_no+"_t");
@@ -597,7 +598,7 @@ public class MarkPictureActivity extends AppCompatActivity {
         EditText edit_size = (EditText) view.findViewById(R.id.input_size);
         addTextString = edit_text.getText().toString();
         if (addTextString.equals("")) {
-            return;
+            addTextString = "NULL";
         }
         if (edit_size.getText().toString().equals("")) {
             addTextStringSize = 30;
