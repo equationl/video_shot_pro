@@ -5,15 +5,11 @@
     android:id="@+id/content_main2"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.equationl.videoshotpro.MainActivity"
     tools:showIn="@layout/app_bar_main">
 
-    <Button
+    <!--<Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="快速开始"
@@ -30,6 +26,120 @@
         android:layout_marginRight="8dp"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="8dp" />   -->
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="200dp"
+        android:orientation="horizontal"
+        android:id="@+id/linearLayout">
+
+        <ImageView
+            android:id="@+id/main_TopImg"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:scaleType="fitXY"
+            android:src="@drawable/main_top_bg" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_main_quickStart"
+        android:layout_width="320dp"
+        android:layout_height="50dp"
+        android:layout_margin="5dip"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="0dp"
+        android:layout_weight="1"
+        android:background="@drawable/btn_light_blue_bg"
+        android:gravity="center"
+        android:text="@string/main_view_button_start"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+        app:layout_constraintVertical_bias="0.058" />
+
+
+    <Button
+        android:id="@+id/btn_main_splicing"
+        android:layout_width="320dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="10dp"
+        android:layout_weight="1"
+        android:background="@drawable/btn_light_green_bg"
+        android:gravity="center"
+        android:padding="5dp"
+        android:text="@string/main_view_button_splicing"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        app:layout_constraintLeft_toLeftOf="@+id/btn_main_quickStart"
+        app:layout_constraintTop_toBottomOf="@+id/btn_main_quickStart" />
+
+    <Button
+        android:id="@+id/btn_main_floatBtn"
+        android:layout_width="320dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="10dp"
+        android:layout_weight="1"
+        android:background="@drawable/btn_amber_bg"
+        android:gravity="center"
+        android:padding="5dp"
+        android:text="@string/main_view_button_floatBtn"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        app:layout_constraintLeft_toLeftOf="@+id/btn_main_splicing"
+        app:layout_constraintTop_toBottomOf="@+id/btn_main_splicing" />
+
+    <Button
+        android:id="@+id/btn_main_ffmpeg"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="10dp"
+        android:layout_weight="1"
+        android:background="@drawable/btn_purle_bg"
+        android:drawableLeft="@android:drawable/ic_media_ff"
+        android:gravity="center"
+        android:padding="5dp"
+        android:text="@string/main_view_button_ffmpeg"
+        android:textColor="@color/white"
+        app:layout_constraintLeft_toLeftOf="@+id/btn_main_floatBtn"
+        app:layout_constraintTop_toBottomOf="@+id/btn_main_floatBtn" />
+
+    <Button
+        android:id="@+id/btn_main_help"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginLeft="32dp"
+        android:layout_marginTop="12dp"
+        android:layout_weight="1"
+        android:background="@drawable/btn_pink_bg"
+        android:drawableLeft="@android:drawable/ic_menu_help"
+        android:gravity="center"
+        android:padding="5dp"
+        android:text="@string/main_view_button_guide"
+        android:textColor="@color/white"
+        app:layout_constraintLeft_toRightOf="@+id/btn_main_ffmpeg"
+        app:layout_constraintTop_toBottomOf="@+id/btn_main_floatBtn" />
+
+    <Button
+        android:id="@+id/btn_main_setting"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginLeft="32dp"
+        android:layout_marginTop="10dp"
+        android:layout_weight="1"
+        android:background="@drawable/btn_light_blue_bg"
+        android:drawableLeft="@android:drawable/ic_menu_manage"
+        android:gravity="center"
+        android:padding="5dp"
+        android:text="@string/main_view_button_setting"
+        android:textColor="@color/white"
+        app:layout_constraintLeft_toRightOf="@+id/btn_main_help"
+        app:layout_constraintTop_toBottomOf="@+id/btn_main_floatBtn" />
+
 
 </android.support.constraint.ConstraintLayout>

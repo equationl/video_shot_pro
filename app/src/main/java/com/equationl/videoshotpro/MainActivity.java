@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     List<String> FileList;
     String extension;
     ProgressDialog dialog_copyFile;
+    Button button_splicing, button_floatBtn, button_ffmpeg,button_help, button_setting;
 
     public static MainActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
 
@@ -127,7 +128,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        button_user = (Button)findViewById(R.id.button_byUser);
+        button_user = (Button)findViewById(R.id.btn_main_quickStart);
+        button_splicing = (Button)findViewById(R.id.btn_main_splicing);
+        button_ffmpeg = (Button)findViewById(R.id.btn_main_ffmpeg);
+        button_floatBtn = (Button)findViewById(R.id.btn_main_floatBtn);
+        button_help = (Button)findViewById(R.id.btn_main_help);
+        button_setting = (Button)findViewById(R.id.btn_main_setting);
+
         dialog = new AlertDialog.Builder(this);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -156,6 +163,38 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 intent.setType("video/*");
                 intent.addCategory(intent.CATEGORY_OPENABLE);
                 startActivityForResult(Intent.createChooser(intent, "请选择视频文件"),1);
+            }
+        });
+
+        button_splicing.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                btn_splicing();
+            }
+        });
+
+        button_floatBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                btn_floatBtn();
+            }
+        });
+
+        button_ffmpeg.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, CommandActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        button_help.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                btn_help();
+            }
+        });
+
+        button_setting.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivity(intent);
             }
         });
     }
@@ -226,12 +265,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         if (id == R.id.nav_help) {
-            String info_text = res.getString(R.string.main_information_content);
-            String content = String.format(info_text, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString());
-            dialog.setTitle(res.getString(R.string.main_information_title));
-            dialog.setMessage(content);
-            dialog.setIcon(R.mipmap.ic_launcher);
-            dialog.create().show();
+            btn_help();
         } else if (id == R.id.nav_more) {
             Intent intent = new Intent(MainActivity.this, CommandActivity.class);
             startActivity(intent);
@@ -258,25 +292,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_splicing) {
-            if (sp_init.getBoolean("isFirstUseSplicing", true)) {
-                showSplicingDialog();
-                SharedPreferences.Editor editor = sp_init.edit();
-                editor.putBoolean("isFirstUseSplicing", false);
-                editor.apply();
-            }
-            else {
-                GalleryPick.getInstance().setGalleryConfig(galleryConfig).open(MainActivity.this);
-            }
+            btn_splicing();
         } else if (id == R.id.nav_floatBtn) {
-            if (sp_init.getBoolean("isFirstUseFloat", true)) {
-                showFloatDialog();
-                SharedPreferences.Editor editor = sp_init.edit();
-                editor.putBoolean("isFirstUseFloat", false);
-                editor.apply();
-            }
-            else {
-                showFloatBtn();
-            }
+            btn_floatBtn();
         } else if (id == R.id.nav_support) {
             showSupportDialog();
         } else if (id == R.id.nav_about) {
@@ -790,6 +808,40 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onPause() {
         super.onPause();
         dialog_copyFile.dismiss();
+    }
+
+
+    private void btn_splicing() {
+        if (sp_init.getBoolean("isFirstUseSplicing", true)) {
+            showSplicingDialog();
+            SharedPreferences.Editor editor = sp_init.edit();
+            editor.putBoolean("isFirstUseSplicing", false);
+            editor.apply();
+        }
+        else {
+            GalleryPick.getInstance().setGalleryConfig(galleryConfig).open(MainActivity.this);
+        }
+    }
+
+    private void btn_floatBtn() {
+        if (sp_init.getBoolean("isFirstUseFloat", true)) {
+            showFloatDialog();
+            SharedPreferences.Editor editor = sp_init.edit();
+            editor.putBoolean("isFirstUseFloat", false);
+            editor.apply();
+        }
+        else {
+            showFloatBtn();
+        }
+    }
+
+    private void btn_help() {
+        String info_text = res.getString(R.string.main_information_content);
+        String content = String.format(info_text, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString());
+        dialog.setTitle(res.getString(R.string.main_information_title));
+        dialog.setMessage(content);
+        dialog.setIcon(R.mipmap.ic_launcher);
+        dialog.create().show();
     }
 }
 

@@ -118,7 +118,12 @@
         本app涉及到的开源项目：\n\n
         %2$s \n
     </string>
-
+    <string name="main_view_button_start">快速开始</string>
+    <string name="main_view_button_ffmpeg">高级</string>
+    <string name="main_view_button_guide">说明</string>
+    <string name="main_view_button_splicing">已有截图合成</string>
+    <string name="main_view_button_floatBtn">外部程序截图</string>
+    <string name="main_view_button_setting">设置</string>
 
     <string name="main_snackbar_loadSo_fail">加载FFmpeg失败</string>
     <string name="main_snackbar_btn_retry">重试</string>
