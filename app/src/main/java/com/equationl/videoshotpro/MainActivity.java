@@ -15,6 +15,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Binder;
@@ -32,6 +33,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.text.Html;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -78,6 +80,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     String extension;
     ProgressDialog dialog_copyFile;
     Button button_splicing, button_floatBtn, button_ffmpeg,button_help, button_setting;
+    TextView text_bottom;
+    DrawerLayout drawer;
+    int activityResultMode = 0;
 
     public static MainActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
 
@@ -86,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final int HandlerStatusPackageNameNotRight = 2;
     private static final int HandlerStatusCopyFileDone = 3;
     private static final int IntentResultCodeMediaProjection = 10;
+    private static final int ActivityResultFrameByFrame = 100;
 
     private static final String TAG = "In MainActivity";
 
@@ -135,9 +141,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         button_help = (Button)findViewById(R.id.btn_main_help);
         button_setting = (Button)findViewById(R.id.btn_main_setting);
 
+        text_bottom = (TextView)findViewById(R.id.text_main_bottom);
+        text_bottom.getPaint().setFlags(Paint. UNDERLINE_TEXT_FLAG );
+
         dialog = new AlertDialog.Builder(this);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
@@ -156,6 +165,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .provider("com.equationl.videoshotpro.fileprovider")
                 .multiSelect(true, 100)
                 .build();
+
+        text_bottom.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                drawer.openDrawer(Gravity.START);
+            }
+        });
 
         button_user.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -217,15 +232,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 startService(startService);
             }
             else {
-                Uri uri = data.getData();
-                //String path = uri.getPath();
-                String path = tool.getImageAbsolutePath(this, uri);
-                Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
-                Bundle bundle = new Bundle();
-                bundle.putString("path", path);
-                intent.putExtras(bundle);
-                intent.setData(uri);
-                startActivity(intent);
+                if (activityResultMode == ActivityResultFrameByFrame) {
+                    //逐帧截取
+                    activityResultMode = 0;
+                    Uri uri = data.getData();
+                    //String path = uri.getPath();
+                    String path = tool.getImageAbsolutePath(this, uri);
+                    Intent intent = new Intent(MainActivity.this, PlayerForDataActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("path", path);
+                    bundle.putString("do", "FrameByFrame");
+                    intent.putExtras(bundle);
+                    intent.setData(uri);
+                    startActivity(intent);
+                }
+                else {
+                    //快速开始
+                    Uri uri = data.getData();
+                    //String path = uri.getPath();
+                    String path = tool.getImageAbsolutePath(this, uri);
+                    Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("path", path);
+                    intent.putExtras(bundle);
+                    intent.setData(uri);
+                    startActivity(intent);
+                }
             }
         }
 
@@ -264,12 +296,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
 
+        activityResultMode = 0;
+
         if (id == R.id.nav_help) {
             btn_help();
-        } else if (id == R.id.nav_more) {
+        }
+        /*else if (id == R.id.nav_more) {
             Intent intent = new Intent(MainActivity.this, CommandActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_feedback) {
+        } */
+        else if (id == R.id.nav_feedback) {
             String versionName;
             int currentapiVersion=0;
             try {
@@ -288,17 +324,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             data.putExtra(Intent.EXTRA_SUBJECT, this.getResources().getString(R.string.main_mail_title));
             data.putExtra(Intent.EXTRA_TEXT, mail_content);
             startActivity(data);
-        } else if (id == R.id.nav_setting) {
+        }
+        /*else if (id == R.id.nav_setting) {
             Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_splicing) {
+        }
+        else if (id == R.id.nav_splicing) {
             btn_splicing();
         } else if (id == R.id.nav_floatBtn) {
             btn_floatBtn();
-        } else if (id == R.id.nav_support) {
+        }  */
+        else if (id == R.id.nav_support) {
             showSupportDialog();
         } else if (id == R.id.nav_about) {
             showAboutDialog();
+        } else if (id == R.id.nav_frameByFrame) {
+            btn_shotFrame();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -742,6 +783,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
+                                showNavigationGuider();
                             }
                         }).create();
         dialog.show();
@@ -757,6 +799,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
                                 GalleryPick.getInstance().setGalleryConfig(galleryConfig).open(MainActivity.this);
+                            }
+                        }).create();
+        dialog.show();
+    }
+
+    private void showShotFrmeDialog() {
+        Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
+                .setTitle(R.string.main_dialog_shotFrame_title)
+                .setMessage(R.string.main_dialog_shotFrame_content)
+                .setPositiveButton(res.getString(R.string.main_dialog_btn_ok),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                activityResultMode = ActivityResultFrameByFrame;
+                                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                                intent.setType("video/*");
+                                intent.addCategory(intent.CATEGORY_OPENABLE);
+                                startActivityForResult(Intent.createChooser(intent, "请选择视频文件"),1);
                             }
                         }).create();
         dialog.show();
@@ -842,6 +903,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         dialog.setMessage(content);
         dialog.setIcon(R.mipmap.ic_launcher);
         dialog.create().show();
+    }
+
+    private void btn_shotFrame() {
+        if (sp_init.getBoolean("isFirstUseShotFrame", true)) {
+            showShotFrmeDialog();
+            SharedPreferences.Editor editor = sp_init.edit();
+            editor.putBoolean("isFirstUseShotFrame", false);
+            editor.apply();
+        }
+        else {
+            activityResultMode = ActivityResultFrameByFrame;
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("video/*");
+            intent.addCategory(intent.CATEGORY_OPENABLE);
+            startActivityForResult(Intent.createChooser(intent, "请选择视频文件"),1);
+        }
+    }
+
+    private void showNavigationGuider() {
+        drawer.openDrawer(Gravity.START);
+        Toast.makeText(this, R.string.main_toast_showNavigationGuider, Toast.LENGTH_LONG).show();
     }
 }
 

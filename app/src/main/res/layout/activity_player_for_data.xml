@@ -5,37 +5,31 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
-    <!--<VideoView
-        android:layout_width="wrap_content"
-        android:layout_height="211dp"
-        android:id="@+id/videoView" />  -->
-
     <RelativeLayout
+        android:id="@+id/data_main_videoview_contianer"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:minHeight="200dp"
-        android:visibility="visible"
         android:orientation="vertical"
-        android:id="@+id/main_videoview_contianer">
+        android:visibility="visible">
 
         <VideoView
-            android:id="@+id/videoView"
+            android:id="@+id/data_videoView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            />
+            android:layout_gravity="center_horizontal" />
 
         <TextView
-            android:text="0:00"
+            android:id="@+id/data_video_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
             android:layout_marginTop="11dp"
-            android:visibility="gone"
-            android:id="@+id/video_time"
-            android:textColor="@android:color/holo_red_dark" />
+            android:text="0:00"
+            android:textColor="@android:color/holo_red_dark"
+            android:visibility="gone" />
 
     </RelativeLayout>
 
@@ -55,30 +49,19 @@
         android:textColor="#ffffff"/>
 
     <Button
+        android:id="@+id/data_button_right"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/player_text_done"
-        android:id="@+id/button_done"
         android:layout_alignBottom="@+id/data_button_left"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
         android:background="@drawable/button_radius"
         android:paddingBottom="8dp"
         android:paddingLeft="8dp"
         android:paddingRight="8dp"
         android:paddingTop="8dp"
-        android:textColor="#ffffff"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="@string/player_text_shotStatus"
-        android:id="@+id/text_count"
-        android:layout_alignTop="@+id/data_button_bottom"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="80dp"
-        android:textColor="#84ff00" />
+        android:text="@string/player_text_done"
+        android:textColor="#ffffff" />
 
     <Button
         android:layout_width="wrap_content"

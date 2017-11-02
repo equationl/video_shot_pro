@@ -28,6 +28,10 @@ public class CommandActivity extends AppCompatActivity {
     EditText edittext;
     Tools tool;
     ScrollView sv;
+    int ResultDo=1;
+
+    private static final int ActivityResultCodeAddPath = 1;
+    private static final int ActivityResultCodeAddTime = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +109,15 @@ public class CommandActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.command_menu_add_path) {
+            ResultDo = ActivityResultCodeAddPath;
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("*/*");
+            intent.addCategory(intent.CATEGORY_OPENABLE);
+            startActivityForResult(Intent.createChooser(intent, "请选择文件"),1);
+            return true;
+        }
+        if (id == R.id.command_menu_add_time) {
+            ResultDo = ActivityResultCodeAddTime;
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("*/*");
             intent.addCategory(intent.CATEGORY_OPENABLE);
@@ -118,15 +131,32 @@ public class CommandActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == Activity.RESULT_OK) {
-            Uri uri = data.getData();
-            //String path = uri.getPath();
-            String path = tool.getImageAbsolutePath(this, uri);
+        if (requestCode == ActivityResultCodeAddTime && resultCode == 1) {
+            int time = data.getIntExtra("time", 0);
             int index = edittext.getSelectionStart();
             Editable editable = edittext.getText();
-            editable.insert(index, path);
+            editable.insert(index, time/1000.0+"");
         }
+        else if (resultCode == Activity.RESULT_OK) {
+            if (ResultDo == ActivityResultCodeAddPath) {
+                Uri uri = data.getData();
+                //String path = uri.getPath();
+                String path = tool.getImageAbsolutePath(this, uri);
+                int index = edittext.getSelectionStart();
+                Editable editable = edittext.getText();
+                editable.insert(index, path);
+            }
+            if (ResultDo == ActivityResultCodeAddTime) {
+                Uri uri = data.getData();
+                String path = tool.getImageAbsolutePath(this, uri);
 
+                ResultDo = 0;
+                Intent intent = new Intent(this, PlayerForDataActivity.class);
+                intent.putExtra("do", "getTime");
+                intent.setData(uri);
+                startActivityForResult(intent, ActivityResultCodeAddTime);
+            }
+        }
         else {
             Toast.makeText(getApplicationContext(),"未选择文件！", Toast.LENGTH_LONG).show();
         }

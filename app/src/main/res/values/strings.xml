@@ -21,10 +21,17 @@
         有很多应用平台出现了本app的二次打包版本，且被添加了强制下载的广告，虽然我一直在努力和平台交涉，但是始终无法让官方将其下架，所以，只能提醒各位用户，本app正版没有任何的广告，并且权限干净，如果你下载的版本有广告且权限过多，那么就是盗版了。\n
         \t默认合成图片保存目录在 %1$s \n
         \t推荐直接直接使用系统图库查看\n
+
+        注意：\n
+        从 1.1 版本开始app名称已更改为 隐云图解制作。
         \n\n\n
     </string>
 
     <string name="main_updateHistory_text">
+        1.1 Update 01:\n
+        \t*主界面UI重构\n
+        \t*新增逐帧选优模式\n
+        \t*FFmpeg命令新增快速插入时间\n
         1.1:\n
         \t*更改app名为 隐云图解制作\n
         \t*添加文字支持设置文字背景颜色\n
@@ -103,7 +110,8 @@
     使用方法：\n
     根据提示勾选您需要合成的图片，勾选完毕后选择右上角的 “完成” 即可。</string>
     <string name="main_dialog_float_title">温馨提示</string>
-    <string name="main_dialog_float_content">使用本模式可以在任意位置截图，方便喜欢在线观看视频的用户也能制作属于自己的电影对白字幕。\n\n
+    <string name="main_dialog_float_content">该功能目前处于测试阶段，可能会出现不可预料的错误，请谨慎使用\n\n
+        使用本模式可以在任意位置截图，方便喜欢在线观看视频的用户制作属于自己的电影对白字幕。\n\n
     使用方法：\n
     \t选择该模式后，本app会显示一个悬浮按钮，此时您可以前往其他app开始在线观看视频，当需要截图时，只需要点击一下悬浮按钮。\n
     \t当所需图片已经全部截取完毕后，您可以下拉通知栏点击本app发送的通知 “点击开始制作” 。</string>
@@ -118,12 +126,15 @@
         本app涉及到的开源项目：\n\n
         %2$s \n
     </string>
+    <string name="main_dialog_shotFrame_title">温馨提示</string>
+    <string name="main_dialog_shotFrame_content">使用本模式可以快速提取视频指定时间间隔的所有帧，方便用户从中选出满意的截图。\n使用方法：\n选择视频后点击按钮标记起始位置，再次点击按钮标记终止位置，并开始截取。截取后的图片在手机根目录的 /Pictures/截取时间 目录下。 </string>
     <string name="main_view_button_start">快速开始</string>
     <string name="main_view_button_ffmpeg">高级</string>
     <string name="main_view_button_guide">说明</string>
     <string name="main_view_button_splicing">已有截图合成</string>
-    <string name="main_view_button_floatBtn">外部程序截图</string>
+    <string name="main_view_button_floatBtn">外部程序截图（测试）</string>
     <string name="main_view_button_setting">设置</string>
+    <string name="main_view_button_more">更多&#8230;</string>
 
     <string name="main_snackbar_loadSo_fail">加载FFmpeg失败</string>
     <string name="main_snackbar_btn_retry">重试</string>
@@ -136,6 +147,7 @@
     <string name="main_toast_choosePictures_fail">选择图片出错！</string>
     <string name="main_toast_unSupportFloatBtn">当前系统版本过低，无法使用该功能！</string>
     <string name="main_toast_getPermission_fail">获取权限失败！</string>
+    <string name="main_toast_showNavigationGuider">向右滑动可以打开侧边栏哦~</string>
 
     <string name="main_nav_text_setting">设置</string>
     <string name="main_nav_text_more">更多&#8230;</string>
@@ -146,11 +158,16 @@
     <string name="main_nav_title_info">反馈与帮助</string>
     <string name="main_nav_text_support">支持作者</string>
     <string name="main_nav_text_about">关于</string>
+    <string name="main_nav_title_more">更多功能</string>
+    <string name="main_nav_text_frameByFrame">逐帧选优</string>
 
     <string name="player_toast_needMoreShot">至少需要截取两张图片！</string>
     <string name="player_toast_shotGif_fail">截取动图失败！</string>
     <string name="player_toast_shotGif_success">动图已保存</string>
     <string name="player_toast_shotGif_start">开始截取动图</string>
+    <string name="player_toast_mark_timeError">结束时间必须大于开始时间</string>
+    <string name="player_toast_FBF_done">截取完成，请进入图库查看！</string>
+
 
     <string name="player_text_rotationScreen">翻转</string>
     <string name="player_text_shotStatus">标记/已截取：%1$d/%2$d</string>
@@ -159,6 +176,12 @@
     <string name="player_text_start_play">开始播放</string>
     <string name="player_text_done">完成</string>
     <string name="player_text_shot">截取</string>
+    <string name="player_text_mark">标记</string>
+    <string name="player_text_mark_end">结束</string>
+    <string name="player_text_ok">确定</string>
+
+    <string name="player_dialog_FBF_title">正在截取中……</string>
+    <string name="player_dialog_FBF_content">截取已开始</string>
 
     <string name="markPicture_toast_readFile_fail">读取图片列表出错！</string>
     <string name="markPicture_ProgressDialog_msg">请稍候</string>
@@ -283,4 +306,6 @@
     </string-array>
 
     <string name="title_activity_command">自定义FFmpeg命令</string>
+    <string name="command_menu_addPath">插入路径</string>
+    <string name="command_menu_addTime">插入时间</string>
 </resources>

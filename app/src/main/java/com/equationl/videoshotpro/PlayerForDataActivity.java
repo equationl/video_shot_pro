@@ -1,5 +1,6 @@
 package com.equationl.videoshotpro;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,12 +13,12 @@ import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -25,6 +26,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
@@ -34,6 +36,7 @@ import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -42,11 +45,12 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class PlayerActivity extends AppCompatActivity {
+public class PlayerForDataActivity extends AppCompatActivity {
+
     VideoView videoview;
     View videoview_contianer;
-    Button btn_status,btn_done,btn_shot;
-    TextView text_count,video_time;
+    Button btn_left,btn_right,btn_bottom;
+    TextView video_time;
     Uri uri;
     LinkedBlockingQueue<Long> mark_time = new LinkedBlockingQueue<Long>();
     int pic_num=0, isFirstPlay=1, shot_num=0;
@@ -67,7 +71,11 @@ public class PlayerActivity extends AppCompatActivity {
     boolean isShotFinish=false;
     int shotToGifMinTime;
 
-    public static PlayerActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
+    String do4Rasult;
+    int markTime[] = {0,0};
+    ProgressDialog dialog;
+
+    public static PlayerForDataActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
 
 
     private static final int HandlerStatusHideTime = 10010;
@@ -76,27 +84,30 @@ public class PlayerActivity extends AppCompatActivity {
     private static final int HandlerShotGifFail = 10013;
     private static final int HandlerShotGifSuccess = 10014;
     private static final int HandlerShotGifRunning = 10015;
+    private static final int HandlerFBFonProgress = 20000;
+    private static final int HandlerFBFonSuccess = 20001;
+    private static final int HandlerFBFonFail = 20002;
+    private static final int HandlerFBFRunningFail = 20003;
+    private static final int HandlerFBFRunningFinish = 20004;
 
 
-    private static final String TAG = "el,In PlayerActivity";
+    private static final String TAG = "el,In PFDA";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setRetainInstance(true);
-        setContentView(R.layout.activity_player);
+        setContentView(R.layout.activity_player_for_data);
 
         instance = this;
 
-        videoview = (VideoView) findViewById(R.id.videoView);
-        btn_status = (Button) findViewById(R.id.data_button_left);
-        btn_done   = (Button) findViewById(R.id.button_done);
-        btn_shot   = (Button) findViewById(R.id.data_button_bottom);
-        text_count = (TextView) findViewById(R.id.text_count);
-        videoview_contianer = findViewById(R.id.main_videoview_contianer);
-        video_time = (TextView) findViewById(R.id.video_time);
+        videoview = (VideoView) findViewById(R.id.data_videoView);
+        btn_left = (Button) findViewById(R.id.data_button_left);
+        btn_right   = (Button) findViewById(R.id.data_button_right);
+        btn_bottom   = (Button) findViewById(R.id.data_button_bottom);
+        videoview_contianer = findViewById(R.id.data_main_videoview_contianer);
+        video_time = (TextView) findViewById(R.id.data_video_time);
 
-        params = (RelativeLayout.LayoutParams) btn_shot.getLayoutParams();
+        params = (RelativeLayout.LayoutParams) btn_bottom.getLayoutParams();
         ffmpeg = FFmpeg.getInstance(this);
 
         settings = PreferenceManager.getDefaultSharedPreferences(this);
@@ -104,14 +115,16 @@ public class PlayerActivity extends AppCompatActivity {
         isShotGif = settings.getBoolean("isShotGif", false);
 
         res = getResources();
-        text_count.setText(String.format(res.getString(R.string.player_text_shotStatus),0, 0));
+        //text_count.setText(String.format(res.getString(R.string.player_text_shotStatus),0, 0));
 
         tool.cleanExternalCache(this);    //清除上次产生的缓存图片
 
         Bundle bundle = this.getIntent().getExtras();
         path = bundle.getString("path");
 
-        Log.i("el_test: video path=", path);
+        Log.i(TAG, "path="+path);
+
+        do4Rasult = bundle.getString("do");
 
         uri = getIntent().getData();
         //videoview.setMediaController(new MediaController(this));
@@ -122,7 +135,7 @@ public class PlayerActivity extends AppCompatActivity {
         String meta_duration = rev.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION);
         long duration = Long.parseLong(meta_duration);
         Bitmap bitmap = rev.getFrameAtTime(((duration/2)*1000),
-                    MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
+                MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
         videoview.setBackground(new BitmapDrawable(bitmap));
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
@@ -137,8 +150,19 @@ public class PlayerActivity extends AppCompatActivity {
             }
         });
 
+        if (do4Rasult.equals("FrameByFrame")) {
+            Log.i(TAG, "逐帧截取模式，隐藏按钮");
+            btn_right.setVisibility(View.INVISIBLE);
+            btn_bottom.setText(R.string.player_text_mark);
+        }
 
-        btn_done   .setOnClickListener(new View.OnClickListener() {
+        if (do4Rasult.equals("getTime")) {
+            Log.i(TAG, "获取时间，隐藏按钮");
+            btn_right.setVisibility(View.INVISIBLE);
+            btn_bottom.setText(R.string.player_text_ok);
+        }
+
+        btn_right   .setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (pic_num < 1) {
                     Toast.makeText(getApplicationContext(),R.string.player_toast_needMoreShot, Toast.LENGTH_LONG).show();
@@ -150,17 +174,17 @@ public class PlayerActivity extends AppCompatActivity {
                         thread.start();
                     }
                     isDone = true;
-                    btn_shot.setClickable(false);
-                    btn_done.setClickable(false);
+                    btn_bottom.setClickable(false);
+                    btn_right.setClickable(false);
                 }
             }
         });
-        btn_status .setOnClickListener(new View.OnClickListener() {
+        btn_left .setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (isFirstPlay==1) {
                     videoview.setBackgroundResource(0);
                     videoview.start();
-                    btn_status.setText(R.string.player_text_rotationScreen);
+                    btn_left.setText(R.string.player_text_rotationScreen);
                     isFirstPlay = 0;
                 }
                 else {
@@ -174,25 +198,35 @@ public class PlayerActivity extends AppCompatActivity {
                 }
             }
         });
-        btn_shot   .setOnClickListener(new View.OnClickListener() {
+        btn_bottom   .setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                btn_shot.setBackground(res.getDrawable(R.drawable.button_radius));
+                /*btn_bottom.setBackground(res.getDrawable(R.drawable.button_radius));
                 text_count.setText(String.format(res.getString(R.string.player_text_shotStatus),pic_num+1,shot_num));
                 mark_time.offer((long)videoview.getCurrentPosition());
                 pic_num++;
                 if (!thread.isAlive()) {
                     thread = new Thread(new MyThread());
                     thread.start();
+                }   */
+
+                if (do4Rasult.equals("FrameByFrame")) {
+                    Log.i(TAG, "逐帧截取模式，点击按钮");
+                    shotFrameOnclickButton();
+                }
+
+                if (do4Rasult.equals("getTime")) {
+                    Log.i(TAG, "获取时间，点击按钮");
+                    addTimeOnClickButton();
                 }
             }
         });
 
-        btn_shot.setOnTouchListener(new View.OnTouchListener() {
+        /*btn_bottom.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                Log.i(TAG, "on btn_shot.onTouch");
+                Log.i(TAG, "on btn_bottom.onTouch");
                 if (isShotingGif) {
-                    Log.i(TAG, "on btn_shot.onTouch, and is shotting gif");
+                    Log.i(TAG, "on btn_bottom.onTouch, and is shotting gif");
                     return false;
                 }
                 if(motionEvent.getAction() == MotionEvent.ACTION_UP && isShotGif){
@@ -201,7 +235,7 @@ public class PlayerActivity extends AppCompatActivity {
                     shotToGifMinTime = Integer.valueOf(settings.getString("shotToGifMinTime", "3"));
                     Log.i(TAG, "shotToGifMinTime="+shotToGifMinTime);
                     if (gif_end_time-gif_start_time > shotToGifMinTime*1000) {
-                        btn_shot.setBackground(res.getDrawable(R.drawable.button_radius_up));
+                        btn_bottom.setBackground(res.getDrawable(R.drawable.button_radius_up));
                         isShotingGif = true;
                         if (!gif_thread.isAlive()) {
                             gif_thread = new Thread(new ThreadShotGif());
@@ -212,12 +246,12 @@ public class PlayerActivity extends AppCompatActivity {
                 }
                 if(motionEvent.getAction() == MotionEvent.ACTION_DOWN && isShotGif){
                     Log.d(TAG, "shot button ---> down");
-                    btn_shot.setBackground(res.getDrawable(R.drawable.button_radius));
+                    btn_bottom.setBackground(res.getDrawable(R.drawable.button_radius));
                     gif_start_time = videoview.getCurrentPosition();
                 }
                 return false;
             }
-        });
+        });   */
 
         videoview.setOnErrorListener(new MediaPlayer.OnErrorListener() {
             @Override
@@ -234,21 +268,19 @@ public class PlayerActivity extends AppCompatActivity {
         videoview.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                btn_status.setText(R.string.player_text_replay);
+                btn_left.setText(R.string.player_text_replay);
                 isFirstPlay = 1;
             }
         });
     }
-
-
 
     @Override
     protected void onRestart() {
         Log.i("el_test", "onRestart");
         super.onRestart();
         isDone = false;
-        btn_shot.setClickable(true);
-        btn_done.setClickable(true);
+        btn_bottom.setClickable(true);
+        btn_right.setClickable(true);
     }
 
     @Override
@@ -265,7 +297,7 @@ public class PlayerActivity extends AppCompatActivity {
             videoview_contianer.getLayoutParams().height = (int) height;
             videoview_contianer.getLayoutParams().width = (int) width;
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            btn_shot.setLayoutParams(params);
+            btn_bottom.setLayoutParams(params);
             Log.i("TEST","width="+width+" height="+height);
         } else {
             final WindowManager.LayoutParams attrs = getWindow().getAttributes();
@@ -277,7 +309,7 @@ public class PlayerActivity extends AppCompatActivity {
             videoview_contianer.getLayoutParams().height = (int) height;
             videoview_contianer.getLayoutParams().width = (int) width;
             params.removeRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            btn_shot.setLayoutParams(params);
+            btn_bottom.setLayoutParams(params);
         }
     }
 
@@ -308,14 +340,13 @@ public class PlayerActivity extends AppCompatActivity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case 1:
-                    text_count.setText(msg.obj.toString());
                     break;
                 case 2:
                     //text_count.setText(msg.obj.toString());
                     Toast.makeText(getApplicationContext(), (String)msg.obj, Toast.LENGTH_LONG).show();
                     break;
                 case 3:
-                    Intent intent = new Intent(PlayerActivity.this, MarkPictureActivity.class);
+                    Intent intent = new Intent(PlayerForDataActivity.this, MarkPictureActivity.class);
                     startActivity(intent);
                     break;
                 case HandlerStatusHideTime:
@@ -354,15 +385,31 @@ public class PlayerActivity extends AppCompatActivity {
                     break;
                 case HandlerShotGifSuccess:
                     isShotingGif = false;
-                    MediaScannerConnection.scanFile(PlayerActivity.this, new String[]{msg.obj.toString()}, null, null);
-                    Toast.makeText(PlayerActivity.this, R.string.player_toast_shotGif_success, Toast.LENGTH_SHORT).show();
+                    MediaScannerConnection.scanFile(PlayerForDataActivity.this, new String[]{msg.obj.toString()}, null, null);
+                    Toast.makeText(PlayerForDataActivity.this, R.string.player_toast_shotGif_success, Toast.LENGTH_SHORT).show();
                     break;
                 case HandlerShotGifFail:
-                    Toast.makeText(PlayerActivity.this, R.string.player_toast_shotGif_fail, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PlayerForDataActivity.this, R.string.player_toast_shotGif_fail, Toast.LENGTH_SHORT).show();
                     break;
                 case HandlerShotGifRunning:
-                    Toast.makeText(PlayerActivity.this, R.string.player_toast_shotGif_start, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PlayerForDataActivity.this, R.string.player_toast_shotGif_start, Toast.LENGTH_SHORT).show();
                     break;
+                case HandlerFBFonFail:
+                    dialog.setMessage("截取失败：\n"+msg.obj.toString());
+                    dialog.setCancelable(true);
+                    break;
+                case HandlerFBFonSuccess:
+                    dialog.setMessage("截取成功：\n"+msg.obj.toString());
+                    dialog.dismiss();
+                    Toast.makeText(PlayerForDataActivity.this, R.string.player_toast_FBF_done, Toast.LENGTH_SHORT).show();
+                    markTime[0] = 0;
+                    markTime[1] = 0;
+                    break;
+                case HandlerFBFonProgress:
+                    dialog.setMessage(msg.obj.toString());
+                    break;
+                case HandlerFBFRunningFinish:
+                    btn_bottom.setText(R.string.player_text_mark);
             }
 
         }
@@ -388,7 +435,7 @@ public class PlayerActivity extends AppCompatActivity {
                     String cmd[] = {"-ss", ""+(time/1000.0), "-i", path, "-y", "-f", "image2", "-t", "0.001", outPathName};
                     try {
                         ffmpeg.execute(cmd, new ExecuteBinaryResponseHandler() {
-                           @Override
+                            @Override
                             public void onFailure(String message) {
                                 Log.i("el_test: onFailure", message);
                                 Message msg = Message.obtain();
@@ -444,7 +491,7 @@ public class PlayerActivity extends AppCompatActivity {
             String gif_RP = settings.getString("gifRP_value", "320x240");
             String gif_frameRate = settings.getString("gifFrameRate_value", "14");
             Log.i(TAG, "RP="+gif_RP+" fraerate="+gif_frameRate);
-            String video_path = tool.getImageAbsolutePath(PlayerActivity.this,uri);
+            String video_path = tool.getImageAbsolutePath(PlayerForDataActivity.this,uri);
             SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
             String date    =    sDateFormat.format(new    java.util.Date());
             date += "-by_EL.gif";
@@ -513,7 +560,7 @@ public class PlayerActivity extends AppCompatActivity {
             else {
                 videoview.setBackgroundResource(0);
                 videoview.start();
-                btn_status.setText(R.string.player_text_rotationScreen);
+                btn_left.setText(R.string.player_text_rotationScreen);
             }
 
             return true;
@@ -530,15 +577,15 @@ public class PlayerActivity extends AppCompatActivity {
 
             if (settings.getBoolean("isHideButton", false) && isORIENTATION_LANDSCAPE) {
                 if (isHideBtn) {
-                    btn_status.setVisibility(View.VISIBLE);
-                    btn_done.setVisibility(View.  VISIBLE);
-                    btn_shot.setVisibility(View.  VISIBLE);
+                    btn_left.setVisibility(View.VISIBLE);
+                    btn_right.setVisibility(View.  VISIBLE);
+                    btn_bottom.setVisibility(View.  VISIBLE);
                     isHideBtn = false;
                 }
                 else {
-                    btn_status.setVisibility(View.INVISIBLE);
-                    btn_done.setVisibility(View.  INVISIBLE);
-                    btn_shot.setVisibility(View.  INVISIBLE);
+                    btn_left.setVisibility(View.INVISIBLE);
+                    btn_right.setVisibility(View.  INVISIBLE);
+                    btn_bottom.setVisibility(View.  INVISIBLE);
                     isHideBtn = true;
                 }
             }
@@ -591,4 +638,95 @@ public class PlayerActivity extends AppCompatActivity {
         }
     }
 
+
+    private void startFrameByFrame() {
+        String video_path = tool.getImageAbsolutePath(PlayerForDataActivity.this,uri);
+        SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
+        String date    =    sDateFormat.format(new    java.util.Date());
+        String save_path = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES)+"/"+date+"/";
+        File dirFirstFolder = new File(save_path);
+        if(!dirFirstFolder.exists())
+        {
+            dirFirstFolder.mkdirs();
+        }
+        String text_last = settings.getBoolean("isShotToJpg",true)?"jpg -vcodec mjpeg":"png";
+        double time_start = markTime[0];
+        time_start = time_start/1000.0;
+        double time_end = markTime[1];
+        time_end = time_end/1000.0;
+        time_end = time_end - time_start;
+        String text = "-ss "+time_start+" -t "+time_end+" -i "+video_path+" "+save_path+"%08d."+text_last;
+        Log.i(TAG, "cmd="+text);
+        FFmpeg ffmpeg = FFmpeg.getInstance(getApplicationContext());
+        if (!ffmpeg.isFFmpegCommandRunning()) {
+            String cmd[] = text.split(" ");
+            try {
+                ffmpeg.execute(cmd, new ExecuteBinaryResponseHandler() {
+                    @Override
+                    public void onStart() {}
+                    @Override
+                    public void onFailure(String message) {
+                        Message msg = Message.obtain();
+                        msg.obj = message;
+                        msg.what = HandlerFBFonFail;
+                        handler.sendMessage(msg);
+                    }
+                    @Override
+                    public void onSuccess(String message) {
+                        Message msg = Message.obtain();
+                        msg.obj = message;
+                        msg.what = HandlerFBFonSuccess;
+                        handler.sendMessage(msg);
+                    }
+                    @Override
+                    public void onProgress(String message) {
+                        Message msg = Message.obtain();
+                        msg.obj = message;
+                        msg.what = HandlerFBFonProgress;
+                        handler.sendMessage(msg);
+                    }
+                    @Override
+                    public void onFinish() {
+                        handler.sendEmptyMessage(HandlerFBFRunningFinish);
+                    }
+                });
+            } catch (FFmpegCommandAlreadyRunningException e) {
+                handler.sendEmptyMessage(HandlerFBFRunningFail);
+            }
+        }
+    }
+
+    private void shotFrameOnclickButton() {
+        int time = 0;
+        if (markTime[0] == 0 && markTime[1] == 0) {
+            btn_bottom.setText(R.string.player_text_mark_end);
+            time = videoview.getCurrentPosition();
+            markTime[0] = time==0 ? 1:time;
+        }
+        else {
+            if (time >= videoview.getCurrentPosition()) {
+                Toast.makeText(PlayerForDataActivity.this, R.string.player_toast_mark_timeError, Toast.LENGTH_SHORT).show();
+            }
+            else {
+                markTime[1] = videoview.getCurrentPosition();
+                dialog = new ProgressDialog(PlayerForDataActivity.this);
+                dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                dialog.setIndeterminate(false);
+                dialog.setCancelable(false);
+                dialog.setMessage(res.getString(R.string.player_dialog_FBF_content));
+                dialog.setTitle(res.getString(R.string.player_dialog_FBF_title));
+                dialog.show();
+                startFrameByFrame();
+            }
+        }
+    }
+
+    private void addTimeOnClickButton() {
+        int time = videoview.getCurrentPosition();
+        Intent intent = new Intent();
+        intent.putExtra("time", time);
+        this.setResult(1, intent);
+        finish();
+    }
 }
