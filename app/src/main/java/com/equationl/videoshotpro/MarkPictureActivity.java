@@ -185,7 +185,7 @@ public class MarkPictureActivity extends AppCompatActivity {
                                         (int)mCurPosX;
                                 int moveY = //(int)(offsetY+imageViewText.getPaddingTop());
                                         (int)mCurPosY;
-                                int bgRealSize[] = getImageRealSize(imagview);
+                                int bgRealSize[] = tool.getImageRealSize(imagview);
                                 bgRealWidth =  bgRealSize[0];
                                 bgRealHeight =  bgRealSize[1];
                                 relativeX = moveX-(imagview.getWidth()-bgRealWidth)/2;
@@ -293,7 +293,6 @@ public class MarkPictureActivity extends AppCompatActivity {
         btn_start.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (isMoveText) {
-                    //TODO 文字移动完成后
                     btn_start.setText("开始合成");
                     Bitmap bitmap, bitmapBg;
                     if (pic_no<pic_num && fileList[pic_no].equals("text")) {
@@ -608,7 +607,6 @@ public class MarkPictureActivity extends AppCompatActivity {
         }
 
         //Log.i("ccccc",text);
-        //TODO
         TextImgTemp = text2Image(getBitmapFromFile(pic_no+""),addTextString,addTextStringSize);
         imageViewText.setImageBitmap(TextImgTemp);
 
@@ -723,31 +721,5 @@ public class MarkPictureActivity extends AppCompatActivity {
         try {
             dialog.dismiss();
         } catch (NullPointerException e){}
-    }
-
-    private int[] getImageRealSize(ImageView imageview) {
-        int realImgShowWidth=0;
-        int realImgShowHeight=0;
-        Drawable imgDrawable = imageview.getDrawable();
-        if (imgDrawable != null) {
-            //获得ImageView中Image的真实宽高，
-            int dw = imageview.getDrawable().getBounds().width();
-            int dh = imageview.getDrawable().getBounds().height();
-
-            //获得ImageView中Image的变换矩阵
-            Matrix m = imageview.getImageMatrix();
-            float[] values = new float[10];
-            m.getValues(values);
-
-            //Image在绘制过程中的变换矩阵，从中获得x和y方向的缩放系数
-            float sx = values[0];
-            float sy = values[4];
-
-            //计算Image在屏幕上实际绘制的宽高
-            realImgShowWidth = (int) (dw * sx);
-            realImgShowHeight = (int) (dh * sy);
-        }
-        int size[] = {realImgShowWidth, realImgShowHeight};
-        return size;
     }
 }

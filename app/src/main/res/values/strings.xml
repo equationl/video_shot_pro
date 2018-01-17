@@ -28,6 +28,9 @@
     </string>
 
     <string name="main_updateHistory_text">
+        1.1 Fix 01:\n
+        \t*修复关闭压缩图片后使用外部程序截图导致合成图片有大片透明的BUG （感谢 @蜜汁炖鱿鱼 的反馈）\n
+        \t*修复高级功能中选择文件未过滤类型的BUG\n
         1.1 Update 01:\n
         \t*主界面UI重构\n
         \t*新增逐帧选优模式\n

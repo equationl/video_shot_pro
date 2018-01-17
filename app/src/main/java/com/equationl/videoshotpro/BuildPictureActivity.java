@@ -49,6 +49,8 @@ public class BuildPictureActivity extends AppCompatActivity {
     Boolean isFromExtra;
     public static BuildPictureActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
 
+    private static final String TAG = "EL,InBuildActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,10 +91,17 @@ public class BuildPictureActivity extends AppCompatActivity {
         paint.setStrokeWidth((float) 5);
         bHeight = bm_test.getHeight();
         bWidth = bm_test.getWidth();
+
+        Log.i(TAG, "TEST IMAGE WIDTH="+bWidth+" HEIGHT="+bHeight);
+
         startY = (float) (bHeight*0.8);
         stopY = startY;
         canvas.drawLine(0,startY,bWidth,stopY,paint);
         imageTest.setImageBitmap(bm_test);
+
+        int test[] = tool.getImageRealSize(imageTest);
+        Log.i(TAG, "imageview width="+imageTest.getHeight()+" height="+imageTest.getWidth());
+
 
         btn_up.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -138,6 +147,8 @@ public class BuildPictureActivity extends AppCompatActivity {
 
         btn_done.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                int test[] = tool.getImageRealSize(imageTest);
+                Log.i(TAG, "imageview width="+test[0]+" height="+test[1]);
                 if (isDone==1) {
                     Uri imageUri = Uri.fromFile(savePath);
                     Intent shareIntent = new Intent();

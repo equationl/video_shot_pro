@@ -119,7 +119,7 @@ public class CommandActivity extends AppCompatActivity {
         if (id == R.id.command_menu_add_time) {
             ResultDo = ActivityResultCodeAddTime;
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.setType("*/*");
+            intent.setType("video/*");
             intent.addCategory(intent.CATEGORY_OPENABLE);
             startActivityForResult(Intent.createChooser(intent, "请选择文件"),1);
             return true;

@@ -11,13 +11,16 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.widget.ImageView;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -30,6 +33,8 @@ public class Tools{
 
     public int AllowNotBlackNums = 20;
     public int AllowCheckBlackLines = 10;
+
+    private static final String TAG = "EL,In Tools";
 
     /**
      * 将 bitmap 保存为png
@@ -82,6 +87,10 @@ public class Tools{
     public Bitmap jointBitmap(Bitmap first, Bitmap second) {
         int width = Math.max(first.getWidth(),second.getWidth());
         int height = first.getHeight() + second.getHeight();
+
+        Log.i(TAG, "in jointBitmap, width="+width+" height="+height);
+        Log.i(TAG, "in jointBitmap, first.height="+first.getHeight());
+
         Bitmap result = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(result);
         canvas.drawBitmap(first, 0, 0, null);
@@ -454,7 +463,8 @@ public class Tools{
             color = bitmap.getPixel(i, y);
             //Log.i("nidaye", "i="+i+" y="+y);
             //Log.i("nidaye", "color="+color);
-            if (color != Color.BLACK) {
+            //Log.i("el", "ALPHA="+Color.alpha(color));
+            if (color != Color.BLACK && Color.alpha(color) != 0) {
                 NotBlackNum++;
             }
         }
@@ -515,6 +525,38 @@ public class Tools{
 
 
         return new int[]{temp1, temp2};
+    }
+
+    /**
+    * 获取imageview实际绘制的图片大小
+     *
+     * @param imageview 欲获取的imgaeview
+     * @return 返回实际大小数组
+    * */
+    public int[] getImageRealSize(ImageView imageview) {
+        int realImgShowWidth=0;
+        int realImgShowHeight=0;
+        Drawable imgDrawable = imageview.getDrawable();
+        if (imgDrawable != null) {
+            //获得ImageView中Image的真实宽高，
+            int dw = imageview.getDrawable().getBounds().width();
+            int dh = imageview.getDrawable().getBounds().height();
+
+            //获得ImageView中Image的变换矩阵
+            Matrix m = imageview.getImageMatrix();
+            float[] values = new float[10];
+            m.getValues(values);
+
+            //Image在绘制过程中的变换矩阵，从中获得x和y方向的缩放系数
+            float sx = values[0];
+            float sy = values[4];
+
+            //计算Image在屏幕上实际绘制的宽高
+            realImgShowWidth = (int) (dw * sx);
+            realImgShowHeight = (int) (dh * sy);
+        }
+        int size[] = {realImgShowWidth, realImgShowHeight};
+        return size;
     }
 
 }
