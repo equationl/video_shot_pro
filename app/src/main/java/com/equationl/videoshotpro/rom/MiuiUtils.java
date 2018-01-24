@@ -85,7 +85,7 @@ public class MiuiUtils {
             goToMiuiPermissionActivity_V6(context);
         } else if (versionCode == 7) {
             goToMiuiPermissionActivity_V7(context);
-        } else if (versionCode == 8) {
+        } else if (versionCode == 8 || versionCode == 9) {   //MIUI8和MIUI9获取悬浮窗权限的方法没有改变
             goToMiuiPermissionActivity_V8(context);
         } else {
             Toast.makeText(context, "获取权限失败，请手动设置！", Toast.LENGTH_LONG).show();

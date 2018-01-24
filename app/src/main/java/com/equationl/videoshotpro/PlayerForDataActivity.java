@@ -38,6 +38,7 @@ import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunnin
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -92,6 +93,8 @@ public class PlayerForDataActivity extends AppCompatActivity {
 
 
     private static final String TAG = "el,In PFDA";
+
+    private final MyHandler handler = new MyHandler(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -335,7 +338,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
         return flag;
     }
 
-    private Handler handler = new Handler() {
+    /**private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -413,7 +416,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
             }
 
         }
-    };
+    };   **/
 
     private class MyThread implements Runnable {
         @Override
@@ -643,7 +646,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
         String video_path = tool.getImageAbsolutePath(PlayerForDataActivity.this,uri);
         SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
         String date    =    sDateFormat.format(new    java.util.Date());
-        String save_path = Environment.getExternalStoragePublicDirectory(
+        final String save_path = Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_PICTURES)+"/"+date+"/";
         File dirFirstFolder = new File(save_path);
         if(!dirFirstFolder.exists())
@@ -675,7 +678,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(String message) {
                         Message msg = Message.obtain();
-                        msg.obj = message;
+                        msg.obj = save_path;
                         msg.what = HandlerFBFonSuccess;
                         handler.sendMessage(msg);
                     }
@@ -729,4 +732,96 @@ public class PlayerForDataActivity extends AppCompatActivity {
         this.setResult(1, intent);
         finish();
     }
+
+
+
+    private static class MyHandler extends Handler {
+        private final WeakReference<PlayerForDataActivity> mActivity;
+
+        public MyHandler(PlayerForDataActivity activity) {
+            mActivity = new WeakReference<PlayerForDataActivity>(activity);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            PlayerForDataActivity activity = mActivity.get();
+            if (activity != null) {
+                switch (msg.what) {
+                    case 1:
+                        break;
+                    case 2:
+                        //text_count.setText(msg.obj.toString());
+                        Toast.makeText(activity.getApplicationContext(), (String)msg.obj, Toast.LENGTH_LONG).show();
+                        break;
+                    case 3:
+                        Intent intent = new Intent(activity, MarkPictureActivity.class);
+                        activity.startActivity(intent);
+                        break;
+                    case HandlerStatusHideTime:
+                        activity.isShowingTime = false;
+                        activity.video_time.setVisibility(View.GONE);
+                        break;
+                    case HandlerStatusShowTime:
+                        activity.isShowingTime = true;
+                        activity.video_time.setVisibility(View.VISIBLE);
+                        String res;
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
+                        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        long lt = new Long(activity.videoview.getCurrentPosition());
+                        Date date = new Date(lt);
+                        res = simpleDateFormat.format(date);
+                        res += "/"+activity.duration_text;
+                        activity.video_time.setText(res);
+                        activity.autoHideTime();
+                        if (activity.videoview.isPlaying() && activity.isShowingTime) {
+                            activity.handler.sendEmptyMessageDelayed(HandlerStatusUpdateTime, 200);
+                        }
+                        Log.i("test", "res="+res);
+                        break;
+                    case HandlerStatusUpdateTime:
+                        //video_time.setVisibility(View.VISIBLE);
+                        simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
+                        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        lt = new Long(activity.videoview.getCurrentPosition());
+                        date = new Date(lt);
+                        res = simpleDateFormat.format(date);
+                        res += "/"+activity.duration_text;
+                        activity.video_time.setText(res);
+                        if (activity.videoview.isPlaying() && activity.isShowingTime) {
+                            activity.handler.sendEmptyMessageDelayed(HandlerStatusUpdateTime, 200);
+                        }
+                        break;
+                    case HandlerShotGifSuccess:
+                        activity.isShotingGif = false;
+                        MediaScannerConnection.scanFile(activity, new String[]{msg.obj.toString()}, null, null);
+                        Toast.makeText(activity, R.string.player_toast_shotGif_success, Toast.LENGTH_SHORT).show();
+                        break;
+                    case HandlerShotGifFail:
+                        Toast.makeText(activity, R.string.player_toast_shotGif_fail, Toast.LENGTH_SHORT).show();
+                        break;
+                    case HandlerShotGifRunning:
+                        Toast.makeText(activity, R.string.player_toast_shotGif_start, Toast.LENGTH_SHORT).show();
+                        break;
+                    case HandlerFBFonFail:
+                        activity.dialog.setMessage("截取失败：\n"+msg.obj.toString());
+                        activity.dialog.setCancelable(true);
+                        break;
+                    case HandlerFBFonSuccess:
+                        activity.dialog.setMessage("截取成功！");
+                        activity.dialog.dismiss();
+                        Toast.makeText(activity, String.format(activity.res.getString(R.string.player_toast_FBF_done),msg.obj.toString()),
+                                Toast.LENGTH_LONG).show();
+                        activity.markTime[0] = 0;
+                        activity.markTime[1] = 0;
+                        break;
+                    case HandlerFBFonProgress:
+                        activity.dialog.setMessage(msg.obj.toString());
+                        break;
+                    case HandlerFBFRunningFinish:
+                        activity.btn_bottom.setText(R.string.player_text_mark);
+                }
+            }
+        }
+    }
+
 }

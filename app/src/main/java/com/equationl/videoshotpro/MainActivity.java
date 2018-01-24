@@ -57,6 +57,8 @@ import com.equationl.videoshotpro.rom.RomUtils;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
+import com.tencent.bugly.Bugly;
+import com.tencent.bugly.crashreport.CrashReport;
 import com.yancy.gallerypick.config.GalleryConfig;
 import com.yancy.gallerypick.config.GalleryPick;
 import com.yancy.gallerypick.inter.IHandlerCallBack;
@@ -158,6 +160,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         Thread t = new Thread(new MainActivity.MyThread());
         t.start();
+
+
+        Bugly.init(getApplicationContext(), "41a66442fd", false);    //FIXME 上线时更改为false
 
         galleryConfig = new GalleryConfig.Builder()
                 .imageLoader(new GlideImageLoader())
@@ -319,11 +324,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
             String mail_content = String.format(getResources().getString(R.string.main_mail_content),
                     versionName, currentapiVersion+"", android.os.Build.MODEL);
-            Intent data=new Intent(Intent.ACTION_SENDTO);
+
+            //Fixme
+            Intent intent = new Intent(MainActivity.this, FeedbackActivity.class);
+            startActivity(intent);
+            /*Intent data=new Intent(Intent.ACTION_SENDTO);
             data.setData(Uri.parse("mailto:admin@likehide.com"));
             data.putExtra(Intent.EXTRA_SUBJECT, this.getResources().getString(R.string.main_mail_title));
             data.putExtra(Intent.EXTRA_TEXT, mail_content);
-            startActivity(data);
+            startActivity(data);   */
         }
         /*else if (id == R.id.nav_setting) {
             Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
@@ -598,7 +607,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private boolean commonROMPermissionCheck(Context context) {
-        //最新发现魅族6.0的系统这种方式不好用，天杀的，只有你是奇葩，没办法，单独适配一下
         if (RomUtils.checkIsMeizuRom()) {
             return meizuPermissionCheck(context);
         }
