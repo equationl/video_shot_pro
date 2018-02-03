@@ -3,10 +3,8 @@ package com.equationl.videoshotpro;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.AppOpsManager;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -18,7 +16,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -44,7 +41,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -58,11 +54,11 @@ import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
 import com.tencent.bugly.Bugly;
-import com.tencent.bugly.crashreport.CrashReport;
 import com.yancy.gallerypick.config.GalleryConfig;
 import com.yancy.gallerypick.config.GalleryPick;
 import com.yancy.gallerypick.inter.IHandlerCallBack;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -86,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     DrawerLayout drawer;
     int activityResultMode = 0;
 
+    private final MyHandler handler = new MyHandler(this);
     public static MainActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
 
     private static final int HandlerStatusLoadLibsFailure = 0;
@@ -95,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final int IntentResultCodeMediaProjection = 10;
     private static final int ActivityResultFrameByFrame = 100;
 
-    private static final String TAG = "In MainActivity";
+    private static final String TAG = "el,In MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        button_user = (Button)findViewById(R.id.btn_main_quickStart);
+        button_user = findViewById(R.id.btn_main_quickStart);
         button_splicing = (Button)findViewById(R.id.btn_main_splicing);
         button_ffmpeg = (Button)findViewById(R.id.btn_main_ffmpeg);
         button_floatBtn = (Button)findViewById(R.id.btn_main_floatBtn);
@@ -442,62 +439,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             handler.sendEmptyMessage(HandlerStatusFFmpegNotSupported);
         }
     }
-
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case HandlerStatusLoadLibsFailure:
-                    Snackbar snackbar = Snackbar.make(container, R.string.main_snackbar_loadSo_fail, Snackbar.LENGTH_LONG);
-                    snackbar.setAction(R.string.main_snackbar_btn_retry, new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            loadLib();
-                        }
-                    });
-                    snackbar.setActionTextColor(Color.BLUE);
-                    snackbar.show();
-                    break;
-                case HandlerStatusFFmpegNotSupported:
-                    Snackbar snackbar2 = Snackbar.make(container, R.string.main_snackbar_so_notAble, Snackbar.LENGTH_SHORT);
-                    snackbar2.setAction(R.string.main_snackbar_btn_contact, new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            String versionName;
-                            int currentapiVersion=0;
-                            try {
-                                PackageManager packageManager = getPackageManager();
-                                PackageInfo packInfo = packageManager.getPackageInfo(getPackageName(),0);
-                                versionName = packInfo.versionName;
-                                currentapiVersion=android.os.Build.VERSION.SDK_INT;
-                            }
-                            catch (Exception ex) {
-                                versionName = "NULL";
-                            }
-                            String mail_content = String.format(getResources().getString(R.string.main_mail_content),
-                                    versionName, currentapiVersion+"", android.os.Build.MODEL);
-                            Intent data=new Intent(Intent.ACTION_SENDTO);
-                            data.setData(Uri.parse("mailto:admin@likehide.com"));
-                            data.putExtra(Intent.EXTRA_SUBJECT, MainActivity.this.getResources().getString(R.string.main_mail_title));
-                            data.putExtra(Intent.EXTRA_TEXT, mail_content);
-                            startActivity(data);
-                        }
-                    });
-                    snackbar2.setActionTextColor(Color.BLUE);
-                    snackbar2.show();
-                    break;
-                case HandlerStatusPackageNameNotRight:
-                    Snackbar snackbar3 = Snackbar.make(container, R.string.main_snackbar_isPiracy, Snackbar.LENGTH_LONG);
-                    snackbar3.show();
-                    break;
-                case HandlerStatusCopyFileDone:
-
-                    Intent intent = new Intent(MainActivity.this, MarkPictureActivity.class);
-                    startActivity(intent);
-            }
-
-        }
-    };
 
     private class MyThread implements Runnable {
         @Override
@@ -932,6 +873,70 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void showNavigationGuider() {
         drawer.openDrawer(Gravity.START);
         Toast.makeText(this, R.string.main_toast_showNavigationGuider, Toast.LENGTH_LONG).show();
+    }
+
+    private static class MyHandler extends Handler {
+        private final WeakReference<MainActivity> mActivity;
+
+        private MyHandler(MainActivity activity) {
+            mActivity = new WeakReference<MainActivity>(activity);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            final MainActivity activity = mActivity.get();
+            if (activity != null) {
+                switch (msg.what) {
+                    case HandlerStatusLoadLibsFailure:
+                        Snackbar snackbar = Snackbar.make(activity.container, R.string.main_snackbar_loadSo_fail, Snackbar.LENGTH_LONG);
+                        snackbar.setAction(R.string.main_snackbar_btn_retry, new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                activity.loadLib();
+                            }
+                        });
+                        snackbar.setActionTextColor(Color.BLUE);
+                        snackbar.show();
+                        break;
+                    case HandlerStatusFFmpegNotSupported:
+                        Snackbar snackbar2 = Snackbar.make(activity.container, R.string.main_snackbar_so_notAble, Snackbar.LENGTH_SHORT);
+                        snackbar2.setAction(R.string.main_snackbar_btn_contact, new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                String versionName;
+                                int currentapiVersion=0;
+                                try {
+                                    PackageManager packageManager = activity.getPackageManager();
+                                    PackageInfo packInfo = packageManager.getPackageInfo(activity.getPackageName(),0);
+                                    versionName = packInfo.versionName;
+                                    currentapiVersion=android.os.Build.VERSION.SDK_INT;
+                                }
+                                catch (Exception ex) {
+                                    versionName = "NULL";
+                                }
+                                String mail_content = String.format(activity.getResources().getString(R.string.main_mail_content),
+                                        versionName, currentapiVersion+"", android.os.Build.MODEL);
+                                Intent data=new Intent(Intent.ACTION_SENDTO);
+                                data.setData(Uri.parse("mailto:admin@likehide.com"));
+                                data.putExtra(Intent.EXTRA_SUBJECT, activity.getResources().getString(R.string.main_mail_title));
+                                data.putExtra(Intent.EXTRA_TEXT, mail_content);
+                                activity.startActivity(data);
+                            }
+                        });
+                        snackbar2.setActionTextColor(Color.BLUE);
+                        snackbar2.show();
+                        break;
+                    case HandlerStatusPackageNameNotRight:
+                        Snackbar snackbar3 = Snackbar.make(activity.container, R.string.main_snackbar_isPiracy, Snackbar.LENGTH_LONG);
+                        snackbar3.show();
+                        break;
+                    case HandlerStatusCopyFileDone:
+
+                        Intent intent = new Intent(activity, MarkPictureActivity.class);
+                        activity.startActivity(intent);
+                }
+            }
+        }
     }
 }
 

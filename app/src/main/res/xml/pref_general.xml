@@ -1,98 +1,151 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <SwitchPreference
-        android:defaultValue="true"
-        android:key="isAddWatermark_switch"
-        android:summary="@string/pref_description_watermark"
-        android:title="@string/pref_title_watermark" />
-    <EditTextPreference
-        android:capitalize="words"
-        android:defaultValue="@string/pref_default_display_watermark"
-        android:inputType="text"
-        android:key="watermark_text"
-        android:maxLines="1"
-        android:selectAllOnFocus="true"
-        android:singleLine="true"
-        android:title="@string/pref_title_display_watermark"
-        android:dependency="isAddWatermark_switch"/>
-    <ListPreference
-        android:defaultValue="1"
-        android:entries="@array/pref_watermark_position_titles"
-        android:entryValues="@array/pref_watermark_position_values"
-        android:key="watermark_position_value"
-        android:negativeButtonText="@null"
-        android:positiveButtonText="@null"
-        android:title="@string/pref_title_watermark_position"
-        android:dependency="isAddWatermark_switch"/>
+    <PreferenceCategory xmlns:android="http://schemas.android.com/apk/res/android"
+        android:title="@string/pref_category_title_watermark" >
 
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="isAddWatermark_switch"
+            android:summary="@string/pref_description_watermark"
+            android:title="@string/pref_title_watermark" />
+        <EditTextPreference
+            android:capitalize="words"
+            android:defaultValue="@string/pref_default_display_watermark"
+            android:inputType="text"
+            android:key="watermark_text"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_title_display_watermark"
+            android:dependency="isAddWatermark_switch"/>
+        <ListPreference
+            android:defaultValue="1"
+            android:entries="@array/pref_watermark_position_titles"
+            android:entryValues="@array/pref_watermark_position_values"
+            android:key="watermark_position_value"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            android:title="@string/pref_title_watermark_position"
+            android:dependency="isAddWatermark_switch"/>
 
-    <SwitchPreference
-        android:defaultValue="false"
-        android:key="isReduce_switch"
-        android:summary="@string/pref_description_reduce"
-        android:title="@string/pref_title_reduce" />
-    <ListPreference
-        android:defaultValue="100"
-        android:entries="@array/pref_reduce_list_titles"
-        android:entryValues="@array/pref_reduce_list_values"
-        android:key="reduce_value"
-        android:negativeButtonText="@null"
-        android:positiveButtonText="@null"
-        android:title="@string/pref_title_reduce_value"
-        android:dependency="isReduce_switch"/>
+    </PreferenceCategory>
 
-    <SwitchPreference
-        android:defaultValue="false"
-        android:key="isHideButton"
-        android:summary="@string/pref_description_hide_btn"
-        android:title="@string/pref_title_hide_btn" />
+    <PreferenceCategory xmlns:android="http://schemas.android.com/apk/res/android"
+        android:title="@string/pref_category_title_quality" >
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="isReduce_switch"
+            android:summary="@string/pref_description_reduce"
+            android:title="@string/pref_title_reduce" />
+        <ListPreference
+            android:defaultValue="100"
+            android:entries="@array/pref_reduce_list_titles"
+            android:entryValues="@array/pref_reduce_list_values"
+            android:key="reduce_value"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            android:title="@string/pref_title_reduce_value"
+            android:dependency="isReduce_switch"/>
 
-    <SwitchPreference
-        android:defaultValue="false"
-        android:key="isMonitoredShow"
-        android:summary="@string/pref_description_monitored_show"
-        android:title="@string/pref_title_monitored_show" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="isShotToJpg"
+            android:summary="@string/pref_description_shot_jpg"
+            android:title="@string/pref_title_shot_jpg" />
 
-    <SwitchPreference
-        android:defaultValue="true"
-        android:key="isShotToJpg"
-        android:summary="@string/pref_description_shot_jpg"
-        android:title="@string/pref_title_shot_jpg" />
+        <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+            android:summary="@string/pref_screen_description_quality"
+            android:title="@string/pref_screen_title_quality" >
 
-    <SwitchPreference
-        android:defaultValue="false"
-        android:key="isShotGif"
-        android:summary="@string/pref_description_isShotGif"
-        android:title="@string/pref_title_isShotGif" />
+            <SwitchPreference
+                android:defaultValue="false"
+                android:key="isMonitoredShow"
+                android:summary="@string/pref_description_monitored_show"
+                android:title="@string/pref_title_monitored_show" />
 
-    <ListPreference
-        android:defaultValue="3"
-        android:entries="@array/pref_gif_MinTime_titles"
-        android:entryValues="@array/pref_gif_MinTime_values"
-        android:key="shotToGifMinTime"
-        android:negativeButtonText="@null"
-        android:positiveButtonText="@null"
-        android:title="@string/pref_title_gif_MinTime"
-        android:dependency="isShotGif"/>
+            <SwitchPreference
+                android:defaultValue="false"
+                android:key="isSetColorMode"
+                android:summary="@string/pref_description_colorMode"
+                android:title="@string/pref_title_colorMode" />
+            <ListPreference
+                android:defaultValue="1"
+                android:entries="@array/pref_colorMode_list_titles"
+                android:entryValues="@array/pref_colorMode_list_values"
+                android:key="colorMode_value"
+                android:negativeButtonText="@null"
+                android:positiveButtonText="@null"
+                android:title="@string/pref_colorMode_title"
+                android:dependency="isSetColorMode"/>
 
-    <ListPreference
-        android:defaultValue="320x240"
-        android:entries="@array/pref_gif_RP_titles"
-        android:entryValues="@array/pref_gif_RP_values"
-        android:key="gifRP_value"
-        android:negativeButtonText="@null"
-        android:positiveButtonText="@null"
-        android:title="@string/pref_title_gif_RP"
-        android:dependency="isShotGif"/>
+            <SwitchPreference
+                android:defaultValue="false"
+                android:key="isSetResolution"
+                android:summary="@string/pref_description_resolution"
+                android:title="@string/pref_title_resolution" />
+            <ListPreference
+                android:defaultValue="2"
+                android:entries="@array/pref_resolution_list_titles"
+                android:entryValues="@array/pref_resolution_list_values"
+                android:key="resolution_value"
+                android:negativeButtonText="@null"
+                android:positiveButtonText="@null"
+                android:title="@string/pref_resolution_title"
+                android:dependency="isSetResolution"/>
 
-    <ListPreference
-        android:defaultValue="14"
-        android:entries="@array/pref_gif_frameRate_titles"
-        android:entryValues="@array/pref_gif_frameRate_values"
-        android:key="gifFrameRate_value"
-        android:negativeButtonText="@null"
-        android:positiveButtonText="@null"
-        android:title="@string/pref_title_gif_frameRate"
-        android:dependency="isShotGif"/>
+        </PreferenceScreen>
+    </PreferenceCategory>
+
+    <PreferenceCategory xmlns:android="http://schemas.android.com/apk/res/android"
+        android:title="@string/pref_category_title_gif" >
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="isShotGif"
+            android:summary="@string/pref_description_isShotGif"
+            android:title="@string/pref_title_isShotGif" />
+
+        <ListPreference
+            android:defaultValue="3"
+            android:entries="@array/pref_gif_MinTime_titles"
+            android:entryValues="@array/pref_gif_MinTime_values"
+            android:key="shotToGifMinTime"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            android:title="@string/pref_title_gif_MinTime"
+            android:dependency="isShotGif"/>
+
+        <ListPreference
+            android:defaultValue="320x240"
+            android:entries="@array/pref_gif_RP_titles"
+            android:entryValues="@array/pref_gif_RP_values"
+            android:key="gifRP_value"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            android:title="@string/pref_title_gif_RP"
+            android:dependency="isShotGif"/>
+
+        <ListPreference
+            android:defaultValue="14"
+            android:entries="@array/pref_gif_frameRate_titles"
+            android:entryValues="@array/pref_gif_frameRate_values"
+            android:key="gifFrameRate_value"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            android:title="@string/pref_title_gif_frameRate"
+            android:dependency="isShotGif"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory xmlns:android="http://schemas.android.com/apk/res/android"
+        android:title="@string/pref_category_title_other" >
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="isHideButton"
+            android:summary="@string/pref_description_hide_btn"
+            android:title="@string/pref_title_hide_btn" />
+
+    </PreferenceCategory>
 
 </PreferenceScreen>

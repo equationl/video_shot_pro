@@ -7,8 +7,8 @@ android {
         applicationId "com.equationl.videoshotpro"
         minSdkVersion 17
         targetSdkVersion 26
-        versionCode 7
-        versionName "1.1 UPDATE 02"
+        versionCode 8
+        versionName "1.1 Fix 02"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         ndk {
             //设置支持的SO库架构

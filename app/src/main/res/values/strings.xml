@@ -29,6 +29,13 @@
     </string>
 
     <string name="main_updateHistory_text">
+        1.1 Fix 02:\n
+        \t*大幅优化内存使用策略，降低因内存不足闪退的情况\n
+        \t*添加内存使用监听，当内存不足时不会闪退而是提示更改图片质量设置\n
+        \t*支持自定义图片质量，可在降低图片质量的情况下合成更多图片\n
+        \t*优化撤销操作（感谢 @xiajichen 的反馈）\n
+        \t*修复大量可能导致app崩溃的隐患\n
+        \t*\n
         1.1 Update 02:\n
         \t*修复某些机型无法获取悬浮窗权限的BUG\n
         \t*优化反馈方式\n
@@ -238,19 +245,46 @@
     <string name="player_dialog_FBF_content">截取已开始</string>
 
     <string name="markPicture_toast_readFile_fail">读取图片列表出错！</string>
+    <string name="markPicture_toast_markFinish">已是最后一张，请点击右下角“开始合成”</string>
     <string name="markPicture_ProgressDialog_msg">请稍候</string>
     <string name="markPicture_ProgressDialog_title">请稍候&#8230;</string>
     <string name="markPicture_ProgressDialog_msgOnRunning">正在处理第%1$s张图片&#8230;</string>
+    <string name="markPicture_btn_start">开始合成</string>
+    <string name="markPicture_text_undo">撤销</string>
+    <string name="markPicture_tip_dialog_tittle">使用指南</string>
+    <string name="markPicture_tip_dialog_content">选择添加文字后可以快捷的在图片任意位置添加任意大小任意颜色的文字。\n
+    在弹出的对话框中您可以输入想要添加的文字和文字大小，亦可以选择文字颜色和文字背景颜色（日后将支持透明背景），输入完毕,点击 确定 后可更改添加文字位置。\n
+    单击或拖动屏幕，文字将跟随您的手指位置在图片上显示，将文字拖动到图片底部，文字将自动更改为拼接到图片外部而非添加到内部。\n
+    确定好文字位置后点击右下角 确定 按钮即可将文字添加到文字中。</string>
+    <string name="markPicture_tip_dialog_btn_ok">我知道了</string>
 
 
     <string name="floatWindowsService_notice_ticker_text">启动通知</string>
     <string name="floatWindowsService_notice_content">点击开始制作</string>
     <string name="floatWindowsService_notice_title">程序运行中</string>
 
+
+    <string name="buildPicture_btn_up">上调</string>
+    <string name="buildPicture_btn_down">下调</string>
+    <string name="buildPicture_btn_done">确定</string>
+    <string name="buildPicture_text_memory">%1$s/%2$s</string>
+    <string name="buildPicture_dialog_oom_tittle">内存不足！</string>
+    <string name="buildPicture_dialog_oom_content">非常抱歉，您的设备内存不足，我们无法继续工作。
+        \n选择 退出 将退出本次制作，此时您可以选择减少图片数量再次制作亦或是进入 设置-图片质量与性能 降低导出图片质量后再次制作
+        \n选择 继续 将会自动降低导出图片质量再次尝试制作，如仍内存不足或导出图片质量过低，请选择 退出 后手动设置导出图片质量</string>
+    <string name="buildPicture_btn_oom_exit">退出</string>
+    <string name="buildPicture_btn_oom_continue">继续</string>
+
     <string name="action_settings">设置</string>
     <string name="title_activity_settings">设置</string>
 
     <string name="pref_header_general">通用</string>
+    <string name="pref_category_title_watermark">水印设置</string>
+    <string name="pref_category_title_quality">图片质量设置</string>
+    <string name="pref_category_title_gif">动图相关设置</string>
+    <string name="pref_category_title_other">其他设置</string>
+    <string name="pref_screen_title_quality">图片质量与性能</string>
+    <string name="pref_screen_description_quality">修改最终生成的图片质量，该项设置会影响app运行的性能，如app频繁奔溃请修改该项设置</string>
 
     <string name="pref_title_watermark">添加水印</string>
     <string name="pref_description_watermark">选择是否在图片合成后添加水印
@@ -264,6 +298,38 @@
 
     <string name="pref_title_monitored_show">实时预览</string>
     <string name="pref_description_monitored_show">选择是否在合成图片时实时预览（开启后可能会内存溢出闪退，建议关闭）</string>
+
+    <string name="pref_title_colorMode">更改导出图片颜色模式</string>
+    <string name="pref_description_colorMode">选择是否更改颜色模式，从上到下图片质量依次递减，如遇内存不足闪退，请更改为靠后的选项。（该选项并非对所有图片都满足）</string>
+    <string name="pref_colorMode_title">颜色模式</string>
+    <string-array name="pref_colorMode_list_titles">
+        <item>ARGB.8888</item>
+        <item>ARGB.4444</item>
+        <item>RGB_565</item>
+        <item>ALPHA_8</item>
+    </string-array>
+    <string-array name="pref_colorMode_list_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+
+    <string name="pref_title_resolution">更改导出图片分辨率</string>
+    <string name="pref_description_resolution">选择是否更改导出图片分辨率，如遇内存不足闪退，请降低分辨率</string>
+    <string name="pref_resolution_title">图片分辨率</string>
+    <string-array name="pref_resolution_list_titles">
+        <item>原图的1/2</item>
+        <item>原图的1/4</item>
+        <item>原图的1/6</item>
+        <item>原图的1/8</item>
+    </string-array>
+    <string-array name="pref_resolution_list_values">
+        <item>2</item>
+        <item>4</item>
+        <item>6</item>
+        <item>8</item>
+    </string-array>
 
     <string name="pref_title_reduce">压缩图片</string>
     <string name="pref_description_reduce">选择是否在导出时压缩图片（仅降低质量，不改变分辨率）

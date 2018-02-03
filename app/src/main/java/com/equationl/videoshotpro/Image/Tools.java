@@ -112,12 +112,17 @@ public class Tools{
      * 从文件获取图片的bitmap
      * */
     public Bitmap getBitmapFromFile(String no, File dirPath, String extension) throws Exception {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = 1;
+
+        return getBitmapFromFile(no, dirPath, extension, options);
+    }
+
+    public Bitmap getBitmapFromFile(String no, File dirPath, String extension, BitmapFactory.Options options) throws Exception {
         File path = new File(dirPath, no+"."+extension);
         FileInputStream f;
         Bitmap bm = null;
         f = new FileInputStream(path);
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inSampleSize = 1;
         BufferedInputStream bis = new BufferedInputStream(f);
         bm = BitmapFactory.decodeStream(bis, null, options);
 

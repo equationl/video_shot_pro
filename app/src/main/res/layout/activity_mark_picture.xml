@@ -20,27 +20,25 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="0px"
-        android:layout_marginLeft="0px"
+        android:layout_marginStart="0px"
         android:src="@mipmap/ic_launcher" />
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="开始合成"
-            android:id="@+id/button_start"
-            android:layout_alignTop="@+id/imageView"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:background="@drawable/button_radius"
-            android:paddingBottom="8dp"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
-            android:paddingTop="8dp"
-            android:layout_marginTop="25dp"
-            android:textColor="#ffffff" />
+    <Button
+        android:id="@+id/button_start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/make_picture_nums_tip"
+        android:layout_alignParentEnd="true"
+        android:background="@drawable/button_radius"
+        android:paddingBottom="8dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="8dp"
+        android:text="@string/markPicture_btn_start"
+        android:textColor="#ffffff" />
 
         <TextView
-            android:text=" "
+            android:text=""
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
@@ -51,7 +49,7 @@
             android:id="@+id/make_picture_tip" />
 
         <TextView
-            android:text="TextView"
+            android:text=""
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
@@ -60,4 +58,15 @@
             android:textColor="@android:color/background_light"
             android:background="@android:color/darker_gray"
             android:id="@+id/make_picture_nums_tip" />
+
+    <ImageView
+        android:id="@+id/mark_picture_undo"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_above="@+id/button_start"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="10dp"
+        android:background="#99cccccc"
+        android:src="?attr/actionModeCloseDrawable" />
+
 </RelativeLayout>

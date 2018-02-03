@@ -94,6 +94,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         bindPreferenceSummaryToValue(findPreference("gifRP_value"));
         bindPreferenceSummaryToValue(findPreference("gifFrameRate_value"));
         bindPreferenceSummaryToValue(findPreference("shotToGifMinTime"));
+        bindPreferenceSummaryToValue(findPreference("resolution_value"));
+        bindPreferenceSummaryToValue(findPreference("colorMode_value"));
+
     }
 
     /**

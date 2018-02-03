@@ -18,7 +18,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="上调"
+        android:text="@string/buildPicture_btn_up"
         android:id="@+id/button_up"
         android:background="@drawable/button_radius"
         android:paddingBottom="8dp"
@@ -32,7 +32,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="下调"
+        android:text="@string/buildPicture_btn_down"
         android:id="@+id/button_down"
         android:background="@drawable/button_radius"
         android:paddingBottom="8dp"
@@ -46,7 +46,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="确定"
+        android:text="@string/buildPicture_btn_done"
         android:id="@+id/button_final_done"
         android:background="@drawable/button_radius"
         android:paddingBottom="8dp"
@@ -56,5 +56,15 @@
         android:textColor="#ffffff"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/buildPicture_text_memory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:background="#999"
+        android:textColor="#fff"
+        android:text="@string/buildPicture_text_memory" />
 
 </RelativeLayout>

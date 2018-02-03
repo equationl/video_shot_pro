@@ -1,9 +1,12 @@
 package com.equationl.videoshotpro;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -14,6 +17,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Layout;
 import android.text.StaticLayout;
@@ -24,16 +28,21 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.equationl.videoshotpro.Image.Tools;
+import com.tencent.bugly.crashreport.CrashReport;
+
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 
 public class BuildPictureActivity extends AppCompatActivity {
     Button btn_up, btn_down, btn_done;
+    TextView text_memory;
     ImageView imageTest;
     String[] fileList;
     Canvas canvas;
@@ -47,9 +56,16 @@ public class BuildPictureActivity extends AppCompatActivity {
     SharedPreferences settings;
     Tools tool = new Tools();
     Boolean isFromExtra;
+    Resources res;
+    Thread t, t_2;
+
+    private final MyHandler handler = new MyHandler(this);
+
     public static BuildPictureActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
 
     private static final String TAG = "EL,InBuildActivity";
+
+    private static final int HandlerStatusOutOfMemory = 10086;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,12 +80,19 @@ public class BuildPictureActivity extends AppCompatActivity {
         btn_down  = (Button)    findViewById(R.id.button_down);
         btn_done  = (Button)    findViewById(R.id.button_final_done);
         imageTest = (ImageView) findViewById(R.id.imageTest);
+        text_memory = (TextView) findViewById(R.id.buildPicture_text_memory);
+
+        res = getResources();
+
+        updateMemoryText();
 
         settings = PreferenceManager.getDefaultSharedPreferences(this);
 
         Bundle bundle = this.getIntent().getExtras();
         fileList = bundle.getStringArray("fileList");
         isFromExtra = bundle.getBoolean("isFromExtra");
+
+        t_2 = new Thread(new MyThread());
 
         //Log.i("filelist", fileList.toString());
 
@@ -115,6 +138,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                     stopY = startY;
                     canvas.drawLine(0,startY,bm_test.getWidth(),stopY,paint);
                     imageTest.setImageBitmap(bm_test);
+                    updateMemoryText();
                 }
                 else {
                     try {
@@ -141,6 +165,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                     stopY = startY;
                     canvas.drawLine(0,startY,bm_test.getWidth(),stopY,paint);
                     imageTest.setImageBitmap(bm_test);
+                    updateMemoryText();
                 }
             }
         });
@@ -158,13 +183,13 @@ public class BuildPictureActivity extends AppCompatActivity {
                     startActivity(Intent.createChooser(shareIntent, "分享到"));
                 }
                 else {
-                    new Thread(new MyThread()).start();
+                    t = new Thread(new MyThread());
+                    t.start();
                     dialog.show();
                     dialog.setProgress(0);
                 }
             }
         });
-
     }
 
 
@@ -198,11 +223,28 @@ public class BuildPictureActivity extends AppCompatActivity {
             extension = "png";
         }
 
-        try {
-            bm = tool.getBitmapFromFile(no, getExternalCacheDir(),extension);
-        }  catch (Exception e) {
-            //Toast.makeText(getApplicationContext(),"获取截图失败"+e, Toast.LENGTH_LONG).show();
-            Log.e("EL", "获取截图失败："+e.toString());
+        Boolean isSetColorMode = settings.getBoolean("isSetColorMode", false);
+        Boolean isSetResolution = settings.getBoolean("isSetResolution", false);
+        if (isSetColorMode || isSetResolution) {
+            String resolution = isSetResolution ? settings.getString("resolution_value", "2") : "1";
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inSampleSize = Integer.parseInt(resolution);
+            options.inPreferredConfig = getColorConfig();
+            try {
+                bm = tool.getBitmapFromFile(no, getExternalCacheDir(),extension, options);
+            } catch (Exception e) {
+                Log.e("EL", "获取截图失败："+e.toString());
+                CrashReport.postCatchedException(e);
+            }
+        }
+
+        else {
+            try {
+                bm = tool.getBitmapFromFile(no, getExternalCacheDir(),extension);
+            } catch (Exception e) {
+                Log.e("EL", "获取截图失败："+e.toString());
+                CrashReport.postCatchedException(e);
+            }
         }
 
         return bm;
@@ -217,97 +259,77 @@ public class BuildPictureActivity extends AppCompatActivity {
         return getBitmap(0+"");
     }
 
-    private Handler handler = new Handler() {
-        // 在Handler中获取消息，重写handleMessage()方法
-        @Override
-        public void handleMessage(Message msg) {
-            // 判断消息码是否为1
-            if (msg.what == 1) {
-                dialog.setProgress(dialog.getProgress()+1);
-                dialog.setMessage(msg.obj.toString());
-            }
-            else if (msg.what == 2) {
-                dialog.dismiss();
-                btn_up.setText("返回");
-                btn_done.setText("分享");
-                btn_down.setVisibility(View.INVISIBLE);
-                isDone=1;
-                String temp_path = Environment.getExternalStoragePublicDirectory(
-                        Environment.DIRECTORY_PICTURES)+"/"+msg.obj.toString();
-                temp_path += settings.getBoolean("isReduce_switch", false) ? ".jpg":".png";
-                MediaScannerConnection.scanFile(BuildPictureActivity.this, new String[]{temp_path}, null, null);
-                Toast.makeText(getApplicationContext(),"处理完成！图片已保存至 "+ temp_path +" 请进入图库查看", Toast.LENGTH_LONG).show();
-            }
-            else if (msg.what == 3) {
-                Boolean isShow = settings.getBoolean("isMonitoredShow", false);
-                if (isShow) {
-                    imageTest.setImageBitmap((Bitmap) msg.obj);
-                }
-                else {
-                    DisplayMetrics dm = new DisplayMetrics();
-                    dm = getResources().getDisplayMetrics();
-                    int screenHeight = dm.heightPixels;
-
-                    Bitmap bm = (Bitmap) msg.obj;
-                    if (bm.getHeight() > screenHeight) {
-                        Bitmap newbm = Bitmap.createBitmap(bm, 0, bm.getHeight()-screenHeight, bm.getWidth(), screenHeight);
-                        imageTest.setImageBitmap(newbm);
-                    }
-                    else {
-                        imageTest.setImageBitmap(bm);
-                    }
-                }
-            }
-            else if (msg.what == 4) {
-                Toast.makeText(getApplicationContext(),msg.obj.toString(), Toast.LENGTH_LONG).show();
-                dialog.dismiss();
-                isDone = 1;
-                btn_up.setText("退出");
-                btn_down.setVisibility(View.GONE);
-                btn_done.setVisibility(View.GONE);
-            }
-        }
-    };
 
     private class MyThread implements Runnable {
         int delete_nums=0;
+        Boolean isRunning = true;
         @Override
         public void run() {
             Message msg;
             int len = fileList.length;
-            Bitmap final_bitmap = Bitmap.createBitmap(bWidth,1, Bitmap.Config.ARGB_8888);
+            Bitmap final_bitmap = Bitmap.createBitmap(bWidth,1, getColorConfig());
             for (int i=0;i<len;i++) {
                 msg = Message.obtain();
                 msg.obj = "处理第"+i+"张图片";
                 msg.what = 1;
                 handler.sendMessage(msg);
                 if (fileList[i].equals("cut")) {
-                    final_bitmap = addBitmap(final_bitmap,cutBimap(getBitmap(i+"")));
-                    msg = Message.obtain();
-                    msg.obj = final_bitmap;
-                    msg.what = 3;
-                    handler.sendMessage(msg);
+                    try {
+                        final_bitmap = addBitmap(final_bitmap,cutBimap(getBitmap(i+"")));
+                    }
+                    catch (OutOfMemoryError e) {
+                        showDialogOutOfMemory();
+                        isRunning = false;
+                        break;
+                    }
+                    Boolean isShow = settings.getBoolean("isMonitoredShow", false);
+                    if (isShow) {
+                        msg = Message.obtain();
+                        msg.obj = final_bitmap;
+                        msg.what = 3;
+                        handler.sendMessage(msg);
+                    }
                 }
                 else if (fileList[i].equals("all")) {
-                    final_bitmap = addBitmap(final_bitmap,getBitmap(i+""));
-                    msg = Message.obtain();
-                    msg.obj = final_bitmap;
-                    msg.what = 3;
-                    handler.sendMessage(msg);
+                    try {
+                        final_bitmap = addBitmap(final_bitmap,getBitmap(i+""));
+                    }
+                    catch (OutOfMemoryError e) {
+                        showDialogOutOfMemory();
+                        isRunning = false;
+                        break;
+                    }
+                    Boolean isShow = settings.getBoolean("isMonitoredShow", false);
+                    if (isShow) {
+                        msg = Message.obtain();
+                        msg.obj = final_bitmap;
+                        msg.what = 3;
+                        handler.sendMessage(msg);
+                    }
                 }
                 else if (fileList[i].equals("text")) {
-                    final_bitmap = addBitmap(final_bitmap,getBitmap(i+"_t"));
-                    msg = Message.obtain();
-                    msg.obj = final_bitmap;
-                    msg.what = 3;
-                    handler.sendMessage(msg);
+                    try {
+                        final_bitmap = addBitmap(final_bitmap,getBitmap(i+"_t"));
+                    }
+                    catch (OutOfMemoryError e) {
+                        showDialogOutOfMemory();
+                        isRunning = false;
+                        break;
+                    }
+                    Boolean isShow = settings.getBoolean("isMonitoredShow", false);
+                    if (isShow) {
+                        msg = Message.obtain();
+                        msg.obj = final_bitmap;
+                        msg.what = 3;
+                        handler.sendMessage(msg);
+                    }
                 }
                 else {
                     delete_nums++;
                 }
             }
             Boolean isAddWatermark = settings.getBoolean("isAddWatermark_switch",true);
-            if (isAddWatermark) {
+            if (isAddWatermark && isRunning) {
                 Canvas canvas = new Canvas(final_bitmap);
                 String watermark = settings.getString("watermark_text","Made by videoshot");
                 TextPaint textPaint = new TextPaint();
@@ -342,8 +364,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                 msg.what = 4;
                 handler.sendMessage(msg);
             }
-
-            else {
+            else if (isRunning){
                 msg = Message.obtain();
                 msg.obj = "导出图片";
                 msg.what = 1;
@@ -364,6 +385,9 @@ public class BuildPictureActivity extends AppCompatActivity {
                     msg.obj = "保存截图失败"+e;
                     msg.what = 4;
                     handler.sendMessage(msg);
+                }
+                catch (OutOfMemoryError e) {
+                    showDialogOutOfMemory();
                 }
             }
         }
@@ -434,5 +458,171 @@ public class BuildPictureActivity extends AppCompatActivity {
     public void onRestart() {
         super.onRestart();
         Log.i("cao", "In BuildPictureActivity onRestart");
+    }
+
+    private void updateMemoryText() {
+        int maxMemory = ((int) Runtime.getRuntime().maxMemory())/1024/1024;
+        long totalMemory = ((int) Runtime.getRuntime().totalMemory())/1024/1024;
+        long freeMemory = ((int) Runtime.getRuntime().freeMemory())/1024/1024;
+        Log.i(TAG,"---> maxMemory="+maxMemory+"M,totalMemory="+totalMemory+"M,freeMemory="+freeMemory+"M");
+        text_memory.setText(String.format(res.getString(R.string.buildPicture_text_memory), totalMemory+"M", maxMemory+"M"));
+    }
+
+    private static class MyHandler extends Handler {
+        private final WeakReference<BuildPictureActivity> mActivity;
+
+        private MyHandler(BuildPictureActivity activity) {
+            mActivity = new WeakReference<BuildPictureActivity>(activity);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            final BuildPictureActivity activity = mActivity.get();
+            if (activity != null) {
+                switch (msg.what) {
+                    case 1:
+                        activity.updateMemoryText();
+                        activity.dialog.setProgress(activity.dialog.getProgress()+1);
+                        activity.dialog.setMessage(msg.obj.toString());
+                        System.gc();
+                        break;
+
+                    case 2:
+                        activity.updateMemoryText();
+                        activity.dialog.dismiss();
+                        activity.btn_up.setText("返回");
+                        activity.btn_done.setText("分享");
+                        activity.btn_down.setVisibility(View.INVISIBLE);
+                        activity.isDone=1;
+                        String temp_path = Environment.getExternalStoragePublicDirectory(
+                                Environment.DIRECTORY_PICTURES)+"/"+msg.obj.toString();
+                        temp_path += activity.settings.getBoolean("isReduce_switch", false) ? ".jpg":".png";
+                        MediaScannerConnection.scanFile(activity, new String[]{temp_path}, null, null);
+                        Toast.makeText(activity,"处理完成！图片已保存至 "+ temp_path +" 请进入图库查看", Toast.LENGTH_LONG).show();
+                        break;
+
+                    case 3:
+                        Boolean isShow = activity.settings.getBoolean("isMonitoredShow", false);
+                        if (isShow) {
+                            activity.imageTest.setImageBitmap((Bitmap) msg.obj);
+                        }
+                        else {
+                            DisplayMetrics dm = new DisplayMetrics();
+                            dm = activity.getResources().getDisplayMetrics();
+                            int screenHeight = dm.heightPixels;
+
+                            Bitmap bm = (Bitmap) msg.obj;
+                            if (bm.getHeight() > screenHeight) {
+                                Bitmap newbm = Bitmap.createBitmap(bm, 0, bm.getHeight()-screenHeight, bm.getWidth(), screenHeight);
+                                activity.imageTest.setImageBitmap(newbm);
+                            }
+                            else {
+                                activity.imageTest.setImageBitmap(bm);
+                            }
+                        }
+                        break;
+
+                    case 4:
+                        Toast.makeText(activity,msg.obj.toString(), Toast.LENGTH_LONG).show();
+                        activity.dialog.dismiss();
+                        activity.isDone = 1;
+                        activity.btn_up.setText("退出");
+                        activity.btn_down.setVisibility(View.GONE);
+                        activity.btn_done.setVisibility(View.GONE);
+                        break;
+
+                    case HandlerStatusOutOfMemory:
+                        new AlertDialog.Builder(activity)
+                                .setTitle(R.string.buildPicture_dialog_oom_tittle)
+                                .setMessage(R.string.buildPicture_dialog_oom_content)
+                                .setPositiveButton(R.string.buildPicture_btn_oom_continue, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        activity.dialog.dismiss();
+                                        activity.reduceQuilty();
+
+                                        if (activity.t.isAlive()) {
+                                            activity.t.interrupt();
+                                            activity.t = null;
+                                        }
+                                        activity.t_2.start();
+
+                                        activity.dialog.show();
+                                        activity.dialog.setProgress(0);
+                                    }
+                                })
+                                .setNegativeButton(R.string.buildPicture_btn_oom_exit, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        try {
+                                            PlayerActivity.instance.finish();
+                                            MarkPictureActivity.instance.finish();
+                                            MainActivity.instance.finish();
+                                        } catch (NullPointerException e) {Log.e("el", e.toString());}
+                                        Intent intent = new Intent(activity, MainActivity.class);
+                                        activity.startActivity(intent);
+                                        activity.finish();
+                                    }
+                                }).setCancelable(false).show();
+                        break;
+                }
+            }
+        }
+    }
+
+    private void showDialogOutOfMemory() {
+        handler.sendEmptyMessage(HandlerStatusOutOfMemory);
+    }
+
+    private void reduceQuilty() {
+        String[] colorModes, resolutions;
+        String colorMode, resolution;
+
+        colorModes = res.getStringArray(R.array.pref_colorMode_list_values);
+        resolutions = res.getStringArray(R.array.pref_resolution_list_values);
+        colorMode = settings.getString("colorMode_value", "1");
+        resolution = settings.getString("resolution_value", "2");
+
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean("isMonitoredShow", false);  //关闭实时预览
+        editor.putBoolean("isSetColorMode", true);    //允许更改颜色模式
+        editor.putBoolean("isSetResolution", true);    //允许更改图片分辨率
+        editor.putString("colorMode_value", colorModes[getArrayIndexNext(colorModes, colorMode)]);   //将颜色模式降低一个档次
+        editor.putString("resolution_value", resolutions[getArrayIndexNext(resolutions, resolution)]);   //将分辨率降低一个档次
+
+        editor.apply();
+    }
+
+    private int getArrayIndexNext(String[] s, String value) {
+        int size = s.length;
+        for (int i=0; i<size; i++) {
+            if (s[i].equals(value)) {
+                return i+1<size ? i+1:i;
+            }
+        }
+        return size-1;
+    }
+
+    private Bitmap.Config getColorConfig() {
+        Bitmap.Config mode = Bitmap.Config.ARGB_8888;
+        if (settings.getBoolean("isSetColorMode", false)) {
+            Log.i(TAG, "is set color mode");
+            int colorMode = Integer.parseInt(settings.getString("colorMode_value", "1"));
+            switch (colorMode) {
+                case 1:
+                    mode = Bitmap.Config.ARGB_8888;
+                    break;
+                case 2:
+                    mode = Bitmap.Config.ARGB_4444;
+                    break;
+                case 3:
+                    mode = Bitmap.Config.RGB_565;
+                    break;
+                case 4:
+                    mode = Bitmap.Config.ALPHA_8;
+                    break;
+            }
+        }
+        return mode;
     }
 }

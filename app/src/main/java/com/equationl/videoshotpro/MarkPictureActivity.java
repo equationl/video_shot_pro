@@ -2,6 +2,7 @@ package com.equationl.videoshotpro;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,8 +13,10 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
+import android.media.MediaScannerConnection;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
@@ -22,6 +25,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -37,14 +41,17 @@ import android.widget.Toast;
 import com.dingmouren.colorpicker.ColorPickerDialog;
 import com.dingmouren.colorpicker.OnColorPickerListener;
 import com.equationl.videoshotpro.Image.Tools;
+import com.tencent.bugly.crashreport.CrashReport;
+import com.yancy.gallerypick.config.GalleryPick;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class MarkPictureActivity extends AppCompatActivity {
-    ImageView imagview, imageViewText;
+    ImageView imagview, imageViewText, imageUndo;
     String[] fileList;
     Button btn_start;
     Button start_color_picker, start_color_picker_bg;
@@ -52,7 +59,7 @@ public class MarkPictureActivity extends AppCompatActivity {
     AlertDialog.Builder builder;
     private LayoutInflater mLayoutInflater;
     private View view;
-    SharedPreferences settings;
+    SharedPreferences settings, sp_init;
     TextView tip_text, nums_tip_text;
     boolean isLongPress=false;
     Boolean isFromExtra;
@@ -76,6 +83,7 @@ public class MarkPictureActivity extends AppCompatActivity {
     private static final int HandlerStatusGetImgFail = 10016;
 
 
+    private final MyHandler handler = new MyHandler(this);
     public static MarkPictureActivity instance = null;   //FIXME  暂时这样吧，实在找不到更好的办法了
 
     @Override
@@ -100,8 +108,11 @@ public class MarkPictureActivity extends AppCompatActivity {
 
         instance = this;
 
+        sp_init = getSharedPreferences("init", Context.MODE_PRIVATE);
+
         imagview = (ImageView) findViewById(R.id.imageView);
         imageViewText = (ImageView) findViewById(R.id.imageViewText);
+        imageUndo = (ImageView) findViewById(R.id.mark_picture_undo);
         btn_start = (Button) findViewById(R.id.button_start);
         tip_text = (TextView) findViewById(R.id.make_picture_tip);
         nums_tip_text  = (TextView) findViewById(R.id.make_picture_nums_tip);
@@ -146,12 +157,13 @@ public class MarkPictureActivity extends AppCompatActivity {
         }
 
         btn_start.setVisibility(View.GONE);
-
+        imageUndo.setVisibility(View.GONE);
 
 
         flag=0;
         imagview.setOnTouchListener(new View.OnTouchListener() {
             double  mPosX,mPosY,mCurPosX,mCurPosY,offsetX,offsetY;
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (flag == 0) {
@@ -159,6 +171,7 @@ public class MarkPictureActivity extends AppCompatActivity {
                     set_image(pic_no);
                     flag++;
                     btn_start.setVisibility(View.VISIBLE);
+                    imageUndo.setVisibility(View.VISIBLE);
                     imagview.setScaleType(ImageView.ScaleType.FIT_CENTER);
                     return false;
                 }
@@ -170,7 +183,7 @@ public class MarkPictureActivity extends AppCompatActivity {
                             mPosY = event.getY();
                             /*checkIsLongPress(false);
                             Log.i("test", "in ACTION_DOWN");  */
-                            withdrawStep(mPosX, mPosY);
+                            //withdrawStep(mPosX, mPosY);
                             break;
                         case MotionEvent.ACTION_MOVE:
                             mCurPosX = event.getX();
@@ -221,7 +234,7 @@ public class MarkPictureActivity extends AppCompatActivity {
 
                         case MotionEvent.ACTION_UP:
                             if (pic_no >= pic_num) {
-                                Toast.makeText(getApplicationContext(),"已是最后一张，请点击右上角“开始合成”", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(),R.string.markPicture_toast_markFinish, Toast.LENGTH_SHORT).show();
                                 break;
                             }
 
@@ -333,6 +346,15 @@ public class MarkPictureActivity extends AppCompatActivity {
                 }
             }
         });
+
+        imageUndo.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if (pic_no>0 || fileList[pic_no].equals("text")) {
+                    handler.sendEmptyMessage(HandlerStatusLongIsWorking);
+                }
+            }
+        });
+
     }
 
     private void set_image(int  no) {
@@ -435,8 +457,20 @@ public class MarkPictureActivity extends AppCompatActivity {
                 t_height+=char_height*(string_wdith/width);
             }
         }
-
-        Bitmap result = Bitmap.createBitmap(width,t_height, Bitmap.Config.ARGB_8888);
+        Bitmap result = Bitmap.createBitmap(10,10, Bitmap.Config.ARGB_8888);
+        try {
+            result = Bitmap.createBitmap(width,t_height, Bitmap.Config.ARGB_8888);
+        }
+        catch (Exception e) {
+            Toast.makeText(this, "创建文字Bitmap出错："+e.toString(), Toast.LENGTH_LONG).show();
+            Log.e("EL", "创建文字Bitmap出错："+e.toString());
+            CrashReport.postCatchedException(e);
+        }
+        catch (OutOfMemoryError e) {
+            Toast.makeText(this, "创建文字Bitmap出错："+e.toString(), Toast.LENGTH_LONG).show();
+            Log.e("EL", "创建文字Bitmap出错："+e.toString());
+            CrashReport.postCatchedException(e);
+        }
         Canvas canvas = new Canvas(result);
         Paint paint = new Paint();
         paint.setColor(bg_color);
@@ -485,7 +519,7 @@ public class MarkPictureActivity extends AppCompatActivity {
         }
     }
 
-    long callWithdrawTime = 0;
+    /*long callWithdrawTime = 0;
     double x_l, y_l;
     private void withdrawStep(double x, double y) {
         long time_now = System.currentTimeMillis();
@@ -500,52 +534,8 @@ public class MarkPictureActivity extends AppCompatActivity {
         callWithdrawTime = time_now;
         x_l = x;
         y_l = y;
-    }
+    }   */
 
-
-
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case HandlerStatusHideTipText:
-                    tip_text.setVisibility(View.GONE);
-                    break;
-                case HandlerStatusLongIsWorking:
-                    tip_text.setText("撤销");
-                    tip_text.setVisibility(View.VISIBLE);
-                    autoHideText();
-                    if (pic_no<pic_num && fileList[pic_no].equals("text")) {
-                        set_image(pic_no);
-                        fileList[pic_no] = "del";
-                    }
-                    else {
-                        nums_tip_text.setText((pic_no+"/")+pic_num);
-                        set_image(pic_no-1);
-                        fileList[pic_no-1] = "del";
-                        pic_no--;
-                    }
-                    break;
-                case HandlerStatusIsLongPress:
-                    isLongPress = false;
-                    break;
-                case HandlerCheckImgSaveFail:
-                    Toast.makeText(MarkPictureActivity.this, "保存图片失败："+msg.obj, Toast.LENGTH_SHORT).show();
-                    break;
-                case HandlerStatusProgressRunning:
-                    dialog.setProgress(dialog.getProgress()+1);
-                    dialog.setMessage(msg.obj.toString());
-                    break;
-                case HandlerStatusProgressDone:
-                    tool.MakeCacheToStandard(MarkPictureActivity.this);
-                    dialog.dismiss();
-                    break;
-                case HandlerStatusGetImgFail:
-                    Toast.makeText(MarkPictureActivity.this, "获取图片失败："+msg.obj, Toast.LENGTH_SHORT).show();
-                    break;
-            }
-        }
-    };
 
     private class MyThread implements Runnable {
         @Override
@@ -575,7 +565,12 @@ public class MarkPictureActivity extends AppCompatActivity {
                 Log.i("cao", "name= "+name);
                 bitmap = tool.removeImgBlackSide(getBitmapFromFile(file.split("\\.")[0]));
                 try {
-                    saveMyBitmap(bitmap, name);
+                    if (!saveMyBitmap(bitmap, name)) {
+                        msg = Message.obtain();
+                        msg.obj = "保存文件失败！";
+                        msg.what = HandlerCheckImgSaveFail;
+                        handler.sendMessage(msg);
+                    }
                 } catch (IOException e) {
                     msg = Message.obtain();
                     msg.obj = e;
@@ -630,51 +625,59 @@ public class MarkPictureActivity extends AppCompatActivity {
     }
 
     private void slideToLeft() {
-        nums_tip_text.setText((pic_no+1+"/")+pic_num);
-        DialogInterface.OnClickListener dialogOnclicListener=new DialogInterface.OnClickListener(){
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch(which){
-                    case Dialog.BUTTON_POSITIVE:
-                        clickAddTextOkBtn();
-                        break;
-                    case Dialog.BUTTON_NEGATIVE:
-                        break;
+        if (sp_init.getBoolean("isFirstUseAddText", true)) {
+            showAddTextTipDialog();
+            SharedPreferences.Editor editor = sp_init.edit();
+            editor.putBoolean("isFirstUseAddText", false);
+            editor.apply();
+        }
+        else {
+            nums_tip_text.setText((pic_no+1+"/")+pic_num);
+            DialogInterface.OnClickListener dialogOnclicListener=new DialogInterface.OnClickListener(){
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    switch(which){
+                        case Dialog.BUTTON_POSITIVE:
+                            clickAddTextOkBtn();
+                            break;
+                        case Dialog.BUTTON_NEGATIVE:
+                            break;
+                    }
                 }
-            }
-        };
-        mLayoutInflater= LayoutInflater.from(MarkPictureActivity.this);
-        view=mLayoutInflater.inflate(R.layout.dialog_mark_picture, null, false);
-        builder = new AlertDialog.Builder(MarkPictureActivity.this);
-        builder.setTitle("请输入要添加的文字")
-                .setView(view)
-                .setPositiveButton("确定",dialogOnclicListener)
-                .setNegativeButton("取消", dialogOnclicListener)
-                .setCancelable(false)
-                .create();
-        builder.show();
-        start_color_picker = (Button) view.findViewById(R.id.mark_dialog_chooseColor_btn);
-        start_color_picker_bg = (Button) view.findViewById(R.id.mark_dialog_chooseColorBg_btn);
-        start_color_picker.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                ColorPickerDialog mColorPickerDialog = new ColorPickerDialog(
-                        MarkPictureActivity.this,
-                        Color.BLACK,
-                        false,
-                        mOnColorPickerListener
-                ).show();
-            }
-        });
-        start_color_picker_bg.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                ColorPickerDialog mColorPickerDialog = new ColorPickerDialog(
-                        MarkPictureActivity.this,
-                        Color.WHITE,
-                        false,
-                        mOnColorPickerBgListener
-                ).show();
-            }
-        });
+            };
+            mLayoutInflater= LayoutInflater.from(MarkPictureActivity.this);
+            view=mLayoutInflater.inflate(R.layout.dialog_mark_picture, null, false);
+            builder = new AlertDialog.Builder(MarkPictureActivity.this);
+            builder.setTitle("请输入要添加的文字")
+                    .setView(view)
+                    .setPositiveButton("确定",dialogOnclicListener)
+                    .setNegativeButton("取消", dialogOnclicListener)
+                    .setCancelable(false)
+                    .create();
+            builder.show();
+            start_color_picker = (Button) view.findViewById(R.id.mark_dialog_chooseColor_btn);
+            start_color_picker_bg = (Button) view.findViewById(R.id.mark_dialog_chooseColorBg_btn);
+            start_color_picker.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    ColorPickerDialog mColorPickerDialog = new ColorPickerDialog(
+                            MarkPictureActivity.this,
+                            Color.BLACK,
+                            false,
+                            mOnColorPickerListener
+                    ).show();
+                }
+            });
+            start_color_picker_bg.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    ColorPickerDialog mColorPickerDialog = new ColorPickerDialog(
+                            MarkPictureActivity.this,
+                            Color.WHITE,
+                            false,
+                            mOnColorPickerBgListener
+                    ).show();
+                }
+            });
+        }
     }
 
     private OnColorPickerListener mOnColorPickerListener = new OnColorPickerListener() {
@@ -722,4 +725,72 @@ public class MarkPictureActivity extends AppCompatActivity {
             dialog.dismiss();
         } catch (NullPointerException e){}
     }
+
+
+    private static class MyHandler extends Handler {
+        private final WeakReference<MarkPictureActivity> mActivity;
+
+        private MyHandler(MarkPictureActivity activity) {
+            mActivity = new WeakReference<MarkPictureActivity>(activity);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            MarkPictureActivity activity = mActivity.get();
+            if (activity != null) {
+                switch (msg.what) {
+                    case HandlerStatusHideTipText:
+                        activity.tip_text.setVisibility(View.GONE);
+                        break;
+                    case HandlerStatusLongIsWorking:
+                        activity.tip_text.setText("撤销");
+                        activity.tip_text.setVisibility(View.VISIBLE);
+                        activity.autoHideText();
+                        if (activity.pic_no<activity.pic_num && activity.fileList[activity.pic_no].equals("text")) {
+                            activity.set_image(activity.pic_no);
+                            activity.fileList[activity.pic_no] = "del";
+                        }
+                        else {
+                            activity.nums_tip_text.setText((activity.pic_no+"/")+activity.pic_num);
+                            activity.set_image(activity.pic_no-1);
+                            activity.fileList[activity.pic_no-1] = "del";
+                            activity.pic_no--;
+                        }
+                        break;
+                    case HandlerStatusIsLongPress:
+                        activity.isLongPress = false;
+                        break;
+                    case HandlerCheckImgSaveFail:
+                        Toast.makeText(activity, "保存图片失败："+msg.obj, Toast.LENGTH_SHORT).show();
+                        break;
+                    case HandlerStatusProgressRunning:
+                        activity.dialog.setProgress(activity.dialog.getProgress()+1);
+                        activity.dialog.setMessage(msg.obj.toString());
+                        break;
+                    case HandlerStatusProgressDone:
+                        activity.tool.MakeCacheToStandard(activity);
+                        activity.dialog.dismiss();
+                        break;
+                    case HandlerStatusGetImgFail:
+                        Toast.makeText(activity, "获取图片失败："+msg.obj, Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
+        }
+    }
+
+    private void showAddTextTipDialog() {
+        Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
+                .setTitle(R.string.markPicture_tip_dialog_tittle)
+                .setMessage(R.string.markPicture_tip_dialog_content)
+                .setPositiveButton(res.getString(R.string.markPicture_tip_dialog_btn_ok),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        }).create();
+        dialog.show();
+    }
+
 }

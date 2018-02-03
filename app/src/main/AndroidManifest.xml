@@ -20,7 +20,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:largeHeap="true" >   <!-- 申请更大的内存  -->
         <activity
             android:name="com.tencent.bugly.beta.ui.BetaActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|locale"
@@ -85,7 +86,7 @@
             android:theme="@style/AppTheme.Fullscreen" />
         <activity
             android:name=".FeedbackActivity"
-            android:label="@string/title_activity_feedback"></activity>
+            android:label="@string/title_activity_feedback" />
     </application>
 
 </manifest>
