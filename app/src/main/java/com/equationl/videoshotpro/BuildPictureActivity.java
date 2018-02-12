@@ -145,6 +145,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                         PlayerActivity.instance.finish();
                         MarkPictureActivity.instance.finish();
                         MainActivity.instance.finish();
+                        ChooseActivity.instance.finish();
                     } catch (NullPointerException e) {Log.e("el", e.toString());}
                     Intent intent = new Intent(BuildPictureActivity.this, MainActivity.class);
                     startActivity(intent);

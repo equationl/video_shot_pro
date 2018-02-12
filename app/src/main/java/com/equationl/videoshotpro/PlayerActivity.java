@@ -315,8 +315,14 @@ public class PlayerActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), (String)msg.obj, Toast.LENGTH_LONG).show();
                     break;
                 case 3:
-                    Intent intent = new Intent(PlayerActivity.this, MarkPictureActivity.class);
-                    startActivity(intent);
+                    if (settings.getBoolean("isSortPicture", true)) {
+                        Intent intent = new Intent(PlayerActivity.this, ChooseActivity.class);
+                        startActivity(intent);
+                    }
+                    else {
+                        Intent intent = new Intent(PlayerActivity.this, MarkPictureActivity.class);
+                        startActivity(intent);
+                    }
                     break;
                 case HandlerStatusHideTime:
                     isShowingTime = false;

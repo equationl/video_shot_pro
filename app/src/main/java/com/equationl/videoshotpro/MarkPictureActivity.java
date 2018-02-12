@@ -10,13 +10,9 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.drawable.Drawable;
-import android.media.MediaScannerConnection;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
@@ -25,7 +21,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -42,7 +37,6 @@ import com.dingmouren.colorpicker.ColorPickerDialog;
 import com.dingmouren.colorpicker.OnColorPickerListener;
 import com.equationl.videoshotpro.Image.Tools;
 import com.tencent.bugly.crashreport.CrashReport;
-import com.yancy.gallerypick.config.GalleryPick;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,7 +51,7 @@ public class MarkPictureActivity extends AppCompatActivity {
     Button start_color_picker, start_color_picker_bg;
     int pic_num,pic_no=0,flag=0;
     AlertDialog.Builder builder;
-    private LayoutInflater mLayoutInflater;
+    LayoutInflater mLayoutInflater;
     private View view;
     SharedPreferences settings, sp_init;
     TextView tip_text, nums_tip_text;
@@ -120,8 +114,8 @@ public class MarkPictureActivity extends AppCompatActivity {
         settings = PreferenceManager.getDefaultSharedPreferences(this);
         res = getResources();
 
-        final File filepath = new File(getExternalCacheDir().toString());
-        fileList = filepath.list();
+        String filepath = getExternalCacheDir().toString();
+        fileList = tool.getFileOrderByName(filepath);
         pic_num = fileList.length;
 
         imageViewText.setVisibility(View.GONE);
@@ -300,7 +294,6 @@ public class MarkPictureActivity extends AppCompatActivity {
                 }
                 return true;
             }
-
         });
 
         btn_start.setOnClickListener(new View.OnClickListener() {
@@ -375,7 +368,6 @@ public class MarkPictureActivity extends AppCompatActivity {
     private Bitmap getBitmapFromFile(String no) {
         Bitmap bm = null;
         String extension = settings.getBoolean("isShotToJpg", true) ? "jpg":"png";
-
         try {
             bm = tool.getBitmapFromFile(no, getExternalCacheDir(),extension);
         }  catch (Exception e) {
@@ -563,6 +555,8 @@ public class MarkPictureActivity extends AppCompatActivity {
                 }
                 Log.i("cao", "file= "+file);
                 Log.i("cao", "name= "+name);
+                tool.AllowCheckBlackLines = settings.getInt("AllowCheckBlackLines", 10);
+                tool.AllowNotBlackNums = settings.getInt("AllowNotBlackNums", 20);
                 bitmap = tool.removeImgBlackSide(getBitmapFromFile(file.split("\\.")[0]));
                 try {
                     if (!saveMyBitmap(bitmap, name)) {

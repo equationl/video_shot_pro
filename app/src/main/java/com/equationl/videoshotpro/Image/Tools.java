@@ -13,6 +13,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
@@ -22,11 +23,18 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.equationl.videoshotpro.R;
+import com.tencent.bugly.crashreport.BuglyLog;
+import com.tencent.bugly.crashreport.CrashReport;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class Tools{
@@ -127,6 +135,68 @@ public class Tools{
         bm = BitmapFactory.decodeStream(bis, null, options);
 
         return bm;
+    }
+
+    public Bitmap getBitmapFromFile(String filePath) {
+        try {
+            FileInputStream fis = new FileInputStream(filePath);
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inSampleSize = 1;
+            return BitmapFactory.decodeFileDescriptor(fis.getFD(), null, options);
+        } catch (Exception ex) {
+            CrashReport.postCatchedException(ex);
+        }
+        return null;
+    }
+
+    /**
+     * 获取缩放后的本地图片
+     *
+     * <br /><br />by jianshu 闲庭CC
+     *
+     * @param filePath 文件路径
+     * @param width    宽
+     * @param height   高
+     * @return
+     */
+    public Bitmap getBitmapThumbnailFromFile(String filePath, int width, int height) {
+        try {
+            FileInputStream fis = new FileInputStream(filePath);
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeFileDescriptor(fis.getFD(), null, options);
+            float srcWidth = options.outWidth;
+            float srcHeight = options.outHeight;
+            int inSampleSize = 1;
+
+            if (srcHeight > height || srcWidth > width) {
+                if (srcWidth > srcHeight) {
+                    inSampleSize = Math.round(srcHeight / height);
+                } else {
+                    inSampleSize = Math.round(srcWidth / width);
+                }
+            }
+
+            options.inJustDecodeBounds = false;
+            options.inSampleSize = inSampleSize;
+
+            return BitmapFactory.decodeFileDescriptor(fis.getFD(), null, options);
+        } catch (Exception ex) {
+            CrashReport.postCatchedException(ex);
+        }
+        return null;
+    }
+
+    /**
+    * by jianshu 闲庭CC
+    * */
+    public Bitmap drawableToBitmap(int drawbleId, Context context) {
+        Drawable drawable  = context.getResources().getDrawable(drawbleId);
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+        drawable.draw(canvas);
+        return bitmap;
     }
 
     /**
@@ -401,11 +471,20 @@ public class Tools{
         }
     }
 
-    public Boolean renameFile(String path,String oldname,String newname) {
+    public Boolean renameFile(String oldname,String newname) {
         if(!oldname.equals(newname)){
-            File oldfile=new File(path+"/"+oldname);
-            File newfile=new File(path+"/"+newname);
-            oldfile.renameTo(newfile);
+            File oldfile=new File(oldname);
+            File newfile=new File(newname);
+            if(newfile.exists()) {
+                Log.i(TAG, "rename file fail:file is already exist");
+                return false;
+            }
+            else {
+                if (!oldfile.renameTo(newfile)) {
+                    Log.i(TAG, "rename file fail: unknown reason");
+                    return false;
+                }
+            }
             /*if(!oldfile.exists()){
                 Log.i("EL", "wrong in rename: 文件不存在");
                 return false;
@@ -562,6 +641,88 @@ public class Tools{
         }
         int size[] = {realImgShowWidth, realImgShowHeight};
         return size;
+    }
+
+
+    /**
+     * 将缓存的图片顺序重置为用户自定义顺序
+     *
+     * @param newFileName 新的图片图片顺序
+     * @param context Context
+     * */
+    public void sortCachePicture(List <String> newFileName, Context context) {
+        rename(newFileName, context);
+        String path = context.getExternalCacheDir().toString();
+        for (int i=0; i<newFileName.size(); i++) {
+            String newFile = path+"/"+newFileName.get(i);
+            renameFile(newFile+"_c",
+                    path+"/"+i+"."+newFileName.get(i).split("\\.")[1]);
+        }
+    }
+
+    /**
+    * 避免重名
+     *
+    * */
+    private void rename(List <String> newFileName, Context context) {
+        String[] files;
+        String path = context.getExternalCacheDir().toString();
+        files = getFileOrderByName(path);
+        for (int i=0; i<newFileName.size(); i++) {
+            String oldFile = path+"/"+files[i]+"_c";
+            renameFile(path+"/"+files[i], oldFile);
+            Log.i(TAG, "t old:"+path+"/"+files[i]+" new"+oldFile);
+        }
+    }
+
+
+    /**
+    * 获取按照文件名排序的指定路径下所有文件（夹）名
+     *
+     * @param filePath 路径
+     * @return 返回文件名数组
+    * */
+    public String[] getFileOrderByName(String filePath) {
+        List <File> files = Arrays.asList(new File(filePath).listFiles());
+        Collections.sort(files, new Comparator< File>() {
+            @Override
+            public int compare(File o1, File o2) {
+                int i1 = getFileNameToInt(o1);
+                int i2 = getFileNameToInt(o2);
+                if (o1.isDirectory() && o2.isFile())
+                    return -1;
+                if (o1.isFile() && o2.isDirectory())
+                    return 1;
+                if (i1 > i2)
+                    return 1;
+                if (i1 < i2)
+                    return -1;
+                if (i1 == i2)
+                    return 0;
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
+        String[] array = new String[files.size()];
+        for (int i=0; i<files.size(); i++) {
+            array[i] = files.get(i).getName();
+        }
+        return array;
+    }
+
+    private int getFileNameToInt(File f1) {
+        String s = f1.getName();
+        s = s.split("\\.")[0];
+        if (s.contains("_")) {
+            s = s.split("_")[0];
+        }
+        int i=-1;
+        try {
+            i = Integer.valueOf(s);
+        }
+        catch (Exception e) {
+            CrashReport.postCatchedException(e);
+        }
+        return  i;
     }
 
 }

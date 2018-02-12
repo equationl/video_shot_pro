@@ -111,18 +111,21 @@ public class FloatWindowsService extends Service {
         Notification.Builder builder = new Notification.Builder(this).setTicker(res.getString(R.string.floatWindowsService_notice_ticker_text))
                 .setSmallIcon(R.mipmap.ic_launcher).setWhen(System.currentTimeMillis());
         Intent appIntent=null;
-        appIntent = new Intent(this,MarkPictureActivity.class);
+        if (settings.getBoolean("isSortPicture", true)) {
+            appIntent = new Intent(this,ChooseActivity.class);
+        }
+        else {
+            appIntent = new Intent(this,MarkPictureActivity.class);
+        }
         appIntent.setAction(Intent.ACTION_MAIN);
         appIntent.addCategory(Intent.CATEGORY_LAUNCHER);
         appIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK| Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);//关键的一步，设置启动模式
         appIntent.putExtra("isFromExtra", true);
         PendingIntent contentIntent =PendingIntent.getActivity(this, 0,appIntent,PendingIntent.FLAG_UPDATE_CURRENT);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            notice = builder.setContentIntent(contentIntent).setContentTitle(res.getString(R.string.floatWindowsService_notice_title))
-                    .setContentText(res.getString(R.string.floatWindowsService_notice_content)).build();
-            notice.flags=Notification.FLAG_AUTO_CANCEL | Notification.FLAG_ONGOING_EVENT;
-            barmanager.notify(10,notice);
-        }
+        notice = builder.setContentIntent(contentIntent).setContentTitle(res.getString(R.string.floatWindowsService_notice_title))
+                .setContentText(res.getString(R.string.floatWindowsService_notice_content)).build();
+        notice.flags=Notification.FLAG_AUTO_CANCEL | Notification.FLAG_ONGOING_EVENT;
+        barmanager.notify(10,notice);
 
     }
 

@@ -29,13 +29,17 @@
     </string>
 
     <string name="main_updateHistory_text">
-        1.1 Fix 02:\n
+        1.2 Oublier:\n
+        \t*支持截图后对图片进行排序（感谢 @方霖、@q1075715*** 的反馈）\n
+        \t*新增更多新手指导\n
+        \t*\n
+        \t*\n
+        \t*优化设置\n
         \t*大幅优化内存使用策略，降低因内存不足闪退的情况\n
         \t*添加内存使用监听，当内存不足时不会闪退而是提示更改图片质量设置\n
         \t*支持自定义图片质量，可在降低图片质量的情况下合成更多图片\n
         \t*优化撤销操作（感谢 @xiajichen 的反馈）\n
         \t*修复大量可能导致app崩溃的隐患\n
-        \t*\n
         1.1 Update 02:\n
         \t*修复某些机型无法获取悬浮窗权限的BUG\n
         \t*优化反馈方式\n
@@ -83,6 +87,8 @@
         glide：https://github.com/bumptech/glide  \n
         --------------\n
         ColorPicker：https://github.com/DingMouRen/ColorPicker   \n
+        --------------\n
+        HandyGridView：https://github.com/huxq17/HandyGridView   \n
         --------------\n
         特别感谢：
         --------------\n
@@ -220,7 +226,13 @@
     <string name="main_nav_text_support">支持作者</string>
     <string name="main_nav_text_about">关于</string>
     <string name="main_nav_title_more">更多功能</string>
+    <string name="main_nav_title_share">推荐给好友</string>
     <string name="main_nav_text_frameByFrame">逐帧选优</string>
+
+    <string name="main_SHARE_TO_QQ_TITLE">原来电影台词字幕图片是这样做的！</string>
+    <string name="main_SHARE_TO_QQ_SUMMARY">推荐你也使用隐云图解制作APP快速制作电影对白图！</string>
+    <string name="main_SHARE_TO_QQ_IMAGE_URL">http://image.coolapk.com/apk_image/2016/1008/682885_1475815523_9911-for-104111-o_1auhhpq5m13m2fih1pii14mc1gvs1i-uid-408649.jpg</string>
+    <string name="main_SHARE_TO_QQ_APP_NAME">隐云图解制作</string>
 
     <string name="player_toast_needMoreShot">至少需要截取两张图片！</string>
     <string name="player_toast_shotGif_fail">截取动图失败！</string>
@@ -257,6 +269,7 @@
     单击或拖动屏幕，文字将跟随您的手指位置在图片上显示，将文字拖动到图片底部，文字将自动更改为拼接到图片外部而非添加到内部。\n
     确定好文字位置后点击右下角 确定 按钮即可将文字添加到文字中。</string>
     <string name="markPicture_tip_dialog_btn_ok">我知道了</string>
+    <string name="markPicture_toast_getPicture_fail">获取图片失败！</string>
 
 
     <string name="floatWindowsService_notice_ticker_text">启动通知</string>
@@ -274,6 +287,18 @@
         \n选择 继续 将会自动降低导出图片质量再次尝试制作，如仍内存不足或导出图片质量过低，请选择 退出 后手动设置导出图片质量</string>
     <string name="buildPicture_btn_oom_exit">退出</string>
     <string name="buildPicture_btn_oom_continue">继续</string>
+
+    <string name="title_activity_choose">确定图片顺序</string>
+    <string name="choosePicture_menu_title_done">完成</string>
+    <string name="chooseActivity_ProgressDialog_loadImage_title">请稍候&#8230;</string>
+    <string name="chooseActivity_ProgressDialog_loadImage_content">正在生成缩略图&#8230;</string>
+    <string name="choosePicture_tip_dialog_title">使用指南</string>
+    <string name="choosePicture_tip_dialog_content">您可以在当前页面对图片进行进一步的排序。\n
+    长按想要更改顺序的图片，然后移动至目标位置即可。\n
+    当想要更改的顺序在屏幕外时，您可以将图片滑动至屏幕上边缘或下边缘，此时当前界面将会自动滚屏直至您将图片移出屏幕边缘。\n
+    单击图片可以预览大图。</string>
+    <string name="choosePicture_tip_dialog_btn_ok">我知道了</string>
+
 
     <string name="action_settings">设置</string>
     <string name="title_activity_settings">设置</string>
@@ -298,6 +323,20 @@
 
     <string name="pref_title_monitored_show">实时预览</string>
     <string name="pref_description_monitored_show">选择是否在合成图片时实时预览（开启后可能会内存溢出闪退，建议关闭）</string>
+
+    <string name="pref_title_sort_picture">开启排序</string>
+    <string name="pref_description_sort_picture">选择是否在截取完成后对图片进行排序</string>
+    
+    <string name="pref_screen_title_professional">高级设置</string>
+    <string name="pref_screen_description_professional">如您不知道其中设置有何作用，请勿更改此项设置，避免因设置不当导致app无法正常运行</string>
+
+    <string name="pref_category_title_checkBlankLines">检测截图中的黑边设置</string>
+    <string name="pref_edit_AllowNotBlackNums_title">单行允许最多非黑点数</string>
+    <string name="pref_edit_AllowCheckBlackLines_title">最少连续黑边数</string>
+    <string name="pref_edit_AllowNotBlackNums_default">20</string>
+    <string name="pref_edit_AllowCheckBlackLines_default">10</string>
+
+
 
     <string name="pref_title_colorMode">更改导出图片颜色模式</string>
     <string name="pref_description_colorMode">选择是否更改颜色模式，从上到下图片质量依次递减，如遇内存不足闪退，请更改为靠后的选项。（该选项并非对所有图片都满足）</string>

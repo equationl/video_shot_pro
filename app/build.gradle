@@ -7,8 +7,8 @@ android {
         applicationId "com.equationl.videoshotpro"
         minSdkVersion 17
         targetSdkVersion 26
-        versionCode 8
-        versionName "1.1 Fix 02"
+        versionCode 9
+        versionName "1.2 Oublier"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         ndk {
             //设置支持的SO库架构
@@ -47,5 +47,6 @@ dependencies {
     compile 'com.tencent.bugly:nativecrashreport:latest.release'
     compile 'com.squareup.okhttp3:okhttp:3.9.0'
     compile 'com.squareup.okio:okio:1.13.0'
+    compile 'com.huxq17.handygridview:handygridview:1.1.0'
     testCompile 'junit:junit:4.12'
 }

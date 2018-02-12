@@ -54,9 +54,16 @@ import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
 import com.tencent.bugly.Bugly;
+import com.tencent.connect.common.Constants;
+import com.tencent.connect.share.QQShare;
+import com.tencent.tauth.IUiListener;
+import com.tencent.tauth.Tencent;
+import com.tencent.tauth.UiError;
 import com.yancy.gallerypick.config.GalleryConfig;
 import com.yancy.gallerypick.config.GalleryPick;
 import com.yancy.gallerypick.inter.IHandlerCallBack;
+
+import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
@@ -91,6 +98,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final int HandlerStatusCopyFileDone = 3;
     private static final int IntentResultCodeMediaProjection = 10;
     private static final int ActivityResultFrameByFrame = 100;
+
+    private static final int RequestCodeQuickStart = 1000;
 
     private static final String TAG = "el,In MainActivity";
 
@@ -179,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.setType("video/*");
                 intent.addCategory(intent.CATEGORY_OPENABLE);
-                startActivityForResult(Intent.createChooser(intent, "请选择视频文件"),1);
+                startActivityForResult(Intent.createChooser(intent, "请选择视频文件"),RequestCodeQuickStart);
             }
         });
 
@@ -219,6 +228,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Tencent.onActivityResultData(requestCode,resultCode,data, shareListener);
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == IntentResultCodeMediaProjection) {
                 Log.i("EL", "try Start Service");
@@ -233,54 +243,49 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Intent startService = new Intent(this, FloatWindowsService.class);
                 startService(startService);
             }
-            else {
-                if (activityResultMode == ActivityResultFrameByFrame) {
-                    //逐帧截取
-                    activityResultMode = 0;
-                    Uri uri = data.getData();
-                    //String path = uri.getPath();
-                    String path = tool.getImageAbsolutePath(this, uri);
-                    Intent intent = new Intent(MainActivity.this, PlayerForDataActivity.class);
-                    Bundle bundle = new Bundle();
-                    bundle.putString("path", path);
-                    bundle.putString("do", "FrameByFrame");
-                    intent.putExtras(bundle);
-                    intent.setData(uri);
-                    startActivity(intent);
-                }
-                else {
-                    //快速开始
-                    Uri uri = data.getData();
-                    //String path = uri.getPath();
-                    String path = tool.getImageAbsolutePath(this, uri);
-                    Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
-                    Bundle bundle = new Bundle();
-                    bundle.putString("path", path);
-                    intent.putExtras(bundle);
-                    intent.setData(uri);
-                    startActivity(intent);
-                }
+            else if (activityResultMode == ActivityResultFrameByFrame) {
+                //逐帧截取
+                activityResultMode = 0;
+                Uri uri = data.getData();
+                //String path = uri.getPath();
+                String path = tool.getImageAbsolutePath(this, uri);
+                Intent intent = new Intent(MainActivity.this, PlayerForDataActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("path", path);
+                bundle.putString("do", "FrameByFrame");
+                intent.putExtras(bundle);
+                intent.setData(uri);
+                startActivity(intent);
             }
-        }
-
-        //权限判断
-        else if (requestCode == 123) {
-            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                int i = ContextCompat.checkSelfPermission(this,  Manifest.permission.WRITE_EXTERNAL_STORAGE);
-                if (i != PackageManager.PERMISSION_GRANTED) {
-                    showDialogTipUserGoToAppSettting();
-                } else {
-                    if (dialog2 != null && dialog2.isShowing()) {
-                        dialog2.dismiss();
+            else if (requestCode == RequestCodeQuickStart){
+                //快速开始
+                Uri uri = data.getData();
+                //String path = uri.getPath();
+                String path = tool.getImageAbsolutePath(this, uri);
+                Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("path", path);
+                intent.putExtras(bundle);
+                intent.setData(uri);
+                startActivity(intent);
+            }
+            else if (requestCode == 123) {
+                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    int i = ContextCompat.checkSelfPermission(this,  Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                    if (i != PackageManager.PERMISSION_GRANTED) {
+                        showDialogTipUserGoToAppSettting();
+                    } else {
+                        if (dialog2 != null && dialog2.isShowing()) {
+                            dialog2.dismiss();
+                        }
+                        Toast.makeText(this, R.string.main_toast_getPermission_success, Toast.LENGTH_SHORT).show();
                     }
-                    Toast.makeText(this, R.string.main_toast_getPermission_success, Toast.LENGTH_SHORT).show();
                 }
             }
         }
-
-        else {
+        /*else {
             Toast.makeText(getApplicationContext(),R.string.main_toast_chooseFile_fail,Toast.LENGTH_LONG).show();
-        }
+        }*/
     }
 
     @Override
@@ -346,6 +351,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             showAboutDialog();
         } else if (id == R.id.nav_frameByFrame) {
             btn_shotFrame();
+        } else if (id == R.id.nav_share) {
+            shareAPP();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -931,11 +938,54 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         snackbar3.show();
                         break;
                     case HandlerStatusCopyFileDone:
-
-                        Intent intent = new Intent(activity, MarkPictureActivity.class);
-                        activity.startActivity(intent);
+                        if (activity.settings.getBoolean("isSortPicture", true)) {
+                            Intent intent = new Intent(activity, ChooseActivity.class);
+                            activity.startActivity(intent);
+                        }
+                        else {
+                            Intent intent = new Intent(activity, MarkPictureActivity.class);
+                            activity.startActivity(intent);
+                        }
+                        break;
                 }
             }
+        }
+    }
+
+    private void shareAPP() {
+        Tencent mTencent = Tencent.createInstance("1106257597", this);
+        final Bundle params = new Bundle();
+        params.putInt(QQShare.SHARE_TO_QQ_KEY_TYPE, QQShare.SHARE_TO_QQ_TYPE_APP);
+        params.putString(QQShare.SHARE_TO_QQ_TITLE, res.getString(R.string.main_SHARE_TO_QQ_TITLE));
+        params.putString(QQShare.SHARE_TO_QQ_SUMMARY, res.getString(R.string.main_SHARE_TO_QQ_SUMMARY));
+        params.putString(QQShare.SHARE_TO_QQ_IMAGE_URL, res.getString(R.string.main_SHARE_TO_QQ_IMAGE_URL));
+        params.putString(QQShare.SHARE_TO_QQ_APP_NAME, res.getString(R.string.main_SHARE_TO_QQ_APP_NAME));
+        //params.putInt(QQShare.SHARE_TO_QQ_EXT_INT, QQShare.SHARE_TO_QQ_FLAG_QZONE_AUTO_OPEN);
+        mTencent.shareToQQ(MainActivity.this, params, shareListener);
+    }
+
+    IUiListener shareListener = new BaseUiListener() {
+        @Override
+        protected void doComplete(JSONObject values) {
+            Toast.makeText(MainActivity.this, "分享成功！", Toast.LENGTH_SHORT).show();
+        }
+    };
+
+    private class BaseUiListener implements IUiListener {
+
+        @Override
+        public void onComplete(Object response) {
+            doComplete((JSONObject) response);
+        }
+        protected void doComplete(JSONObject values) {
+        }
+        @Override
+        public void onError(UiError e) {
+
+        }
+        @Override
+        public void onCancel() {
+
         }
     }
 }

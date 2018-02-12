@@ -96,7 +96,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         bindPreferenceSummaryToValue(findPreference("shotToGifMinTime"));
         bindPreferenceSummaryToValue(findPreference("resolution_value"));
         bindPreferenceSummaryToValue(findPreference("colorMode_value"));
-
+        bindPreferenceSummaryToValue(findPreference("AllowNotBlackNums"));
+        bindPreferenceSummaryToValue(findPreference("AllowCheckBlackLines"));
     }
 
     /**

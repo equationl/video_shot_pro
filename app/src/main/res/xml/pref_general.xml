@@ -146,6 +146,40 @@
             android:summary="@string/pref_description_hide_btn"
             android:title="@string/pref_title_hide_btn" />
 
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="isSortPicture"
+            android:summary="@string/pref_description_sort_picture"
+            android:title="@string/pref_title_sort_picture" />
+
+        <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+            android:summary="@string/pref_screen_description_professional"
+            android:title="@string/pref_screen_title_professional" >
+
+
+            <PreferenceCategory xmlns:android="http://schemas.android.com/apk/res/android"
+                android:title="@string/pref_category_title_checkBlankLines" >
+                <EditTextPreference
+                    android:defaultValue="@string/pref_edit_AllowNotBlackNums_default"
+                    android:inputType="number"
+                    android:key="AllowNotBlackNums"
+                    android:maxLines="1"
+                    android:selectAllOnFocus="true"
+                    android:singleLine="true"
+                    android:title="@string/pref_edit_AllowNotBlackNums_title" />
+
+                <EditTextPreference
+                    android:defaultValue="@string/pref_edit_AllowCheckBlackLines_default"
+                    android:inputType="number"
+                    android:key="AllowCheckBlackLines"
+                    android:maxLines="1"
+                    android:selectAllOnFocus="true"
+                    android:singleLine="true"
+                    android:title="@string/pref_edit_AllowCheckBlackLines_title" />
+            </PreferenceCategory>
+
+        </PreferenceScreen>
+
     </PreferenceCategory>
 
 </PreferenceScreen>
