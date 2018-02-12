@@ -40,7 +40,9 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,6 +55,12 @@ import com.equationl.videoshotpro.rom.RomUtils;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
+import com.qq.e.ads.banner.ADSize;
+import com.qq.e.ads.banner.AbstractBannerADListener;
+import com.qq.e.ads.banner.BannerView;
+import com.qq.e.ads.interstitial.AbstractInterstitialADListener;
+import com.qq.e.ads.interstitial.InterstitialAD;
+import com.qq.e.comm.util.AdError;
 import com.tencent.bugly.Bugly;
 import com.tencent.connect.common.Constants;
 import com.tencent.connect.share.QQShare;
@@ -87,6 +95,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Button button_splicing, button_floatBtn, button_ffmpeg,button_help, button_setting;
     TextView text_bottom;
     DrawerLayout drawer;
+    ViewGroup bannerContainer;
+    BannerView bv;
     int activityResultMode = 0;
 
     private final MyHandler handler = new MyHandler(this);
@@ -120,6 +130,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         settings = PreferenceManager.getDefaultSharedPreferences(this);
         sp_init = getSharedPreferences("init", Context.MODE_PRIVATE);
 
+        if (!sp_init.getBoolean("isCloseAd", false)) {
+            initBanner();
+            bv.loadAD();
+        }
+
         container =  (android.support.design.widget.CoordinatorLayout)findViewById(R.id.container);
 
         tool = new Tools();
@@ -133,8 +148,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            int i = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            if (i != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                showDialogTipUserRequestPermission();
+            }
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                showDialogTipUserRequestPermission();
+            }
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {
                 showDialogTipUserRequestPermission();
             }
         }
@@ -152,6 +175,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         text_bottom = (TextView)findViewById(R.id.text_main_bottom);
         text_bottom.getPaint().setFlags(Paint. UNDERLINE_TEXT_FLAG );
 
+        bannerContainer = (ViewGroup) findViewById(R.id.main_bannerContainer);
+
         dialog = new AlertDialog.Builder(this);
 
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -168,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         t.start();
 
 
-        Bugly.init(getApplicationContext(), "41a66442fd", false);    //FIXME 上线时更改为false
+        Bugly.init(getApplicationContext(), "41a66442fd", false);
 
         galleryConfig = new GalleryConfig.Builder()
                 .imageLoader(new GlideImageLoader())
@@ -271,8 +296,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
             else if (requestCode == 123) {
                 if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    int i = ContextCompat.checkSelfPermission(this,  Manifest.permission.WRITE_EXTERNAL_STORAGE);
-                    if (i != PackageManager.PERMISSION_GRANTED) {
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                            || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED
+                            || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                         showDialogTipUserGoToAppSettting();
                     } else {
                         if (dialog2 != null && dialog2.isShowing()) {
@@ -380,7 +406,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void startRequestPermission() {
         ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}
+                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.READ_PHONE_STATE,
+                        Manifest.permission.ACCESS_COARSE_LOCATION}
                 , 321);
     }
 
@@ -391,14 +419,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if (requestCode == 321) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    boolean b = shouldShowRequestPermissionRationale(permissions[0]);
-                    if (!b) {
-                        showDialogTipUserGoToAppSettting();
-                    } else
-                        finish();
-                } else {
-                    Toast.makeText(this,  R.string.main_toast_getPermission_success, Toast.LENGTH_SHORT).show();
+                for (int result : grantResults) {
+                    if (result != PackageManager.PERMISSION_GRANTED) {
+                        boolean b = shouldShowRequestPermissionRationale(permissions[0]);
+                        if (!b) {
+                            showDialogTipUserGoToAppSettting();
+                        } else
+                            finish();
+                    } else {
+                        Toast.makeText(this,  R.string.main_toast_getPermission_success, Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         }
@@ -968,6 +998,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         protected void doComplete(JSONObject values) {
             Toast.makeText(MainActivity.this, "分享成功！", Toast.LENGTH_SHORT).show();
+            SharedPreferences.Editor editor = sp_init.edit();
+            editor.putBoolean("isCloseAd", true);
+            editor.apply();
         }
     };
 
@@ -987,6 +1020,45 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         public void onCancel() {
 
         }
+    }
+
+    private void initBanner() {
+        bv = new BannerView(this, ADSize.BANNER, "1105671977", "1000732026922833");
+        bv.setRefresh(30);
+        bv.setShowClose(true);
+        bv.setADListener(new AbstractBannerADListener() {
+            @Override
+            public void onNoAD(AdError error) {
+                Log.i(
+                        "AD_DEMO",
+                        String.format("Banner onNoAD，eCode = %d, eMsg = %s", error.getErrorCode(),
+                                error.getErrorMsg()));
+            }
+            @Override
+            public void onADReceiv() {
+                Log.i("AD_DEMO", "ONBannerReceive");
+                bannerContainer.addView(bv);
+            }
+            @Override
+            public void onADClosed() {
+                showCloseAdDialog();
+            }
+        });
+        //bannerContainer.addView(bv);
+    }
+
+    private void showCloseAdDialog() {
+        Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
+                .setTitle(R.string.dialog_closeAD_title)
+                .setMessage(R.string.dialog_closeAD_content)
+                .setPositiveButton(res.getString(R.string.main_dialog_btn_ok),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        }).create();
+        dialog.show();
     }
 }
 

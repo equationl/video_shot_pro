@@ -32,8 +32,8 @@
         1.2 Oublier:\n
         \t*支持截图后对图片进行排序（感谢 @方霖、@q1075715*** 的反馈）\n
         \t*新增更多新手指导\n
-        \t*\n
-        \t*\n
+        \t*增加QQ分享组件，分享作品更加方便快捷！（微信分享稍后增加）\n
+        \t*增加广告（可以永久关闭）\n
         \t*优化设置\n
         \t*大幅优化内存使用策略，降低因内存不足闪退的情况\n
         \t*添加内存使用监听，当内存不足时不会闪退而是提示更改图片质量设置\n
@@ -90,6 +90,8 @@
         --------------\n
         HandyGridView：https://github.com/huxq17/HandyGridView   \n
         --------------\n
+        okHttp：https://github.com/square/okhttp/   \n
+        --------------\n
         特别感谢：
         --------------\n
         Bugly：https://bugly.qq.com   \n
@@ -97,6 +99,15 @@
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="dialog_closeAD_title">永久关闭广告</string>
+    <string name="dialog_closeAD_content">您只需在首页点击 “更多”，选择 “推荐给好友” 即可永久关闭本APP的广告。\n
+    毕竟加广告是赚不了钱的，可能一个月都还赚不了我一天的伙食费。但是我为什么要加广告呢？\n
+    加广告并不是为了赚钱，纯粹的只是想通过这种半强制的方式把这款APP推广出去，让更多的人了解到这款APP。\n
+    因为我起初开发这款APP就是因为自己有这个需求，然后看到很多人都有这个需求，而市面上又没有一款类似的APP，所以我就把自用的APP提交到市场了。\n
+    但是一直到现在我还是经常能看到有人在四处寻找类似的APP，所以，我就时常在想，究竟怎样才能让需要的人都知道这款APP。恕我无能，只想到了当前这种可能引起大家不满的方式。\n
+    作为补偿，我会择期将这款APP的完整代码上传到 Github ，有能力的人可以自己剔除不喜欢的部分重新编译。同时也欢迎各位大佬为本APP贡献代码。\n
+    PS：本APP的早期版本已经上传至 Github ，详情请到 “支持作者” 界面查看。</string>
 
     <string name="main_mail_title">《视频截图》意见反馈</string>
     <string name="main_mail_content">
@@ -119,10 +130,10 @@
 
     <string name="main_dialog_btn_cancel">取消</string>
     <string name="main_dialog_btn_ok">确定</string>
-    <string name="main_dialog_disablePermission_content">请在-应用设置-权限-中，允许 %1$s 使用存储权限来保存图片</string>
-    <string name="main_dialog_disablePermission_title">存储权限不可用</string>
-    <string name="main_dialog_noPermission_title">未授予读写储存权限</string>
-    <string name="main_dialog_noPermission_content">请授予 读取/写入储存 权限来保存您制作的作品</string>
+    <string name="main_dialog_disablePermission_content">请在-应用设置-权限-中，至少允许 %1$s 使用存储权限来保存您的作品</string>
+    <string name="main_dialog_disablePermission_title">未授予足够的权限</string>
+    <string name="main_dialog_noPermission_title">未授予需要的权限</string>
+    <string name="main_dialog_noPermission_content">为了保证APP的正常运行，我们需要您授予一些权限</string>
     <string name="main_dialog_needFloatPermission_content">使用该功能需要开启悬浮窗权限，是否开启？\n
     如果开启权限失败请参照以下方式开启悬浮窗权限。如有任何疑问，请联系开发者协助解决。\n
         MIUI
@@ -287,6 +298,12 @@
         \n选择 继续 将会自动降低导出图片质量再次尝试制作，如仍内存不足或导出图片质量过低，请选择 退出 后手动设置导出图片质量</string>
     <string name="buildPicture_btn_oom_exit">退出</string>
     <string name="buildPicture_btn_oom_continue">继续</string>
+    <string name="buildPicture_dialog_share_title">分享到&#8230;</string>
+    <string-array name="buildPicture_dialog_share_items">
+        <item>QQ好友</item>
+        <item>QQ空间</item>
+        <item>更多&#8230;</item>
+    </string-array>
 
     <string name="title_activity_choose">确定图片顺序</string>
     <string name="choosePicture_menu_title_done">完成</string>

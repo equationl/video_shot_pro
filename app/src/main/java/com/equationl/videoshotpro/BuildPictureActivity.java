@@ -1,6 +1,8 @@
 package com.equationl.videoshotpro;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -32,8 +34,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.equationl.videoshotpro.Image.Tools;
+import com.qq.e.ads.interstitial.AbstractInterstitialADListener;
+import com.qq.e.ads.interstitial.InterstitialAD;
+import com.qq.e.comm.util.AdError;
 import com.tencent.bugly.crashreport.CrashReport;
+import com.tencent.connect.share.QQShare;
+import com.tencent.tauth.IUiListener;
+import com.tencent.tauth.Tencent;
+import com.tencent.tauth.UiError;
 
+
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,11 +64,13 @@ public class BuildPictureActivity extends AppCompatActivity {
     ProgressDialog dialog;
     int isDone=0;
     File savePath=null;
-    SharedPreferences settings;
+    SharedPreferences settings, sp_init;
     Tools tool = new Tools();
     Boolean isFromExtra;
     Resources res;
     Thread t, t_2;
+    Tencent mTencent;
+    InterstitialAD iad;
 
     private final MyHandler handler = new MyHandler(this);
 
@@ -87,12 +100,15 @@ public class BuildPictureActivity extends AppCompatActivity {
         updateMemoryText();
 
         settings = PreferenceManager.getDefaultSharedPreferences(this);
+        sp_init = getSharedPreferences("init", Context.MODE_PRIVATE);
 
         Bundle bundle = this.getIntent().getExtras();
         fileList = bundle.getStringArray("fileList");
         isFromExtra = bundle.getBoolean("isFromExtra");
 
         t_2 = new Thread(new MyThread());
+
+        mTencent = Tencent.createInstance("1106257597", this);
 
         //Log.i("filelist", fileList.toString());
 
@@ -176,12 +192,13 @@ public class BuildPictureActivity extends AppCompatActivity {
                 int test[] = tool.getImageRealSize(imageTest);
                 Log.i(TAG, "imageview width="+test[0]+" height="+test[1]);
                 if (isDone==1) {
-                    Uri imageUri = Uri.fromFile(savePath);
+                    /*Uri imageUri = Uri.fromFile(savePath);
                     Intent shareIntent = new Intent();
                     shareIntent.setAction(Intent.ACTION_SEND);
                     shareIntent.putExtra(Intent.EXTRA_STREAM, imageUri);
                     shareIntent.setType("image/*");
-                    startActivity(Intent.createChooser(shareIntent, "分享到"));
+                    startActivity(Intent.createChooser(shareIntent, "分享到"));  */
+                    showShareDialog(v);
                 }
                 else {
                     t = new Thread(new MyThread());
@@ -495,6 +512,9 @@ public class BuildPictureActivity extends AppCompatActivity {
                         activity.btn_done.setText("分享");
                         activity.btn_down.setVisibility(View.INVISIBLE);
                         activity.isDone=1;
+                        if (!activity.sp_init.getBoolean("isCloseAd", false)) {
+                            activity.showAD();
+                        }
                         String temp_path = Environment.getExternalStoragePublicDirectory(
                                 Environment.DIRECTORY_PICTURES)+"/"+msg.obj.toString();
                         temp_path += activity.settings.getBoolean("isReduce_switch", false) ? ".jpg":".png";
@@ -625,5 +645,119 @@ public class BuildPictureActivity extends AppCompatActivity {
             }
         }
         return mode;
+    }
+
+    private void showShareDialog(View view){
+        final Bundle params = new Bundle();
+        params.putString(QQShare.SHARE_TO_QQ_IMAGE_LOCAL_URL, savePath.toString());
+        params.putString(QQShare.SHARE_TO_QQ_APP_NAME, res.getString(R.string.app_name));
+        params.putInt(QQShare.SHARE_TO_QQ_KEY_TYPE, QQShare.SHARE_TO_QQ_TYPE_IMAGE);
+
+        final String[] items = res.getStringArray(R.array.buildPicture_dialog_share_items);
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+        alertBuilder.setTitle(R.string.buildPicture_dialog_share_title);
+        alertBuilder.setItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface arg0, int index) {
+                switch (index) {
+                    case 0:
+                        //qq好友
+                        params.putInt(QQShare.SHARE_TO_QQ_EXT_INT, QQShare.SHARE_TO_QQ_FLAG_QZONE_ITEM_HIDE);
+                        mTencent.shareToQQ(BuildPictureActivity.this, params, shareListener);
+                        break;
+                    case 1:
+                        //qq空间
+                        params.putInt(QQShare.SHARE_TO_QQ_EXT_INT, QQShare.SHARE_TO_QQ_FLAG_QZONE_AUTO_OPEN);
+                        mTencent.shareToQQ(BuildPictureActivity.this, params, shareListener);
+                        break;
+                    case 2:
+                        //更多
+                        Uri imageUri = Uri.fromFile(savePath);
+                        Intent shareIntent = new Intent();
+                        shareIntent.setAction(Intent.ACTION_SEND);
+                        shareIntent.putExtra(Intent.EXTRA_STREAM, imageUri);
+                        shareIntent.setType("image/*");
+                        startActivity(Intent.createChooser(shareIntent, "分享到"));
+                        break;
+                }
+            }
+        });
+        alertBuilder.create().show();
+    }
+
+
+    IUiListener shareListener = new BaseUiListener() {
+        @Override
+        protected void doComplete(JSONObject values) {
+            Toast.makeText(BuildPictureActivity.this, "分享成功！", Toast.LENGTH_SHORT).show();
+        }
+    };
+
+    private class BaseUiListener implements IUiListener {
+
+        @Override
+        public void onComplete(Object response) {
+            doComplete((JSONObject) response);
+        }
+        protected void doComplete(JSONObject values) {
+        }
+        @Override
+        public void onError(UiError e) {
+
+        }
+        @Override
+        public void onCancel() {
+
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Tencent.onActivityResultData(requestCode, resultCode, data, shareListener);
+    }
+
+
+    private InterstitialAD getIAD() {
+        if (iad == null) {
+            iad = new InterstitialAD(this, "1105671977", "2090734016933086");
+        }
+        return iad;
+    }
+
+    private void showAD() {
+        getIAD().setADListener(new AbstractInterstitialADListener() {
+            @Override
+            public void onNoAD(AdError error) {
+                Log.i(
+                        "AD_DEMO",
+                        String.format("LoadInterstitialAd Fail, error code: %d, error msg: %s",
+                                error.getErrorCode(), error.getErrorMsg()));
+            }
+            @Override
+            public void onADReceive() {
+                Log.i("AD_DEMO", "onADReceive");
+                iad.show();
+            }
+            @Override
+            public void onADClosed() {
+                showCloseAdDialog();
+            }
+        });
+        iad.loadAD();
+    }
+
+    private void showCloseAdDialog() {
+        Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
+                .setTitle(R.string.dialog_closeAD_title)
+                .setMessage(R.string.dialog_closeAD_content)
+                .setPositiveButton(res.getString(R.string.main_dialog_btn_ok),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        }).create();
+        dialog.show();
     }
 }
