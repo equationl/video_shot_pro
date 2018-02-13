@@ -79,6 +79,11 @@ public class BuildPictureActivity extends AppCompatActivity {
     private static final String TAG = "EL,InBuildActivity";
 
     private static final int HandlerStatusOutOfMemory = 10086;
+    private static final int HandlerStatusBuildPictureNext = 10087;
+    private static final int HandlerStatusBuildPictureDone = 10088;
+    private static final int HandlerStatusBuildPictureUpdateBitmap = 10089;
+    private static final int HandlerStatusBuildPictureFail = 10090;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -289,11 +294,11 @@ public class BuildPictureActivity extends AppCompatActivity {
             for (int i=0;i<len;i++) {
                 msg = Message.obtain();
                 msg.obj = "处理第"+i+"张图片";
-                msg.what = 1;
+                msg.what = HandlerStatusBuildPictureNext;
                 handler.sendMessage(msg);
                 if (fileList[i].equals("cut")) {
                     try {
-                        final_bitmap = addBitmap(final_bitmap,cutBimap(getBitmap(i+"")));
+                        final_bitmap = addBitmap(final_bitmap,cutBitmap(getBitmap(i+"")));
                     }
                     catch (OutOfMemoryError e) {
                         showDialogOutOfMemory();
@@ -304,7 +309,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                     if (isShow) {
                         msg = Message.obtain();
                         msg.obj = final_bitmap;
-                        msg.what = 3;
+                        msg.what = HandlerStatusBuildPictureUpdateBitmap;
                         handler.sendMessage(msg);
                     }
                 }
@@ -321,7 +326,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                     if (isShow) {
                         msg = Message.obtain();
                         msg.obj = final_bitmap;
-                        msg.what = 3;
+                        msg.what = HandlerStatusBuildPictureUpdateBitmap;
                         handler.sendMessage(msg);
                     }
                 }
@@ -338,7 +343,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                     if (isShow) {
                         msg = Message.obtain();
                         msg.obj = final_bitmap;
-                        msg.what = 3;
+                        msg.what = HandlerStatusBuildPictureUpdateBitmap;
                         handler.sendMessage(msg);
                     }
                 }
@@ -379,13 +384,13 @@ public class BuildPictureActivity extends AppCompatActivity {
             if (delete_nums >= len) {
                 msg = Message.obtain();
                 msg.obj = "你全部删除了我合成什么啊？？？";
-                msg.what = 4;
+                msg.what = HandlerStatusBuildPictureFail;
                 handler.sendMessage(msg);
             }
             else if (isRunning){
                 msg = Message.obtain();
-                msg.obj = "导出图片";
-                msg.what = 1;
+                msg.obj = res.getString(R.string.buildPicture_ProgressDialog_msg_export);
+                msg.what = HandlerStatusBuildPictureNext;
                 handler.sendMessage(msg);
                 final_bitmap = tool.addRight(final_bitmap);
                 SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
@@ -394,14 +399,14 @@ public class BuildPictureActivity extends AppCompatActivity {
                     if(saveMyBitmap(final_bitmap,date+"-by_EL", settings.getBoolean("isReduce_switch", false))) {
                         msg = Message.obtain();
                         msg.obj = date+"-by_EL";
-                        msg.what = 2;
+                        msg.what = HandlerStatusBuildPictureDone;
                         handler.sendMessage(msg);
                     }
                 } catch (IOException e) {
                     //Toast.makeText(getApplicationContext(),"保存截图失败"+e,Toast.LENGTH_LONG).show();
                     msg = Message.obtain();
                     msg.obj = "保存截图失败"+e;
-                    msg.what = 4;
+                    msg.what = HandlerStatusBuildPictureFail;
                     handler.sendMessage(msg);
                 }
                 catch (OutOfMemoryError e) {
@@ -411,7 +416,7 @@ public class BuildPictureActivity extends AppCompatActivity {
         }
     }
 
-    private Bitmap cutBimap(Bitmap bm) {
+    private Bitmap cutBitmap(Bitmap bm) {
         //return Bitmap.createBitmap(bm, 0, (int)startY, bWidth, (int)(bm.getHeight()-startY));
         return tool.cutBimap(bm, (int)startY, bWidth);
     }
@@ -498,14 +503,26 @@ public class BuildPictureActivity extends AppCompatActivity {
             final BuildPictureActivity activity = mActivity.get();
             if (activity != null) {
                 switch (msg.what) {
-                    case 1:
-                        activity.updateMemoryText();
-                        activity.dialog.setProgress(activity.dialog.getProgress()+1);
-                        activity.dialog.setMessage(msg.obj.toString());
-                        System.gc();
+                    case HandlerStatusBuildPictureNext:
+                        if (msg.obj.toString().equals(activity.res.getString(R.string.buildPicture_ProgressDialog_msg_export))) {
+                            activity.dialog.dismiss();
+                            activity.dialog = new ProgressDialog(activity);
+                            activity.dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                            activity.dialog.setIndeterminate(false);
+                            activity.dialog.setCancelable(false);
+                            activity.dialog.setMessage(msg.obj.toString());
+                            activity.dialog.setTitle("请稍等");
+                            activity.dialog.show();
+                        }
+                        else {
+                            activity.updateMemoryText();
+                            activity.dialog.setProgress(activity.dialog.getProgress()+1);
+                            activity.dialog.setMessage(msg.obj.toString());
+                            System.gc();
+                        }
                         break;
 
-                    case 2:
+                    case HandlerStatusBuildPictureDone:
                         activity.updateMemoryText();
                         activity.dialog.dismiss();
                         activity.btn_up.setText("返回");
@@ -522,7 +539,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                         Toast.makeText(activity,"处理完成！图片已保存至 "+ temp_path +" 请进入图库查看", Toast.LENGTH_LONG).show();
                         break;
 
-                    case 3:
+                    case HandlerStatusBuildPictureUpdateBitmap:
                         Boolean isShow = activity.settings.getBoolean("isMonitoredShow", false);
                         if (isShow) {
                             activity.imageTest.setImageBitmap((Bitmap) msg.obj);
@@ -543,7 +560,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                         }
                         break;
 
-                    case 4:
+                    case HandlerStatusBuildPictureFail:
                         Toast.makeText(activity,msg.obj.toString(), Toast.LENGTH_LONG).show();
                         activity.dialog.dismiss();
                         activity.isDone = 1;
@@ -560,14 +577,15 @@ public class BuildPictureActivity extends AppCompatActivity {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         activity.dialog.dismiss();
-                                        activity.reduceQuilty();
-
+                                        activity.reduceQuality();
+                                        Bitmap bm_temp = activity.getCutImg();
+                                        activity.bWidth = bm_temp.getWidth();
+                                        bm_temp = null;
                                         if (activity.t.isAlive()) {
                                             activity.t.interrupt();
                                             activity.t = null;
                                         }
                                         activity.t_2.start();
-
                                         activity.dialog.show();
                                         activity.dialog.setProgress(0);
                                     }
@@ -595,7 +613,7 @@ public class BuildPictureActivity extends AppCompatActivity {
         handler.sendEmptyMessage(HandlerStatusOutOfMemory);
     }
 
-    private void reduceQuilty() {
+    private void reduceQuality() {
         String[] colorModes, resolutions;
         String colorMode, resolution;
 

@@ -40,6 +40,7 @@
         \t*支持自定义图片质量，可在降低图片质量的情况下合成更多图片\n
         \t*优化撤销操作（感谢 @xiajichen 的反馈）\n
         \t*修复大量可能导致app崩溃的隐患\n
+        \t*优化部分UI交互体验\n
         1.1 Update 02:\n
         \t*修复某些机型无法获取悬浮窗权限的BUG\n
         \t*优化反馈方式\n
@@ -304,6 +305,7 @@
         <item>QQ空间</item>
         <item>更多&#8230;</item>
     </string-array>
+    <string name="buildPicture_ProgressDialog_msg_export">正在导出&#8230;</string>
 
     <string name="title_activity_choose">确定图片顺序</string>
     <string name="choosePicture_menu_title_done">完成</string>

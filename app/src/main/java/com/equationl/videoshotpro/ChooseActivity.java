@@ -50,6 +50,7 @@ public class ChooseActivity extends AppCompatActivity {
     AlertDialog.Builder builder;
     ChoosePictureAdapter pictureAdapter;
     SharedPreferences sp_init;
+    Boolean isFromExtra;
 
     private final MyHandler handler = new MyHandler(this);
 
@@ -72,6 +73,12 @@ public class ChooseActivity extends AppCompatActivity {
         instance = this;
 
         sp_init = getSharedPreferences("init", Context.MODE_PRIVATE);
+
+        isFromExtra = this.getIntent().getBooleanExtra("isFromExtra", false);
+        if (isFromExtra) {
+            Intent service = new Intent(ChooseActivity.this, FloatWindowsService.class);
+            stopService(service);
+        }
 
 
         String filepath = getExternalCacheDir().toString();
@@ -176,6 +183,9 @@ public class ChooseActivity extends AppCompatActivity {
                 imagePaths = pictureAdapter.getImagePaths();
                 tool.sortCachePicture(imagePaths, this);
                 Intent intent = new Intent(ChooseActivity.this, MarkPictureActivity.class);
+                if (isFromExtra) {
+                    intent.putExtra("isFromExtra", true);
+                }
                 startActivity(intent);
                 break;
         }

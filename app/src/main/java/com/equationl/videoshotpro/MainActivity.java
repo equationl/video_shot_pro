@@ -42,7 +42,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -58,11 +57,8 @@ import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedExceptio
 import com.qq.e.ads.banner.ADSize;
 import com.qq.e.ads.banner.AbstractBannerADListener;
 import com.qq.e.ads.banner.BannerView;
-import com.qq.e.ads.interstitial.AbstractInterstitialADListener;
-import com.qq.e.ads.interstitial.InterstitialAD;
 import com.qq.e.comm.util.AdError;
 import com.tencent.bugly.Bugly;
-import com.tencent.connect.common.Constants;
 import com.tencent.connect.share.QQShare;
 import com.tencent.tauth.IUiListener;
 import com.tencent.tauth.Tencent;
@@ -257,7 +253,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == IntentResultCodeMediaProjection) {
                 Log.i("EL", "try Start Service");
-
                 try {
                     BuildPictureActivity.instance.finish();
                 } catch (NullPointerException e){
@@ -481,6 +476,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         public void run() {
             loadLib();
+            try {
+                MarkPictureActivity.instance.finish();
+                ChooseActivity.instance.finish();
+                BuildPictureActivity.instance.finish();
+                PlayerActivity.instance.finish();
+            } catch (Exception e) {}
             try {
                 String pkName = getApplicationContext().getPackageName();
                 if (!pkName.equals("com.equationl.videoshotpro")) {
@@ -997,10 +998,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     IUiListener shareListener = new BaseUiListener() {
         @Override
         protected void doComplete(JSONObject values) {
-            Toast.makeText(MainActivity.this, "分享成功！", Toast.LENGTH_SHORT).show();
-            SharedPreferences.Editor editor = sp_init.edit();
-            editor.putBoolean("isCloseAd", true);
-            editor.apply();
+            int isSuccess = -1;
+            try {
+                isSuccess = values.getInt("ret");
+            } catch (org.json.JSONException e){}
+            if (isSuccess == 0) {
+                Toast.makeText(MainActivity.this, "分享成功！", Toast.LENGTH_SHORT).show();
+                SharedPreferences.Editor editor = sp_init.edit();
+                editor.putBoolean("isCloseAd", true);
+                editor.apply();
+            }
         }
     };
 
@@ -1008,6 +1015,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         public void onComplete(Object response) {
+            Log.i(TAG, response.toString());
             doComplete((JSONObject) response);
         }
         protected void doComplete(JSONObject values) {

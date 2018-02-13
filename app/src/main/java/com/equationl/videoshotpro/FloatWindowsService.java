@@ -375,8 +375,8 @@ public class FloatWindowsService extends Service {
 
         @Override
         protected void onPostExecute(Bitmap bitmap) {
-            /*super.onPostExecute(bitmap);
-            //预览图片
+            super.onPostExecute(bitmap);
+            /*//预览图片
             if (bitmap != null) {
 
             ((ScreenCaptureApplication) getApplication()).setmScreenCaptureBitmap(bitmap);
@@ -419,8 +419,8 @@ public class FloatWindowsService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)  {
-        MainActivity.instance.finish();
         try {
+            MainActivity.instance.finish();
             BuildPictureActivity.instance.finish();
         } catch (NullPointerException e) {}
 
