@@ -28,6 +28,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.v4.os.AsyncTaskCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -38,6 +39,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.equationl.videoshotpro.Image.Tools;
 
@@ -93,6 +95,8 @@ public class FloatWindowsService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        checkPermission();
 
         Log.i("EL", "in onCreate()");
         res = getResources();
@@ -354,7 +358,8 @@ public class FloatWindowsService extends Service {
                         out.flush();
                         out.close();
                         Intent media = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-                        Uri contentUri = Uri.fromFile(fileImage);
+                        Uri contentUri = //Uri.fromFile(fileImage);
+                                tool.getUriFromFile(fileImage, FloatWindowsService.this);
                         media.setData(contentUri);
                         sendBroadcast(media);
                     }
@@ -442,5 +447,13 @@ public class FloatWindowsService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
+    private void checkPermission() {
+        if (Build.VERSION.SDK_INT  >= 23 ) {
+            if (!Settings.canDrawOverlays(this)) {
+                Toast.makeText(this, R.string.floatWindowsService_toast_floatPermissionDenied, Toast.LENGTH_LONG).show();
+                stopSelf();
+            }
+        }
+    }
 
 }

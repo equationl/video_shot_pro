@@ -18,6 +18,7 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -110,6 +111,8 @@ public class MarkPictureActivity extends AppCompatActivity {
         btn_start = (Button) findViewById(R.id.button_start);
         tip_text = (TextView) findViewById(R.id.make_picture_tip);
         nums_tip_text  = (TextView) findViewById(R.id.make_picture_nums_tip);
+
+        //imagview.setImageDrawable(getResources().getDrawable(R.drawable.tip));
 
         settings = PreferenceManager.getDefaultSharedPreferences(this);
         res = getResources();

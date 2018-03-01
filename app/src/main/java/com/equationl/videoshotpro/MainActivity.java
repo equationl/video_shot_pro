@@ -12,6 +12,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.media.projection.MediaProjectionManager;
@@ -59,7 +61,14 @@ import com.qq.e.ads.banner.AbstractBannerADListener;
 import com.qq.e.ads.banner.BannerView;
 import com.qq.e.comm.util.AdError;
 import com.tencent.bugly.Bugly;
+import com.tencent.bugly.crashreport.CrashReport;
 import com.tencent.connect.share.QQShare;
+import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
+import com.tencent.mm.opensdk.modelmsg.WXMediaMessage;
+import com.tencent.mm.opensdk.modelmsg.WXTextObject;
+import com.tencent.mm.opensdk.modelmsg.WXWebpageObject;
+import com.tencent.mm.opensdk.openapi.IWXAPI;
+import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 import com.tencent.tauth.IUiListener;
 import com.tencent.tauth.Tencent;
 import com.tencent.tauth.UiError;
@@ -94,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     ViewGroup bannerContainer;
     BannerView bv;
     int activityResultMode = 0;
+    IWXAPI wxApi;
 
     private final MyHandler handler = new MyHandler(this);
     public static MainActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
@@ -137,7 +147,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         res = getResources();
 
         if (sp_init.getBoolean("isFirstBoot", true)) {
-            showAlertDialog();
+            //FIXME 显示警告某些应用商城审核就不给过？？？？
+            //showAlertDialog();
             SharedPreferences.Editor editor = sp_init.edit();
             editor.putBoolean("isFirstBoot", false);
             editor.apply();
@@ -148,11 +159,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     != PackageManager.PERMISSION_GRANTED) {
                 showDialogTipUserRequestPermission();
             }
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
+            else if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
                     != PackageManager.PERMISSION_GRANTED) {
                 showDialogTipUserRequestPermission();
             }
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+            else if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED) {
                 showDialogTipUserRequestPermission();
             }
@@ -422,7 +433,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         } else
                             finish();
                     } else {
-                        Toast.makeText(this,  R.string.main_toast_getPermission_success, Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(this,  R.string.main_toast_getPermission_success, Toast.LENGTH_SHORT).show();
                     }
                 }
             }
@@ -589,20 +600,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (RomUtils.checkIsMeizuRom()) {
             return meizuPermissionCheck(context);
         }
-        else if (RomUtils.checkIsMiuiRom()) {
+        if (RomUtils.checkIsMiuiRom()) {
             return miuiPermissionCheck(context);
         }
 
         else {
             Boolean result = true;
             if (Build.VERSION.SDK_INT >= 23) {
-                try {
+                /*try {
                     Class clazz = Settings.class;
                     Method canDrawOverlays = clazz.getDeclaredMethod("canDrawOverlays", Context.class);
                     result = (Boolean) canDrawOverlays.invoke(null, context);
                 } catch (Exception e) {
                     Log.e(TAG, Log.getStackTraceString(e));
-                }
+                }   */
+                result =  Settings.canDrawOverlays(this);
             }
             return result;
         }
@@ -984,6 +996,63 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void shareAPP() {
+        final String[] items = res.getStringArray(R.array.main_dialog_shareAPP_items);
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+        alertBuilder.setTitle(R.string.buildPicture_dialog_share_title);
+        alertBuilder.setItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface arg0, int index) {
+                switch (index) {
+                    case 0:
+                        //qq
+                        shareAPPByQq();
+                        break;
+                    case 1:
+                        //微信朋友圈
+                        shareAPPByWx(SendMessageToWX.Req.WXSceneTimeline);
+                        break;
+                    case 2:
+                        //微信好友
+                        shareAPPByWx(SendMessageToWX.Req.WXSceneSession);
+                        break;
+                }
+            }
+        });
+        alertBuilder.create().show();
+    }
+
+    private void shareAPPByWx(int shareTo) {
+        wxApi = WXAPIFactory.createWXAPI(this, "wx45ceac6c6d2f1aff", true);
+        wxApi.registerApp("wx45ceac6c6d2f1aff");
+
+        WXWebpageObject webpage = new WXWebpageObject();
+        webpage.webpageUrl = "http://sj.qq.com/myapp/detail.htm?apkName=com.equationl.videoshotpro";//收到分享的好友点击会跳转到这个地址里面去
+        WXMediaMessage msg = new WXMediaMessage(webpage);
+        msg.title = res.getString(R.string.main_SHARE_TO_QQ_TITLE);
+        msg.description = res.getString(R.string.main_SHARE_TO_QQ_SUMMARY);
+        try
+        {
+            Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.preview);
+            Bitmap thumbBmp = Bitmap.createScaledBitmap(bmp, 147, 237, true);
+            bmp.recycle();
+            msg.setThumbImage(thumbBmp);
+        }
+        catch (Exception e)
+        {
+            Toast.makeText(this, R.string.main_toast_createThumb_fail, Toast.LENGTH_SHORT).show();
+            CrashReport.postCatchedException(e);
+            return;
+        }
+        SendMessageToWX.Req req = new SendMessageToWX.Req();
+        req.transaction = "shareAPP";
+        req.message = msg;
+        req.scene = shareTo;
+
+        // 调用api接口发送数据到微信
+        wxApi.sendReq(req);
+    }
+
+    private void shareAPPByQq() {
         Tencent mTencent = Tencent.createInstance("1106257597", this);
         final Bundle params = new Bundle();
         params.putInt(QQShare.SHARE_TO_QQ_KEY_TYPE, QQShare.SHARE_TO_QQ_TYPE_APP);
@@ -995,6 +1064,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mTencent.shareToQQ(MainActivity.this, params, shareListener);
     }
 
+    private void shareAPPSuccess() {
+        Toast.makeText(MainActivity.this, "分享成功！", Toast.LENGTH_SHORT).show();
+        SharedPreferences.Editor editor = sp_init.edit();
+        editor.putBoolean("isCloseAd", true);
+        editor.apply();
+    }
+
     IUiListener shareListener = new BaseUiListener() {
         @Override
         protected void doComplete(JSONObject values) {
@@ -1003,10 +1079,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 isSuccess = values.getInt("ret");
             } catch (org.json.JSONException e){}
             if (isSuccess == 0) {
-                Toast.makeText(MainActivity.this, "分享成功！", Toast.LENGTH_SHORT).show();
-                SharedPreferences.Editor editor = sp_init.edit();
-                editor.putBoolean("isCloseAd", true);
-                editor.apply();
+                shareAPPSuccess();
             }
         }
     };

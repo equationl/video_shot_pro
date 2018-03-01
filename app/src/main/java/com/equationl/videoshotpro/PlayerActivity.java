@@ -34,6 +34,7 @@ import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -118,7 +119,15 @@ public class PlayerActivity extends AppCompatActivity {
         videoview.setVideoURI(uri);
 
         MediaMetadataRetriever rev = new MediaMetadataRetriever();
-        rev.setDataSource(getApplicationContext(),uri);
+        try {
+            rev.setDataSource(this, uri);
+        } catch (IllegalArgumentException e) {
+            Toast.makeText(this, R.string.player_toast_loadUriFail_invalid, Toast.LENGTH_LONG).show();
+            finish();
+        } catch (SecurityException e) {
+            Toast.makeText(this, R.string.player_toast_loadUriFail_lackPermission, Toast.LENGTH_LONG).show();
+            finish();
+        }
         String meta_duration = rev.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION);
         long duration = Long.parseLong(meta_duration);
         Bitmap bitmap = rev.getFrameAtTime(((duration/2)*1000),
@@ -384,11 +393,19 @@ public class PlayerActivity extends AppCompatActivity {
                     Log.i("el_test", "time="+time);
                     Log.i("el_test", "shot_num="+shot_num);
                     String outPathName;
+                    File externalCacheDir = getExternalCacheDir();
+                    if (externalCacheDir == null) {
+                        Message msg = Message.obtain();
+                        msg.obj = res.getString(R.string.player_text_savePicture_fail)+res.getString(R.string.player_text_getCachePath_fail);
+                        msg.what = 2;
+                        handler.sendMessage(msg);
+                        break;
+                    }
                     if (settings.getBoolean("isShotToJpg",true)) {
-                        outPathName = getExternalCacheDir().toString()+"/"+shot_num+".jpg";
+                        outPathName = externalCacheDir.toString()+"/"+shot_num+".jpg";
                     }
                     else {
-                        outPathName = getExternalCacheDir().toString()+"/"+shot_num+".png";
+                        outPathName = externalCacheDir.toString()+"/"+shot_num+".png";
                     }
 
                     String cmd[] = {"-ss", ""+(time/1000.0), "-i", path, "-y", "-f", "image2", "-t", "0.001", outPathName};

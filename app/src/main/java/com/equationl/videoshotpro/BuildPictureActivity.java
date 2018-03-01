@@ -39,6 +39,11 @@ import com.qq.e.ads.interstitial.InterstitialAD;
 import com.qq.e.comm.util.AdError;
 import com.tencent.bugly.crashreport.CrashReport;
 import com.tencent.connect.share.QQShare;
+import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
+import com.tencent.mm.opensdk.modelmsg.WXImageObject;
+import com.tencent.mm.opensdk.modelmsg.WXMediaMessage;
+import com.tencent.mm.opensdk.openapi.IWXAPI;
+import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 import com.tencent.tauth.IUiListener;
 import com.tencent.tauth.Tencent;
 import com.tencent.tauth.UiError;
@@ -71,6 +76,8 @@ public class BuildPictureActivity extends AppCompatActivity {
     Thread t, t_2;
     Tencent mTencent;
     InterstitialAD iad;
+    Bitmap final_bitmap;
+    IWXAPI wxApi;
 
     private final MyHandler handler = new MyHandler(this);
 
@@ -270,6 +277,10 @@ public class BuildPictureActivity extends AppCompatActivity {
             }
         }
 
+        if (bm == null) {
+            Toast.makeText(this, R.string.buildPicture_dialog_getBitmap_fail, Toast.LENGTH_LONG).show();
+            finish();
+        }
         return bm;
     }
 
@@ -290,7 +301,7 @@ public class BuildPictureActivity extends AppCompatActivity {
         public void run() {
             Message msg;
             int len = fileList.length;
-            Bitmap final_bitmap = Bitmap.createBitmap(bWidth,1, getColorConfig());
+            final_bitmap = Bitmap.createBitmap(bWidth,1, getColorConfig());
             for (int i=0;i<len;i++) {
                 msg = Message.obtain();
                 msg.obj = "处理第"+i+"张图片";
@@ -666,17 +677,18 @@ public class BuildPictureActivity extends AppCompatActivity {
     }
 
     private void showShareDialog(View view){
-        final Bundle params = new Bundle();
-        params.putString(QQShare.SHARE_TO_QQ_IMAGE_LOCAL_URL, savePath.toString());
-        params.putString(QQShare.SHARE_TO_QQ_APP_NAME, res.getString(R.string.app_name));
-        params.putInt(QQShare.SHARE_TO_QQ_KEY_TYPE, QQShare.SHARE_TO_QQ_TYPE_IMAGE);
-
         final String[] items = res.getStringArray(R.array.buildPicture_dialog_share_items);
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
         alertBuilder.setTitle(R.string.buildPicture_dialog_share_title);
         alertBuilder.setItems(items, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface arg0, int index) {
+                final Bundle params = new Bundle();
+                if (index == 0 || index == 1) {
+                    params.putString(QQShare.SHARE_TO_QQ_IMAGE_LOCAL_URL, savePath.toString());
+                    params.putString(QQShare.SHARE_TO_QQ_APP_NAME, res.getString(R.string.app_name));
+                    params.putInt(QQShare.SHARE_TO_QQ_KEY_TYPE, QQShare.SHARE_TO_QQ_TYPE_IMAGE);
+                }
                 switch (index) {
                     case 0:
                         //qq好友
@@ -689,8 +701,17 @@ public class BuildPictureActivity extends AppCompatActivity {
                         mTencent.shareToQQ(BuildPictureActivity.this, params, shareListener);
                         break;
                     case 2:
+                        //微信好友
+                        shareToWX(SendMessageToWX.Req.WXSceneSession, final_bitmap);
+                        break;
+                    case 3:
+                        //微信朋友圈
+                        shareToWX(SendMessageToWX.Req.WXSceneTimeline, final_bitmap);
+                        break;
+                    case 4:
                         //更多
-                        Uri imageUri = Uri.fromFile(savePath);
+                        Uri imageUri = //Uri.fromFile(savePath);
+                                tool.getUriFromFile(savePath, BuildPictureActivity.this);
                         Intent shareIntent = new Intent();
                         shareIntent.setAction(Intent.ACTION_SEND);
                         shareIntent.putExtra(Intent.EXTRA_STREAM, imageUri);
@@ -777,5 +798,38 @@ public class BuildPictureActivity extends AppCompatActivity {
                             }
                         }).create();
         dialog.show();
+    }
+
+    private void shareToWX(int shareTo, Bitmap bmp) {
+        wxApi = WXAPIFactory.createWXAPI(this, "wx45ceac6c6d2f1aff", true);
+        wxApi.registerApp("wx45ceac6c6d2f1aff");
+
+        WXImageObject imgObj = new WXImageObject(bmp);
+        WXMediaMessage msg = new WXMediaMessage();
+        msg.mediaObject = imgObj;
+
+        try
+        {
+            Bitmap thumbBmp = Bitmap.createScaledBitmap(bmp, 128, 160, true);
+            bmp.recycle();
+            msg.setThumbImage(thumbBmp);
+        }
+        catch (Exception e)
+        {
+            Toast.makeText(this, R.string.buildPicture_toast_createThumb_fail, Toast.LENGTH_SHORT).show();
+            CrashReport.postCatchedException(e);
+            return;
+        }
+
+        msg.title = res.getString(R.string.main_SHARE_TO_QQ_TITLE);
+        msg.description = res.getString(R.string.main_SHARE_TO_QQ_SUMMARY);
+
+        SendMessageToWX.Req req = new SendMessageToWX.Req();
+        req.transaction = "sharePicture";
+        req.message = msg;
+        req.scene = shareTo;
+
+        // 调用api接口发送数据到微信
+        wxApi.sendReq(req);
     }
 }

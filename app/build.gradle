@@ -1,14 +1,22 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        release {
+            keyAlias 'equationl'
+            keyPassword 'equationl'
+            storeFile file('F:/andoid/equationl.jks')
+            storePassword 'equationl'
+        }
+    }
     compileSdkVersion 26
     buildToolsVersion "26.0.2"
     defaultConfig {
         applicationId "com.equationl.videoshotpro"
         minSdkVersion 17
         targetSdkVersion 26
-        versionCode 9
-        versionName "1.2 Oublier"
+        versionCode 10
+        versionName "1.2 FIX 01"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         ndk {
             //设置支持的SO库架构
@@ -20,6 +28,9 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            signingConfig signingConfigs.release
         }
     }
 }
@@ -48,5 +59,6 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.9.0'
     compile 'com.squareup.okio:okio:1.13.0'
     compile 'com.huxq17.handygridview:handygridview:1.1.0'
+    compile 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:+'
     testCompile 'junit:junit:4.12'
 }

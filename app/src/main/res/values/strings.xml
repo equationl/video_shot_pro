@@ -29,6 +29,15 @@
     </string>
 
     <string name="main_updateHistory_text">
+        1.2 Fix 01:\n
+        \t*增加微信分享组件\n
+        \t*修复加载视频失败闪退的BUG\n
+        \t*修复因无悬浮窗权限导致闪退的BUG\n
+        \t*修复因获取图片失败导致闪退的BUG\n
+        \t*修复因在安卓低版本上不兼容某些库导致闪退的BUG\n
+        \t*修复在安卓7.0以上无法分享图片的BUG\n
+        \t*修复因获取缓存目录失败导致闪退的BUG\n
+        \t*优化授权体验\n
         1.2 Oublier:\n
         \t*支持截图后对图片进行排序（感谢 @方霖、@q1075715*** 的反馈）\n
         \t*新增更多新手指导\n
@@ -246,13 +255,30 @@
     <string name="main_SHARE_TO_QQ_IMAGE_URL">http://image.coolapk.com/apk_image/2016/1008/682885_1475815523_9911-for-104111-o_1auhhpq5m13m2fih1pii14mc1gvs1i-uid-408649.jpg</string>
     <string name="main_SHARE_TO_QQ_APP_NAME">隐云图解制作</string>
 
+    <string name="main_toast_createThumb_fail">生成缩略图失败！</string>
+
+    <string-array name="main_dialog_shareAPP_items">
+        <item>QQ</item>
+        <item>微信朋友圈</item>
+        <item>微信好友</item>
+    </string-array>
+
+    <string name="WXEntry_toast_share_ERR_AUTH_DENIED">分享失败：认证失败！请联系开发者解决。</string>
+    <string name="WXEntry_toast_share_ERR_SENT_FAILED">分享失败：发送失败！</string>
+    <string name="WXEntry_toast_share_ERR_UNSUPPORT">分享失败：不支持分享该内容。</string>
+    <string name="WXEntry_toast_share_ERR_COMM">分享失败！</string>
+    <string name="WXEntry_toast_share_ERR_UNKNOW">分享失败：未知错误！</string>
+    <string name="WXEntry_toast_share_success">分享成功！</string>
+
+
     <string name="player_toast_needMoreShot">至少需要截取两张图片！</string>
     <string name="player_toast_shotGif_fail">截取动图失败！</string>
     <string name="player_toast_shotGif_success">动图已保存</string>
     <string name="player_toast_shotGif_start">开始截取动图</string>
     <string name="player_toast_mark_timeError">结束时间必须大于开始时间</string>
     <string name="player_toast_FBF_done">截取完成，请进入 %1$s 查看！</string>
-
+    <string name="player_toast_loadUriFail_invalid">抱歉，加载文件失败：文件失效，请重试！</string>
+    <string name="player_toast_loadUriFail_lackPermission">抱歉，加载文件失败：无权限，请重试！</string>
 
     <string name="player_text_rotationScreen">翻转</string>
     <string name="player_text_shotStatus">标记/已截取：%1$d/%2$d</string>
@@ -264,6 +290,7 @@
     <string name="player_text_mark">标记</string>
     <string name="player_text_mark_end">结束</string>
     <string name="player_text_ok">确定</string>
+    <string name="player_text_getCachePath_fail">获取缓存目录出错！</string>
 
     <string name="player_dialog_FBF_title">正在截取中……</string>
     <string name="player_dialog_FBF_content">截取已开始</string>
@@ -287,6 +314,7 @@
     <string name="floatWindowsService_notice_ticker_text">启动通知</string>
     <string name="floatWindowsService_notice_content">点击开始制作</string>
     <string name="floatWindowsService_notice_title">程序运行中</string>
+    <string name="floatWindowsService_toast_floatPermissionDenied">没有悬浮窗权限！</string>
 
 
     <string name="buildPicture_btn_up">上调</string>
@@ -303,9 +331,15 @@
     <string-array name="buildPicture_dialog_share_items">
         <item>QQ好友</item>
         <item>QQ空间</item>
+        <item>微信好友</item>
+        <item>微信朋友圈</item>
         <item>更多&#8230;</item>
     </string-array>
     <string name="buildPicture_ProgressDialog_msg_export">正在导出&#8230;</string>
+    <string name="buildPicture_dialog_getBitmap_fail">获取图片出错！请重试！</string>
+    <string name="buildPicture_toast_createThumb_fail">生成缩略图失败！</string>
+
+
 
     <string name="title_activity_choose">确定图片顺序</string>
     <string name="choosePicture_menu_title_done">完成</string>

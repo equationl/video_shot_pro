@@ -66,7 +66,6 @@
         android:layout_above="@+id/button_start"
         android:layout_alignParentEnd="true"
         android:layout_marginBottom="10dp"
-        android:background="#99cccccc"
-        android:src="?attr/actionModeCloseDrawable" />
+        android:src="@drawable/btn_undo" />
 
 </RelativeLayout>
