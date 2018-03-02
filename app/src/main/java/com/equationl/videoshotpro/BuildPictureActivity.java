@@ -702,11 +702,11 @@ public class BuildPictureActivity extends AppCompatActivity {
                         break;
                     case 2:
                         //微信好友
-                        shareToWX(SendMessageToWX.Req.WXSceneSession, final_bitmap);
+                        shareToWX(SendMessageToWX.Req.WXSceneSession);
                         break;
                     case 3:
                         //微信朋友圈
-                        shareToWX(SendMessageToWX.Req.WXSceneTimeline, final_bitmap);
+                        shareToWX(SendMessageToWX.Req.WXSceneTimeline);
                         break;
                     case 4:
                         //更多
@@ -800,18 +800,18 @@ public class BuildPictureActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void shareToWX(int shareTo, Bitmap bmp) {
+    private void shareToWX(int shareTo) {
         wxApi = WXAPIFactory.createWXAPI(this, "wx45ceac6c6d2f1aff", true);
         wxApi.registerApp("wx45ceac6c6d2f1aff");
 
-        WXImageObject imgObj = new WXImageObject(bmp);
+        WXImageObject imgObj = new WXImageObject();
+        imgObj.setImagePath(savePath.toString());
         WXMediaMessage msg = new WXMediaMessage();
         msg.mediaObject = imgObj;
 
         try
         {
-            Bitmap thumbBmp = Bitmap.createScaledBitmap(bmp, 128, 160, true);
-            bmp.recycle();
+            Bitmap thumbBmp = Bitmap.createScaledBitmap(tool.getBitmapFromFile(savePath.toString()), 128, 160, true);
             msg.setThumbImage(thumbBmp);
         }
         catch (Exception e)
@@ -830,6 +830,8 @@ public class BuildPictureActivity extends AppCompatActivity {
         req.scene = shareTo;
 
         // 调用api接口发送数据到微信
-        wxApi.sendReq(req);
+        if (!wxApi.sendReq(req)) {
+            Toast.makeText(this, R.string.buildPicture_toast_sharePicture_fail, Toast.LENGTH_LONG).show();
+        }
     }
 }

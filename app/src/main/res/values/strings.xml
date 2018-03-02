@@ -338,7 +338,7 @@
     <string name="buildPicture_ProgressDialog_msg_export">正在导出&#8230;</string>
     <string name="buildPicture_dialog_getBitmap_fail">获取图片出错！请重试！</string>
     <string name="buildPicture_toast_createThumb_fail">生成缩略图失败！</string>
-
+    <string name="buildPicture_toast_sharePicture_fail">分享失败，请尝试在 分享->更多 中选择 微信 进行分享</string>
 
 
     <string name="title_activity_choose">确定图片顺序</string>
