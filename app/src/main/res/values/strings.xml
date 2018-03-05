@@ -2,33 +2,39 @@
     <string name="app_name">隐云图解制作</string>
     <string name="main_information_title">说明</string>
     <string name="main_information_content">
-        经常在网上看到别人制作的电影台词的长截图？想要自己制作一张？一张一张截图后剪切再拼接很麻烦？ \n
-        有了视频截取，你就可以边看视频边将想要截图的位置标记下来，当视频播放完后你的截图也已经处理完毕。\n
-        可用于制作电影图解 or 电影台词截图 or 精彩画面合集。 \n
-        还支持自定义裁剪范围，甚至是保留整张截图。\n\n\n
+    快速制作电影图解或对白截图
+    \n
+    经常在网上看到别人制作的电影台词的长截图？想要自己制作一张？一张一张截图后剪切再拼接很麻烦？
+    \n
+    有了隐云图解制作，你就可以边看视频边截图，当视频播放完后你的截图也已经处理完毕。
+    \n
+    可用于制作电影图解、电影对白图片等，也可用于获取视频中的任何一帧精彩画面。
+    \n
+    不仅如此，隐云图解制作还提供了截取GIF功能，在截图的任意位置添加文字功能等。
+    \n
+    对于截图er，我们提供了逐帧选优功能，从此不再因为想要截取一闪而过的画面而按到手软！
+    \n
+    对于画质er，我们提供了截取原视频原画质功能！
+    \n
+    对于发烧友，我们提供了自定义 FFmpeg 命令！
+    \n
+    更多功能等你探索！\n\n
         注意：\n
         从 1.1 版本开始app名称已更改为 隐云图解制作。
         \n
-        pro版本和普通版本的区别：\n
-        \t*增加截取GIF动图功能\n
-        \t*增加合成已有截图功能\n
-        \t*增加逐帧截取模式\n
-        \t*支持截取在线观看的视频\n
-        \t*更便捷丰富的文字添加方式\n
-        \t*更自由的截取方式（作者：扯淡的，还在开发中）\n
-        \t*更高端的分享方式（作者：能不能别立Flag了？）\n
-        \t*优化手势操作\n
-        \t*更高的开发优先级\n
-        \t*高端定制的屎黄色图标\n
         重要提示：\n
         有很多应用平台出现了本app的二次打包版本，且被添加了强制下载的广告，虽然我一直在努力和平台交涉，但是始终无法让官方将其下架，所以，只能提醒各位用户当心盗版！\n
         \t默认合成图片保存目录在 %1$s \n
         \t推荐直接直接使用系统图库查看\n
-
         \n\n\n
     </string>
 
     <string name="main_updateHistory_text">
+        1.2 Update 02:\n
+        \t*增加 shortcut\n
+        \t*外部程序截图模式适配安卓 8.0\n
+        \t*修复使用外部程序截图时按钮概率性无法隐藏的BUG\n
+        \t*适配圆形图标\n
         1.2 Fix 01:\n
         \t*增加微信分享组件\n
         \t*修复加载视频失败闪退的BUG\n
@@ -102,7 +108,7 @@
         --------------\n
         okHttp：https://github.com/square/okhttp/   \n
         --------------\n
-        特别感谢：
+        特别感谢：\n
         --------------\n
         Bugly：https://bugly.qq.com   \n
     </string>
@@ -145,36 +151,6 @@
     <string name="main_dialog_noPermission_title">未授予需要的权限</string>
     <string name="main_dialog_noPermission_content">为了保证APP的正常运行，我们需要您授予一些权限</string>
     <string name="main_dialog_needFloatPermission_content">使用该功能需要开启悬浮窗权限，是否开启？\n
-    如果开启权限失败请参照以下方式开启悬浮窗权限。如有任何疑问，请联系开发者协助解决。\n
-        MIUI
-        \nMIUI 默认关闭了应用悬浮窗，需要在设置中打开，打开方式：
-        \n
-        \nMIUI 4.8下：设置 -> 应用 -> 找到应用 -> 显示悬浮窗 -> 开启
-        \n
-        \nMIUI 6/7/8/9下：安全中心 -> 授权管理 -> 应用权限管理 -> 权限管理-> 显示悬浮窗 -> 勾选
-        \n
-        \n也可以尝试：设置 -> 其他应用管理 -> 找到应用 -> 权限管理-> 显示悬浮窗 -> 勾选
-        \n
-        \n锤子 Smartisan OS
-        \n在锤子手机上，会提示是否允许 隐云图解制作 显示悬浮窗，请选择允许。 如果需要手动设置，可以到“设置-锁屏和安全-应用程序权限管理-首页悬浮窗”，找到应用，打开。
-        \n
-        \n魅族 flyme4 OS
-        \n具体设置方法如下：
-        \n
-        \n打开【安全中心】
-        \n点击【权限管理】
-        \n点击上方菜单的【通知】，就可以设置其他应用的悬浮窗了
-        \n或在应用详情找到 隐云图解制作 -> 打开悬浮窗权限
-        \n华为 EMU
-        \n手机管家 －> 通知管理 －> 悬浮窗管理 －> 勾选 隐云图解制作
-        \n
-        \nOPPO R9
-        \n桌面－>手机管家－>权限隐私－>悬浮窗管理－>勾选 隐云图解制作
-        \n
-        \n360 手机
-        \n设置－>应用权限管理－>权限管理－>选择 隐云图解制作－>勾选允许显示悬浮窗
-
-        （转自 https://docs.bugtags.com/zh/faq/android/icon-not-found.html）
     </string>
     <string name="main_dialog_support_topText">如果喜欢本app，欢迎捐赠 。</string>
     <string name="main_dialog_support_byAlipay_text">使用支付宝捐赠：</string>
@@ -379,7 +355,7 @@
 
     <string name="pref_title_sort_picture">开启排序</string>
     <string name="pref_description_sort_picture">选择是否在截取完成后对图片进行排序</string>
-    
+
     <string name="pref_screen_title_professional">高级设置</string>
     <string name="pref_screen_description_professional">如您不知道其中设置有何作用，请勿更改此项设置，避免因设置不当导致app无法正常运行</string>
 
@@ -388,7 +364,6 @@
     <string name="pref_edit_AllowCheckBlackLines_title">最少连续黑边数</string>
     <string name="pref_edit_AllowNotBlackNums_default">20</string>
     <string name="pref_edit_AllowCheckBlackLines_default">10</string>
-
 
 
     <string name="pref_title_colorMode">更改导出图片颜色模式</string>
@@ -428,7 +403,7 @@
     </string>
 
     <string name="pref_title_display_watermark">水印文字</string>
-    <string name="pref_default_display_watermark">Made by equationl</string>
+    <string name="pref_default_display_watermark">使用 隐云图解制作 生成</string>
 
     <string name="pref_title_reduce_value">图片质量</string>
     <string-array name="pref_reduce_list_titles">
@@ -521,4 +496,14 @@
     <string name="command_menu_addPath">插入路径</string>
     <string name="command_menu_addTime">插入时间</string>
     <string name="title_activity_feedback">反馈</string>
+
+
+    <string name="float_done_channel_name">请勿关闭此通道，否则将无法使用外部程序截图！</string>
+    <string name="float_done_channel_description">使用外部程序截图时，通过该通知提示APP截图完成</string>
+
+    <string name="shortcut_quick_ShortLabel">快速开始</string>
+    <string name="shortcut_quick_LongLabel">快速开始</string>
+
+    <string name="shortcut_float_ShortLabel">开始截图</string>
+    <string name="shortcut_float_LongLabel">外部程序截图</string>
 </resources>

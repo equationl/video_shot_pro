@@ -365,7 +365,7 @@ public class BuildPictureActivity extends AppCompatActivity {
             Boolean isAddWatermark = settings.getBoolean("isAddWatermark_switch",true);
             if (isAddWatermark && isRunning) {
                 Canvas canvas = new Canvas(final_bitmap);
-                String watermark = settings.getString("watermark_text","Made by videoshot");
+                String watermark = settings.getString("watermark_text","使用 隐云图解制作 生成");
                 TextPaint textPaint = new TextPaint();
                 textPaint.setColor(Color.argb(80,150,150,150));
                 textPaint.setTextSize(40);

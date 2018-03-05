@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Instrumentation;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -13,6 +14,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
@@ -114,6 +116,10 @@ public class FloatWindowsService extends Service {
         Notification notice;
         Notification.Builder builder = new Notification.Builder(this).setTicker(res.getString(R.string.floatWindowsService_notice_ticker_text))
                 .setSmallIcon(R.mipmap.ic_launcher).setWhen(System.currentTimeMillis());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel();
+            builder.setChannelId("float_done");
+        }
         Intent appIntent=null;
         if (settings.getBoolean("isSortPicture", true)) {
             appIntent = new Intent(this,ChooseActivity.class);
@@ -160,7 +166,12 @@ public class FloatWindowsService extends Service {
         mScreenWidth = metrics.widthPixels;
         mScreenHeight = metrics.heightPixels;
 
-        mLayoutParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            mLayoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        }else {
+            mLayoutParams.type =  WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+        }
+        //mLayoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         mLayoutParams.format = PixelFormat.RGBA_8888;
         // 设置Window flag
         mLayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
@@ -256,7 +267,7 @@ public class FloatWindowsService extends Service {
 
 
     private void createImageReader() {
-
+        mImageReader = null;
         mImageReader = ImageReader.newInstance(mScreenWidth, mScreenHeight, PixelFormat.RGBA_8888, 1);
 
     }
@@ -391,6 +402,8 @@ public class FloatWindowsService extends Service {
 
             mFloatView.setVisibility(View.VISIBLE);
             shot_num++;
+            stopVirtual();
+            tearDownMediaProjection();
         }
     }
 
@@ -456,4 +469,16 @@ public class FloatWindowsService extends Service {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.O)
+    private void createNotificationChannel() {
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        String id = "float_done";
+        CharSequence name = getString(R.string.float_done_channel_name);
+        String description = getString(R.string.float_done_channel_description);
+        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+        NotificationChannel mChannel = new NotificationChannel(id, name, importance);
+        mChannel.setDescription(description);
+
+        mNotificationManager.createNotificationChannel(mChannel);
+    }
 }

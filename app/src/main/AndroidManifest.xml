@@ -36,6 +36,10 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
         <activity
             android:name=".PlayerActivity"
@@ -74,7 +78,6 @@
                 android:resource="@xml/provider_paths"
                 tools:replace="name,resource" />
         </provider>
-
         <provider
             android:name=".utils.GdtFileProvider"
             android:authorities="${applicationId}.fileProvider"
@@ -86,6 +89,7 @@
                 android:resource="@xml/gdt_file_path"
                 tools:replace="name,resource" />
         </provider>
+
         <service
             android:name=".FloatWindowsService"
             android:enabled="true"
@@ -99,29 +103,40 @@
         <activity
             android:name=".FeedbackActivity"
             android:label="@string/title_activity_feedback" />
-        <activity android:name=".ChooseActivity"
-            android:label="@string/title_activity_choose"/>
+        <activity
+            android:name=".ChooseActivity"
+            android:label="@string/title_activity_choose" />
         <activity
             android:name="com.tencent.tauth.AuthActivity"
-            android:noHistory="true"
-            android:launchMode="singleTask" >
+            android:launchMode="singleTask"
+            android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data android:scheme="tencent1106257597" />
             </intent-filter>
         </activity>
-        <activity android:name="com.tencent.connect.common.AssistActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+        <activity
+            android:name="com.tencent.connect.common.AssistActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            />
-        <service android:name="com.qq.e.comm.DownloadService" android:exported="false" />
-        <activity android:name="com.qq.e.ads.ADActivity" android:configChanges="keyboard|keyboardHidden|orientation|screenSize" />
-        <activity android:name=".wxapi.WXEntryActivity"
-            android:launchMode="singleTop"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <service
+            android:name="com.qq.e.comm.DownloadService"
+            android:exported="false" />
+
+        <activity
+            android:name="com.qq.e.ads.ADActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".wxapi.WXEntryActivity"
             android:exported="true"
-            android:theme="@style/AppTheme.Fullscreen.Translucent"/>
+            android:launchMode="singleTop"
+            android:theme="@style/AppTheme.Fullscreen.Translucent" />
+        <activity android:name=".ShortCutsActivity"></activity>
     </application>
 
 </manifest>
