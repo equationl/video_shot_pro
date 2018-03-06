@@ -141,7 +141,7 @@
         android:title="@string/pref_category_title_other" >
 
         <SwitchPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="isHideButton"
             android:summary="@string/pref_description_hide_btn"
             android:title="@string/pref_title_hide_btn" />
@@ -176,6 +176,18 @@
                     android:selectAllOnFocus="true"
                     android:singleLine="true"
                     android:title="@string/pref_edit_AllowCheckBlackLines_title" />
+            </PreferenceCategory>
+
+            <PreferenceCategory xmlns:android="http://schemas.android.com/apk/res/android"
+                android:title="@string/pref_category_title_PlayVideo" >
+                <EditTextPreference
+                    android:defaultValue="@string/pref_edit_gestureSensibility_default"
+                    android:inputType="number"
+                    android:key="gestureSensibility"
+                    android:maxLines="1"
+                    android:selectAllOnFocus="true"
+                    android:singleLine="true"
+                    android:title="@string/pref_edit_gestureSensibility_title" />
             </PreferenceCategory>
 
         </PreferenceScreen>

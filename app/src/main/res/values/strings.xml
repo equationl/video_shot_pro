@@ -30,6 +30,11 @@
     </string>
 
     <string name="main_updateHistory_text">
+        1.2 Update 03:\n
+        \t*优化播放体验\n
+        \t*\n
+        \t*\n
+        \t*\n
         1.2 Update 02:\n
         \t*增加 shortcut\n
         \t*外部程序截图模式适配安卓 8.0\n
@@ -347,8 +352,8 @@
     <string name="pref_title_shot_jpg">截取为jpg</string>
     <string name="pref_description_shot_jpg">选择是否在截取图片时保存为jpg（使用jpg能大幅减少图片大小，但是质量会略微有所降低）</string>
 
-    <string name="pref_title_hide_btn">单击隐藏按钮</string>
-    <string name="pref_description_hide_btn">选择是否在全屏播放时单击屏幕显示/隐藏按钮</string>
+    <string name="pref_title_hide_btn">单击隐藏界面</string>
+    <string name="pref_description_hide_btn">选择是否在全屏播放时单击屏幕显示/隐藏界面</string>
 
     <string name="pref_title_monitored_show">实时预览</string>
     <string name="pref_description_monitored_show">选择是否在合成图片时实时预览（开启后可能会内存溢出闪退，建议关闭）</string>
@@ -364,6 +369,10 @@
     <string name="pref_edit_AllowCheckBlackLines_title">最少连续黑边数</string>
     <string name="pref_edit_AllowNotBlackNums_default">20</string>
     <string name="pref_edit_AllowCheckBlackLines_default">10</string>
+
+    <string name="pref_category_title_PlayVideo">视频播放相关设置</string>
+    <string name="pref_edit_gestureSensibility_title">手势灵敏度</string>
+    <string name="pref_edit_gestureSensibility_default">10</string>
 
 
     <string name="pref_title_colorMode">更改导出图片颜色模式</string>

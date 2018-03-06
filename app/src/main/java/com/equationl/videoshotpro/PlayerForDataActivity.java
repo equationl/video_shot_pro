@@ -21,12 +21,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
@@ -51,7 +55,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
     VideoView videoview;
     View videoview_contianer;
     Button btn_left,btn_right,btn_bottom;
-    TextView video_time;
+    TextView video_time, play_controlBar_current_time, play_controlBar_totally_time;
     Uri uri;
     LinkedBlockingQueue<Long> mark_time = new LinkedBlockingQueue<Long>();
     int pic_num=0, isFirstPlay=1, shot_num=0;
@@ -71,6 +75,9 @@ public class PlayerForDataActivity extends AppCompatActivity {
     int gif_start_time=0, gif_end_time=0;
     boolean isShotFinish=false;
     int shotToGifMinTime;
+    LinearLayout player_controlBar_layout;
+    SeekBar play_seekbar;
+    ImageView play_controlBar_play_pause_btn;
 
     String do4Rasult;
     int markTime[] = {0,0};
@@ -85,6 +92,8 @@ public class PlayerForDataActivity extends AppCompatActivity {
     private static final int HandlerShotGifFail = 10013;
     private static final int HandlerShotGifSuccess = 10014;
     private static final int HandlerShotGifRunning = 10015;
+    private static final int HandlerUpdateControlBarCurrentTime = 10016;
+
     private static final int HandlerFBFonProgress = 20000;
     private static final int HandlerFBFonSuccess = 20001;
     private static final int HandlerFBFonFail = 20002;
@@ -109,6 +118,11 @@ public class PlayerForDataActivity extends AppCompatActivity {
         btn_bottom   = (Button) findViewById(R.id.data_button_bottom);
         videoview_contianer = findViewById(R.id.data_main_videoview_contianer);
         video_time = (TextView) findViewById(R.id.data_video_time);
+        player_controlBar_layout = (LinearLayout) findViewById(R.id.playerForData_controlBar_layout);
+        play_controlBar_current_time = (TextView) findViewById(R.id.playerForData_controlBar_current_time) ;
+        play_controlBar_totally_time = (TextView) findViewById(R.id.playerForData_controlBar_totally_time) ;
+        play_seekbar = (SeekBar) findViewById(R.id.playerForData_controlBar_seekBar);
+        play_controlBar_play_pause_btn = (ImageView) findViewById(R.id.playerForData_controlBar_play_pause_btn);
 
         params = (RelativeLayout.LayoutParams) btn_bottom.getLayoutParams();
         ffmpeg = FFmpeg.getInstance(this);
@@ -195,15 +209,19 @@ public class PlayerForDataActivity extends AppCompatActivity {
                 if (isFirstPlay==1) {
                     videoview.setBackgroundResource(0);
                     videoview.start();
+                    handler.sendEmptyMessage(HandlerUpdateControlBarCurrentTime);
                     btn_left.setText(R.string.player_text_rotationScreen);
                     isFirstPlay = 0;
+                    play_controlBar_play_pause_btn.setImageResource(android.R.drawable.ic_media_pause);
                 }
                 else {
                     if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
                         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                        player_controlBar_layout.setVisibility(View.INVISIBLE);
                         isORIENTATION_LANDSCAPE = false;
                     } else {
                         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                        player_controlBar_layout.setVisibility(View.VISIBLE);
                         isORIENTATION_LANDSCAPE = true;
                     }
                 }
@@ -283,6 +301,45 @@ public class PlayerForDataActivity extends AppCompatActivity {
                 isFirstPlay = 1;
             }
         });
+
+
+        play_seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                updataTimeFormat(play_controlBar_current_time, progress);
+                if (videoview.getDuration() == progress) {
+                    play_controlBar_play_pause_btn.setImageResource(android.R.drawable.ic_media_play);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                handler.removeMessages(HandlerUpdateControlBarCurrentTime);
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                int totall = seekBar.getProgress();
+                videoview.seekTo(totall);
+                handler.sendEmptyMessage(HandlerUpdateControlBarCurrentTime);
+            }
+        });
+
+        play_controlBar_play_pause_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (videoview.isPlaying()) {
+                    play_controlBar_play_pause_btn.setImageResource(android.R.drawable.ic_media_play);
+                    videoview.pause();
+                    handler.removeMessages(HandlerUpdateControlBarCurrentTime);
+                } else {
+                    play_controlBar_play_pause_btn.setImageResource(android.R.drawable.ic_media_pause);
+                    videoview.start();
+                    handler.sendEmptyMessage(HandlerUpdateControlBarCurrentTime);
+                }
+            }
+        });
+
     }
 
     @Override
@@ -309,6 +366,9 @@ public class PlayerForDataActivity extends AppCompatActivity {
             videoview_contianer.getLayoutParams().width = (int) width;
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
             btn_bottom.setLayoutParams(params);
+            if (videoview.isPlaying()) {
+                play_controlBar_play_pause_btn.setImageResource(android.R.drawable.ic_media_pause);
+            }
             Log.i("TEST","width="+width+" height="+height);
         } else {
             final WindowManager.LayoutParams attrs = getWindow().getAttributes();
@@ -575,10 +635,14 @@ public class PlayerForDataActivity extends AppCompatActivity {
         public boolean onDoubleTap(MotionEvent e) {
             if (videoview.isPlaying()) {
                 videoview.pause();
+                play_controlBar_play_pause_btn.setImageResource(android.R.drawable.ic_media_play);
+                handler.removeMessages(HandlerUpdateControlBarCurrentTime);
             }
             else {
                 videoview.setBackgroundResource(0);
                 videoview.start();
+                play_controlBar_play_pause_btn.setImageResource(android.R.drawable.ic_media_pause);
+                handler.sendEmptyMessage(HandlerUpdateControlBarCurrentTime);
                 btn_left.setText(R.string.player_text_rotationScreen);
             }
 
@@ -599,12 +663,16 @@ public class PlayerForDataActivity extends AppCompatActivity {
                     btn_left.setVisibility(View.VISIBLE);
                     btn_right.setVisibility(View.  VISIBLE);
                     btn_bottom.setVisibility(View.  VISIBLE);
+                    player_controlBar_layout.setVisibility(View.VISIBLE);
+                    //text_count.setVisibility(View.VISIBLE);
                     isHideBtn = false;
                 }
                 else {
                     btn_left.setVisibility(View.INVISIBLE);
                     btn_right.setVisibility(View.  INVISIBLE);
                     btn_bottom.setVisibility(View.  INVISIBLE);
+                    player_controlBar_layout.setVisibility(View.INVISIBLE);
+                    //text_count.setVisibility(View.INVISIBLE);
                     isHideBtn = true;
                 }
             }
@@ -616,7 +684,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             video_time.setVisibility(View.VISIBLE);
-            int px2ime = 500;
+            int px2ime = Integer.valueOf(settings.getString("gestureSensibility", "10"));
             videoview.seekTo(videoview.getCurrentPosition()-(int)distanceX*px2ime);
             String res;
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
@@ -835,9 +903,61 @@ public class PlayerForDataActivity extends AppCompatActivity {
                         break;
                     case HandlerFBFRunningFinish:
                         activity.btn_bottom.setText(R.string.player_text_mark);
+                    case HandlerUpdateControlBarCurrentTime:
+                        int currentTime = activity.videoview.getCurrentPosition();
+                        int totally = activity.videoview.getDuration();
+                        activity.updataTimeFormat(activity.play_controlBar_totally_time, totally);
+                        activity.updataTimeFormat(activity.play_controlBar_current_time, currentTime);
+                        activity.play_seekbar.setMax(totally);
+                        activity.play_seekbar.setProgress(currentTime);
+                        activity.handler.sendEmptyMessageDelayed(HandlerUpdateControlBarCurrentTime, 500);//500毫秒刷新
+                        break;
                 }
             }
         }
     }
 
+
+    /**
+     * 时间格式化
+     *    作者：zzj丶
+     *    链接：https://www.jianshu.com/p/564cffc2df87
+     * @param textView    时间控件
+     * @param millisecond 总时间 毫秒
+     */
+    private void updataTimeFormat(TextView textView, int millisecond) {
+        //将毫秒转换为秒
+        int second = millisecond / 1000;
+        //计算小时
+        int hh = second / 3600;
+        //计算分钟
+        int mm = second % 3600 / 60;
+        //计算秒
+        int ss = second % 60;
+        //判断时间单位的位数
+        String str = null;
+        if (hh != 0) {//表示时间单位为三位
+            str = String.format("%02d:%02d:%02d", hh, mm, ss);
+        } else {
+            str = String.format("%02d:%02d", mm, ss);
+        }
+        //将时间赋值给控件
+        textView.setText(str);
+    }
+
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+            if (isORIENTATION_LANDSCAPE) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                player_controlBar_layout.setVisibility(View.INVISIBLE);
+                isORIENTATION_LANDSCAPE = false;
+                return true;
+            }
+            return super.onKeyDown(keyCode, event);
+        }else {
+            return super.onKeyDown(keyCode, event);
+        }
+    }
 }
