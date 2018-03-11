@@ -60,7 +60,7 @@ public class MarkPictureActivity extends AppCompatActivity {
     Boolean isFromExtra;
     ProgressDialog dialog;
     Resources res;
-    int text_color=Color.BLACK, bg_color = Color.WHITE;
+    int text_color=Color.BLACK, bg_color = Color.argb(0, 255, 255, 255);
     boolean isMoveText=false;
     int bgRealWidth, bgRealHeight, relativeX, relativeY;
     Bitmap TextImgTemp=null;
@@ -312,7 +312,11 @@ public class MarkPictureActivity extends AppCompatActivity {
                     }
 
                     if (relativeY+TextImgTemp.getHeight()>bitmapBg.getHeight()) {
+                        if (bg_color == Color.argb(0, 255, 255, 255)) {
+                            bg_color = Color.WHITE;     //如果添加到图片底部，禁止设置背景为透明
+                        }
                         bitmap = addBitmap(bitmapBg,addTextToImage(bitmapBg,addTextString,addTextStringSize));
+                        bg_color = Color.argb(0, 255, 255, 255);
                     }
                     else {
                         bitmap = tool.jointTextImage(TextImgTemp,bitmapBg,relativeX,relativeY);
@@ -630,7 +634,7 @@ public class MarkPictureActivity extends AppCompatActivity {
         }
         else {
             nums_tip_text.setText((pic_no+1+"/")+pic_num);
-            DialogInterface.OnClickListener dialogOnclicListener=new DialogInterface.OnClickListener(){
+            DialogInterface.OnClickListener dialogOnclickListener=new DialogInterface.OnClickListener(){
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     switch(which){
@@ -647,18 +651,22 @@ public class MarkPictureActivity extends AppCompatActivity {
             builder = new AlertDialog.Builder(MarkPictureActivity.this);
             builder.setTitle("请输入要添加的文字")
                     .setView(view)
-                    .setPositiveButton("确定",dialogOnclicListener)
-                    .setNegativeButton("取消", dialogOnclicListener)
+                    .setPositiveButton("确定",dialogOnclickListener)
+                    .setNegativeButton("取消", dialogOnclickListener)
                     .setCancelable(false)
                     .create();
             builder.show();
             start_color_picker = (Button) view.findViewById(R.id.mark_dialog_chooseColor_btn);
             start_color_picker_bg = (Button) view.findViewById(R.id.mark_dialog_chooseColorBg_btn);
+            start_color_picker_bg.setBackgroundColor(bg_color);
+            start_color_picker.setBackgroundColor(text_color);
+            start_color_picker.setTextColor(tool.getInverseColor(text_color));
+            start_color_picker_bg.setTextColor(tool.getInverseColor(bg_color));
             start_color_picker.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     ColorPickerDialog mColorPickerDialog = new ColorPickerDialog(
                             MarkPictureActivity.this,
-                            Color.BLACK,
+                            text_color,
                             false,
                             mOnColorPickerListener
                     ).show();
@@ -668,7 +676,7 @@ public class MarkPictureActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     ColorPickerDialog mColorPickerDialog = new ColorPickerDialog(
                             MarkPictureActivity.this,
-                            Color.WHITE,
+                            bg_color,
                             false,
                             mOnColorPickerBgListener
                     ).show();
@@ -746,6 +754,12 @@ public class MarkPictureActivity extends AppCompatActivity {
                         if (activity.pic_no<activity.pic_num && activity.fileList[activity.pic_no].equals("text")) {
                             activity.set_image(activity.pic_no);
                             activity.fileList[activity.pic_no] = "del";
+                        }
+                        else if (activity.pic_no>0 && activity.pic_no<activity.pic_num && activity.fileList[activity.pic_no-1].equals("text")) {
+                            activity.nums_tip_text.setText((activity.pic_no+"/")+activity.pic_num);
+                            activity.set_image(activity.pic_no-1, "_t");
+                            activity.fileList[activity.pic_no] = "del";
+                            activity.pic_no--;
                         }
                         else {
                             activity.nums_tip_text.setText((activity.pic_no+"/")+activity.pic_num);

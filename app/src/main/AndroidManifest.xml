@@ -102,6 +102,7 @@
             android:theme="@style/AppTheme.Fullscreen" />
         <activity
             android:name=".FeedbackActivity"
+            android:parentActivityName=".MainActivity"
             android:label="@string/title_activity_feedback" />
         <activity
             android:name=".ChooseActivity"

@@ -39,6 +39,7 @@ public class CommandActivity extends AppCompatActivity {
         setContentView(R.layout.activity_command);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         btn = (Button) findViewById(R.id.command_button);
         textview = (TextView) findViewById(R.id.command_text);
@@ -123,6 +124,10 @@ public class CommandActivity extends AppCompatActivity {
             intent.addCategory(intent.CATEGORY_OPENABLE);
             startActivityForResult(Intent.createChooser(intent, "请选择文件"),1);
             return true;
+        }
+
+        if (id == android.R.id.home) {
+            finish();
         }
 
         return super.onOptionsItemSelected(item);

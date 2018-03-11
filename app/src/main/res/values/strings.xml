@@ -30,11 +30,17 @@
     </string>
 
     <string name="main_updateHistory_text">
+        1.2 Update 04:\n
+        \t*增加退出自动清除缓存\n
+        \t*修改添加文字时默认背景为全透明\n
+        \t*优化添加文字时选择颜色的可视化过程\n
+        \t*优化添加文字的撤销操作\n
+        \t*优化某些界面的Toolbar\n
+        \t*\n
         1.2 Update 03:\n
-        \t*优化播放体验\n
-        \t*\n
-        \t*\n
-        \t*\n
+        \t*优化播放体验：\n
+        \t使用横屏播放时增加时间轴\n
+        \t优化手势操作\n
         1.2 Update 02:\n
         \t*增加 shortcut\n
         \t*外部程序截图模式适配安卓 8.0\n
@@ -217,6 +223,7 @@
     <string name="main_toast_unSupportFloatBtn">当前系统版本过低，无法使用该功能！</string>
     <string name="main_toast_getPermission_fail">获取权限失败！</string>
     <string name="main_toast_showNavigationGuider">向右滑动可以打开侧边栏哦~</string>
+    <string name="main_toast_confirmExit">再按一次退出程序</string>
 
     <string name="main_nav_text_setting">设置</string>
     <string name="main_nav_text_more">更多&#8230;</string>
