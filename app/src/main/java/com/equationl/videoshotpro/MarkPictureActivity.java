@@ -77,6 +77,8 @@ public class MarkPictureActivity extends AppCompatActivity {
     private static final int HandlerStatusProgressDone = 10015;
     private static final int HandlerStatusGetImgFail = 10016;
 
+    private static final String TAG = "EL,In MarkActivity";
+
 
     private final MyHandler handler = new MyHandler(this);
     public static MarkPictureActivity instance = null;   //FIXME  暂时这样吧，实在找不到更好的办法了
@@ -418,7 +420,7 @@ public class MarkPictureActivity extends AppCompatActivity {
         Canvas canvas = new Canvas(result);
         Paint paint = new Paint();
         paint.setColor(bg_color);
-        canvas.drawRect(0, 0, width, bm.getHeight(), paint);
+        canvas.drawRect(0, 0, result.getWidth(), result.getHeight(), paint);
 
         StaticLayout layout = new StaticLayout(text,textPaint,canvas.getWidth(), Layout.Alignment.ALIGN_NORMAL,1.0F,0.0F,true);
         canvas.translate(5,0);
@@ -451,11 +453,14 @@ public class MarkPictureActivity extends AppCompatActivity {
         int t_height=0;
         for (int i=0;i<len.length;i++) {
             t_height+=char_height;
-            int string_wdith = (int)textPaint.measureText(len[i]);
-            if (string_wdith > width) {
-                t_height+=char_height*(string_wdith/width);
+            int string_width = (int)textPaint.measureText(len[i]);
+            if (string_width > width) {
+                t_height+=char_height*(string_width/width);
+                Log.i(TAG, "line: "+ string_width/width);
             }
         }
+
+        Log.i(TAG, "finally width="+width+" height="+t_height);
         Bitmap result = Bitmap.createBitmap(10,10, Bitmap.Config.ARGB_8888);
         try {
             result = Bitmap.createBitmap(width,t_height, Bitmap.Config.ARGB_8888);
@@ -473,7 +478,7 @@ public class MarkPictureActivity extends AppCompatActivity {
         Canvas canvas = new Canvas(result);
         Paint paint = new Paint();
         paint.setColor(bg_color);
-        canvas.drawRect(0, 0, width, bm.getHeight(), paint);
+        canvas.drawRect(0, 0, result.getWidth(), result.getHeight(), paint);
 
         StaticLayout layout = new StaticLayout(text,textPaint,canvas.getWidth(), Layout.Alignment.ALIGN_NORMAL,1.0F,0.0F,true);
         canvas.translate(5,0);
