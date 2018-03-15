@@ -15,7 +15,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Build;
@@ -44,7 +43,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,6 +52,8 @@ import com.equationl.videoshotpro.rom.MeizuUtils;
 import com.equationl.videoshotpro.rom.MiuiUtils;
 import com.equationl.videoshotpro.rom.QikuUtils;
 import com.equationl.videoshotpro.rom.RomUtils;
+import com.github.clans.fab.FloatingActionButton;
+import com.github.clans.fab.FloatingActionMenu;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
@@ -66,7 +66,6 @@ import com.tencent.bugly.crashreport.CrashReport;
 import com.tencent.connect.share.QQShare;
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
 import com.tencent.mm.opensdk.modelmsg.WXMediaMessage;
-import com.tencent.mm.opensdk.modelmsg.WXTextObject;
 import com.tencent.mm.opensdk.modelmsg.WXWebpageObject;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
@@ -81,12 +80,11 @@ import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    Button button_user;
+    //Button button_user;
     AlertDialog.Builder dialog;
     AlertDialog dialog2;
     android.support.design.widget.CoordinatorLayout container;
@@ -98,13 +96,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     List<String> FileList;
     String extension;
     ProgressDialog dialog_copyFile;
-    Button button_splicing, button_floatBtn, button_ffmpeg,button_help, button_setting;
-    TextView text_bottom;
+    //Button button_splicing, button_floatBtn, button_ffmpeg,button_help, button_setting;
+    //TextView text_bottom;
     DrawerLayout drawer;
     ViewGroup bannerContainer;
     BannerView bv;
     int activityResultMode = 0;
     IWXAPI wxApi;
+    FloatingActionMenu   main_floatBtn_menu;
+    FloatingActionButton main_floatBtn_quick;
+    FloatingActionButton main_floatBtn_splicing;
+    FloatingActionButton main_floatBtn_shotScreen;
+    FloatingActionButton main_floatBtn_frameByFrame;
+
+
 
     private final MyHandler handler = new MyHandler(this);
     public static MainActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
@@ -173,15 +178,45 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        button_user = findViewById(R.id.btn_main_quickStart);
-        button_splicing = (Button)findViewById(R.id.btn_main_splicing);
-        button_ffmpeg = (Button)findViewById(R.id.btn_main_ffmpeg);
-        button_floatBtn = (Button)findViewById(R.id.btn_main_floatBtn);
-        button_help = (Button)findViewById(R.id.btn_main_help);
-        button_setting = (Button)findViewById(R.id.btn_main_setting);
+        //button_user = findViewById(R.id.btn_main_quickStart);
+        //button_splicing = (Button)findViewById(R.id.btn_main_splicing);
+        //button_ffmpeg = (Button)findViewById(R.id.btn_main_ffmpeg);
+        //button_floatBtn = (Button)findViewById(R.id.btn_main_floatBtn);
+        //button_help = (Button)findViewById(R.id.btn_main_help);
+        //button_setting = (Button)findViewById(R.id.btn_main_setting);
 
-        text_bottom = (TextView)findViewById(R.id.text_main_bottom);
-        text_bottom.getPaint().setFlags(Paint. UNDERLINE_TEXT_FLAG );
+        main_floatBtn_menu = (FloatingActionMenu) findViewById(R.id.main_floatBtn_menu);
+
+        main_floatBtn_quick = (FloatingActionButton) findViewById(R.id.main_floatBtn_quick);
+        main_floatBtn_splicing = (FloatingActionButton) findViewById(R.id.main_floatBtn_splicing);
+        main_floatBtn_shotScreen = (FloatingActionButton) findViewById(R.id.main_floatBtn_shotScreen);
+        main_floatBtn_frameByFrame = (FloatingActionButton) findViewById(R.id.main_floatBtn_frameByFrame);
+
+
+        main_floatBtn_menu.setClosedOnTouchOutside(true);
+        main_floatBtn_menu.hideMenuButton(false);
+
+        main_floatBtn_quick.setOnClickListener(clickListener);
+        main_floatBtn_splicing.setOnClickListener(clickListener);
+        main_floatBtn_shotScreen.setOnClickListener(clickListener);
+        main_floatBtn_frameByFrame.setOnClickListener(clickListener);
+
+        main_floatBtn_menu.showMenuButton(true);
+
+        main_floatBtn_menu.setOnMenuButtonClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (main_floatBtn_menu.isOpened()) {
+                    //Toast.makeText(MainActivity.this, main_floatBtn_menu.getMenuButtonLabelText(), Toast.LENGTH_SHORT).show();
+                }
+
+                main_floatBtn_menu.toggle(true);
+            }
+        });
+
+
+        //text_bottom = (TextView)findViewById(R.id.text_main_bottom);
+        //text_bottom.getPaint().setFlags(Paint. UNDERLINE_TEXT_FLAG );
 
         bannerContainer = (ViewGroup) findViewById(R.id.main_bannerContainer);
 
@@ -209,53 +244,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .provider("com.equationl.videoshotpro.fileprovider")
                 .multiSelect(true, 100)
                 .build();
-
-        text_bottom.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                drawer.openDrawer(Gravity.START);
-            }
-        });
-
-        button_user.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("video/*");
-                intent.addCategory(intent.CATEGORY_OPENABLE);
-                startActivityForResult(Intent.createChooser(intent, "请选择视频文件"),RequestCodeQuickStart);
-            }
-        });
-
-        button_splicing.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                btn_splicing();
-            }
-        });
-
-        button_floatBtn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                btn_floatBtn();
-            }
-        });
-
-        button_ffmpeg.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, CommandActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        button_help.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                btn_help();
-            }
-        });
-
-        button_setting.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
-                startActivity(intent);
-            }
-        });
     }
 
     @Override
@@ -334,58 +322,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
+        Intent intent;
         int id = item.getItemId();
-
         activityResultMode = 0;
 
-        if (id == R.id.nav_help) {
-            btn_help();
-        }
-        /*else if (id == R.id.nav_more) {
-            Intent intent = new Intent(MainActivity.this, CommandActivity.class);
-            startActivity(intent);
-        } */
-        else if (id == R.id.nav_feedback) {
-            String versionName;
-            int currentapiVersion=0;
-            try {
-                PackageManager packageManager = getPackageManager();
-                PackageInfo packInfo = packageManager.getPackageInfo(getPackageName(),0);
-                versionName = packInfo.versionName;
-                currentapiVersion=android.os.Build.VERSION.SDK_INT;
-            }
-            catch (Exception ex) {
-                versionName = "NULL";
-            }
-            String mail_content = String.format(getResources().getString(R.string.main_mail_content),
-                    versionName, currentapiVersion+"", android.os.Build.MODEL);
-
-            //Fixme
-            Intent intent = new Intent(MainActivity.this, FeedbackActivity.class);
-            startActivity(intent);
-            /*Intent data=new Intent(Intent.ACTION_SENDTO);
-            data.setData(Uri.parse("mailto:admin@likehide.com"));
-            data.putExtra(Intent.EXTRA_SUBJECT, this.getResources().getString(R.string.main_mail_title));
-            data.putExtra(Intent.EXTRA_TEXT, mail_content);
-            startActivity(data);   */
-        }
-        /*else if (id == R.id.nav_setting) {
-            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
-            startActivity(intent);
-        }
-        else if (id == R.id.nav_splicing) {
-            btn_splicing();
-        } else if (id == R.id.nav_floatBtn) {
-            btn_floatBtn();
-        }  */
-        else if (id == R.id.nav_support) {
-            showSupportDialog();
-        } else if (id == R.id.nav_about) {
-            showAboutDialog();
-        } else if (id == R.id.nav_frameByFrame) {
-            btn_shotFrame();
-        } else if (id == R.id.nav_share) {
-            shareAPP();
+        switch (id) {
+            case R.id.nav_help:
+                btn_help();
+                break;
+            case R.id.nav_feedback:
+                btn_feedback();
+                break;
+            case R.id.main_nav_setting:
+                intent = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.nav_support:
+                showSupportDialog();
+                break;
+            case R.id.nav_about:
+                showAboutDialog();
+                break;
+            case R.id.nav_share:
+                shareAPP();
+                break;
+            case R.id.main_nav_ffmpeg:
+                intent = new Intent(MainActivity.this, CommandActivity.class);
+                startActivity(intent);
+                break;
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -884,7 +848,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    private void btn_floatBtn() {
+    private void btn_shotScreen() {
         if (sp_init.getBoolean("isFirstUseFloat", true)) {
             showFloatDialog();
             SharedPreferences.Editor editor = sp_init.edit();
@@ -903,6 +867,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         dialog.setMessage(content);
         dialog.setIcon(R.mipmap.ic_launcher);
         dialog.create().show();
+    }
+
+    private void btn_feedback() {
+        String versionName;
+        int currentapiVersion=0;
+        try {
+            PackageManager packageManager = getPackageManager();
+            PackageInfo packInfo = packageManager.getPackageInfo(getPackageName(),0);
+            versionName = packInfo.versionName;
+            currentapiVersion=android.os.Build.VERSION.SDK_INT;
+        }
+        catch (Exception ex) {
+            versionName = "NULL";
+        }
+        String mail_content = String.format(getResources().getString(R.string.main_mail_content),
+                versionName, currentapiVersion+"", android.os.Build.MODEL);
+
+        //Fixme
+        Intent intent = new Intent(MainActivity.this, FeedbackActivity.class);
+        startActivity(intent);
+            /*Intent data=new Intent(Intent.ACTION_SENDTO);
+            data.setData(Uri.parse("mailto:admin@likehide.com"));
+            data.putExtra(Intent.EXTRA_SUBJECT, this.getResources().getString(R.string.main_mail_title));
+            data.putExtra(Intent.EXTRA_TEXT, mail_content);
+            startActivity(data);   */
     }
 
     private void btn_shotFrame() {
@@ -1160,5 +1149,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         return super.onKeyDown(keyCode, event);
     }
+
+
+    private View.OnClickListener clickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()) {
+                case R.id.main_floatBtn_quick:
+                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                    intent.setType("video/*");
+                    intent.addCategory(intent.CATEGORY_OPENABLE);
+                    startActivityForResult(Intent.createChooser(intent, "请选择视频文件"),RequestCodeQuickStart);
+                    break;
+                case R.id.main_floatBtn_splicing:
+                    btn_splicing();
+                    break;
+                case R.id.main_floatBtn_shotScreen:
+                    btn_shotScreen();
+                    break;
+                case R.id.main_floatBtn_frameByFrame:
+                    btn_shotFrame();
+                    break;
+            }
+        }
+    };
 }
 

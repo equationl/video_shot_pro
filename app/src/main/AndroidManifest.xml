@@ -102,8 +102,8 @@
             android:theme="@style/AppTheme.Fullscreen" />
         <activity
             android:name=".FeedbackActivity"
-            android:parentActivityName=".MainActivity"
-            android:label="@string/title_activity_feedback" />
+            android:label="@string/title_activity_feedback"
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".ChooseActivity"
             android:label="@string/title_activity_choose" />
@@ -137,7 +137,11 @@
             android:exported="true"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.Fullscreen.Translucent" />
-        <activity android:name=".ShortCutsActivity"></activity>
+        <activity android:name=".ShortCutsActivity" />
+        <activity
+            android:name=".Main2Activity"
+            android:label="@string/title_activity_main2"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

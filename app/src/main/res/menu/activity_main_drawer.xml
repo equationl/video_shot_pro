@@ -4,9 +4,13 @@
     <item android:title="@string/main_nav_title_more">
         <menu>
             <item
-                android:id="@+id/nav_frameByFrame"
+                android:id="@+id/main_nav_ffmpeg"
                 android:icon="?android:attr/actionModeCopyDrawable"
-                android:title="@string/main_nav_text_frameByFrame" />
+                android:title="@string/main_nav_text_ffmpeg" />
+            <item
+                android:id="@+id/main_nav_setting"
+                android:icon="?android:attr/actionModeCopyDrawable"
+                android:title="@string/main_nav_text_setting" />
         </menu>
     </item>
 
