@@ -159,6 +159,11 @@
 
             <PreferenceCategory xmlns:android="http://schemas.android.com/apk/res/android"
                 android:title="@string/pref_category_title_checkBlankLines" >
+                <SwitchPreference
+                    android:defaultValue="true"
+                    android:key="isCheckBlankLines"
+                    android:summary="@string/pref_description_CheckBlankLines"
+                    android:title="@string/pref_title_CheckBlankLines" />
                 <EditTextPreference
                     android:defaultValue="@string/pref_edit_AllowNotBlackNums_default"
                     android:inputType="number"
@@ -166,6 +171,7 @@
                     android:maxLines="1"
                     android:selectAllOnFocus="true"
                     android:singleLine="true"
+                    android:dependency="isCheckBlankLines"
                     android:title="@string/pref_edit_AllowNotBlackNums_title" />
 
                 <EditTextPreference
@@ -175,6 +181,7 @@
                     android:maxLines="1"
                     android:selectAllOnFocus="true"
                     android:singleLine="true"
+                    android:dependency="isCheckBlankLines"
                     android:title="@string/pref_edit_AllowCheckBlackLines_title" />
             </PreferenceCategory>
 

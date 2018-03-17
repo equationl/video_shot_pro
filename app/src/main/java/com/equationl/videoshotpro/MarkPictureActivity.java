@@ -569,7 +569,12 @@ public class MarkPictureActivity extends AppCompatActivity {
                 Log.i("cao", "name= "+name);
                 tool.AllowCheckBlackLines = Integer.valueOf(settings.getString("AllowCheckBlackLines", "10"));
                 tool.AllowNotBlackNums = Integer.valueOf(settings.getString("AllowNotBlackNums", "20"));
-                bitmap = tool.removeImgBlackSide(getBitmapFromFile(file.split("\\.")[0]));
+                if (settings.getBoolean("isCheckBlankLines", true)) {
+                    bitmap = tool.removeImgBlackSide(getBitmapFromFile(file.split("\\.")[0]));
+                }
+                else {
+                    bitmap = getBitmapFromFile(file.split("\\.")[0]);
+                }
                 try {
                     if (!saveMyBitmap(bitmap, name)) {
                         msg = Message.obtain();
