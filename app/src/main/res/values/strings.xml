@@ -30,6 +30,8 @@
     </string>
 
     <string name="main_updateHistory_text">
+        1.2 Fix 05:\n
+        \t*修复外部程序截图时自动去除黑边失败的BUG\n
         1.2 Update 04:\n
         \t*增加退出自动清除缓存\n
         \t*修改添加文字时默认背景为全透明\n
@@ -380,6 +382,8 @@
     <string name="pref_screen_description_professional">如您不知道其中设置有何作用，请勿更改此项设置，避免因设置不当导致app无法正常运行</string>
 
     <string name="pref_category_title_checkBlankLines">检测截图中的黑边设置</string>
+    <string name="pref_title_CheckBlankLines">开启除黑边</string>
+    <string name="pref_description_CheckBlankLines">选择是否在非本地视频截图时自动去除黑边，如果截图不完整，请关闭此项</string>
     <string name="pref_edit_AllowNotBlackNums_title">单行允许最多非黑点数</string>
     <string name="pref_edit_AllowCheckBlackLines_title">最少连续黑边数</string>
     <string name="pref_edit_AllowNotBlackNums_default">20</string>

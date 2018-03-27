@@ -512,35 +512,35 @@ public class Tools{
      * @param  bitmap 源图片
      * @return 处理完成的bitmap
      *
-    * */
+     * */
     public Bitmap removeImgBlackSide(Bitmap bitmap) {
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
 
-        Log.i("cao", "width="+width+" height="+height);
+        Log.i(TAG, "width="+width+" height="+height);
 
         int[] area = getImgBlackArea(bitmap);
 
-        Log.i("cao", "area="+area[0]+" "+area[1]);
+        Log.i(TAG, "area="+area[0]+" "+area[1]);
 
         if (area[0] > 0) {
             bitmap = Bitmap.createBitmap(bitmap, 0, area[0], width, height-area[0]);
         }
         if (area[1] > 0) {
-            bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, area[1]);
+            bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, bitmap.getHeight()-(height-area[1]));
         }
         return bitmap;
     }
 
 
     /**
-    * 检查指定行是否为无内容区域（仅检查横向）
-    *
-    * @param bitmap 源bitmap
+     * 检查指定行是否为无内容区域（仅检查横向）
+     *
+     * @param bitmap 源bitmap
      *@param y 欲检查的行的坐标
      * @return 是否为无内容区域
      *
-    * */
+     * */
     public boolean checkLineColorIsBlack(Bitmap bitmap, int y) {
         int len = bitmap.getWidth();
         int NotBlackNum = 0;
@@ -550,7 +550,7 @@ public class Tools{
             //Log.i("nidaye", "i="+i+" y="+y);
             //Log.i("nidaye", "color="+color);
             //Log.i("el", "ALPHA="+Color.alpha(color));
-            if (color != Color.BLACK && Color.alpha(color) != 0) {
+            if (color != Color.BLACK || Color.alpha(color) != 255) {
                 NotBlackNum++;
             }
         }
@@ -573,7 +573,8 @@ public class Tools{
         Boolean lineIsBlack = checkLineColorIsBlack(bitmap,i);
         while (true) {
             if (i >= bitmap.getHeight()/2) {
-                i = 0;
+                Log.i(TAG, "i >= bitmap.getHeight()/2");
+                i = AllowCheckBlackLines;
                 break;
             }
             if (!lineIsBlack) blackLineNums++;
@@ -587,31 +588,81 @@ public class Tools{
         temp1 = i-AllowCheckBlackLines;
 
 
-        blackLineNums = 0;
-        //i = (int)((bitmap.getHeight())/1.3);
+        /*blackLineNums = 0;
+        //i = (int)((bitmap.getHeight())*0.6);
         Log.i("cao", "i="+i);
         lineIsBlack = checkLineColorIsBlack(bitmap,i);
         while (true) {
+            Log.i(TAG, "i="+i+" lineIsBlack="+lineIsBlack);
             if (i >= (bitmap.getHeight()-1) ) {
                 Log.i("cao", "jiushi ni l ");
+                i = AllowCheckBlackLines*2;
                 break;
             }
             if (lineIsBlack) {
                 blackLineNums++;
-                Log.i("cao", "lineIsBlack:true");
+                Log.i(TAG, "lineIsBlack:true");
             }
             else {
                 blackLineNums = 0;
             }
-            if (blackLineNums >= AllowCheckBlackLines) break;
+            if (blackLineNums >= AllowCheckBlackLines) {
+                Log.i(TAG, "break: blackLineNums="+blackLineNums+"AllowCheckBlackLines="+AllowCheckBlackLines);
+                break;
+            }
             i++;
             lineIsBlack = checkLineColorIsBlack(bitmap,i);
         }
-        temp2 = i-AllowCheckBlackLines-temp1;
+        Log.i(TAG, "i="+i+" lineIsBlack="+lineIsBlack);
 
+        Log.i(TAG, "AllowCheckBlackLines="+AllowCheckBlackLines);
+        temp2 = i-AllowCheckBlackLines*2;
+
+        int temp_AllowCheckBlackLines = AllowCheckBlackLines;
+        while (Math.abs(temp1-temp2) < 50) {
+            temp2 = getImgBlackAreaDown(bitmap, temp1+AllowCheckBlackLines);
+        }
+        AllowCheckBlackLines = temp_AllowCheckBlackLines;*/
+
+        temp2 = getImgBlackAreaDown(bitmap);
 
         return new int[]{temp1, temp2};
     }
+
+    private int getImgBlackAreaDown(Bitmap bitmap) {
+        int blackLineNums = 0;
+        boolean lineIsBlack;
+        int i = bitmap.getHeight()-1;
+        //i = (int)((bitmap.getHeight())*0.6);
+        Log.i("cao", "i="+i);
+        lineIsBlack = checkLineColorIsBlack(bitmap,i);
+        while (true) {
+            Log.i(TAG, "i="+i+" lineIsBlack="+lineIsBlack);
+            if (i <= bitmap.getHeight()/2) {
+                Log.i(TAG, "break case i out");
+                i = bitmap.getHeight();
+                break;
+            }
+            if (!lineIsBlack) {
+                blackLineNums++;
+                Log.i(TAG, "lineIsBlack:true");
+            }
+            else {
+                blackLineNums = 0;
+            }
+            if (blackLineNums >= AllowCheckBlackLines) {
+                Log.i(TAG, "break: blackLineNums="+blackLineNums+"AllowCheckBlackLines="+AllowCheckBlackLines);
+                break;
+            }
+            i--;
+            lineIsBlack = checkLineColorIsBlack(bitmap,i);
+        }
+        Log.i(TAG, "i="+i+" lineIsBlack="+lineIsBlack);
+
+        Log.i(TAG, "AllowCheckBlackLines="+AllowCheckBlackLines);
+        return i+AllowCheckBlackLines;
+    }
+
 
     /**
     * 获取imageview实际绘制的图片大小
