@@ -200,8 +200,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Thread t = new Thread(new MainActivity.MyThread());
         t.start();
 
-
+        int userFlagID = sp_init.getInt("userFlagID", 0);
+        if (userFlagID == 0) {
+            userFlagID = tool.createID();
+            SharedPreferences.Editor editor = sp_init.edit();
+            editor.putInt("userFlagID", userFlagID);
+            editor.apply();
+        }
         Bugly.init(getApplicationContext(), "41a66442fd", false);
+        CrashReport.setUserId(""+userFlagID);
 
         galleryConfig = new GalleryConfig.Builder()
                 .imageLoader(new GlideImageLoader())
