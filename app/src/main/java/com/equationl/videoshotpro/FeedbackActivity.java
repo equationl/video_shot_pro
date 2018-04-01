@@ -1,8 +1,10 @@
 package com.equationl.videoshotpro;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -41,6 +43,7 @@ public class FeedbackActivity extends AppCompatActivity {
     EditText edit_content, edit_email;
     String text_content, text_email;
     Resources res;
+    SharedPreferences sp_init;
 
     private static final int HanderStatusPostFeedbackSuccessful = 1;
     private static final int HanderStatusPostFeedbackNetFail = 2;
@@ -62,6 +65,8 @@ public class FeedbackActivity extends AppCompatActivity {
         edit_content = (EditText) findViewById(R.id.edit_feedback_content);
         edit_email = (EditText) findViewById(R.id.edit_feedback_email);
         res = getResources();
+
+        sp_init = getSharedPreferences("init", Context.MODE_PRIVATE);
 
         btn_submit.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -88,6 +93,8 @@ public class FeedbackActivity extends AppCompatActivity {
                     }
                     String mail_content = String.format(getResources().getString(R.string.main_mail_content),
                             versionName, currentapiVersion + "", android.os.Build.MODEL);
+                    int userFlagID = sp_init.getInt("userFlagID", 0);
+                    text_email += "\n-----------\n用户ID：" + userFlagID;
                     mail_content = text_content + "\n-----------\n系统信息：\n" + mail_content + "\n------------\n联系信息：\n" + text_email;
                     mail_content = mail_content.replaceAll("\n", "<br />");
                     mail_content = mail_content.replaceAll(" ", "&nbsp;");

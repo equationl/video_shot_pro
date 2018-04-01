@@ -127,12 +127,9 @@ public class PlayerActivity extends AppCompatActivity {
 
         tool.cleanExternalCache(this);    //清除上次产生的缓存图片
 
-        Bundle bundle = this.getIntent().getExtras();
-        path = bundle.getString("path");
-
-        Log.i("el_test: video path=", path);
-
         uri = getIntent().getData();
+        path = tool.getImageAbsolutePath(this, uri);
+
         //videoview.setMediaController(new MediaController(this));
         videoview.setVideoURI(uri);
 
@@ -145,9 +142,18 @@ public class PlayerActivity extends AppCompatActivity {
         } catch (SecurityException e) {
             Toast.makeText(this, R.string.player_toast_loadUriFail_lackPermission, Toast.LENGTH_LONG).show();
             finish();
+        }   catch (Exception e) {
+            Toast.makeText(this, R.string.player_toast_loadUriFail_other, Toast.LENGTH_LONG).show();
+            finish();
         }
         String meta_duration = rev.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION);
-        long duration = Long.parseLong(meta_duration);
+        long duration = 0;
+        try {
+            duration = Long.parseLong(meta_duration);
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, R.string.player_toast_getMetaDuration_fail, Toast.LENGTH_LONG).show();
+            finish();
+        }
         Bitmap bitmap = rev.getFrameAtTime(((duration/2)*1000),
                     MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
         videoview.setBackground(new BitmapDrawable(bitmap));

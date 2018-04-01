@@ -166,7 +166,7 @@ public class MarkPictureActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (flag == 0) {
-                    Log.i("el", "第一次调用：pic_no="+pic_no);
+                    //Log.i("el", "第一次调用：pic_no="+pic_no);
                     set_image(pic_no);
                     flag++;
                     btn_start.setVisibility(View.VISIBLE);
@@ -175,7 +175,7 @@ public class MarkPictureActivity extends AppCompatActivity {
                     return false;
                 }
                 else {
-                    Log.i("el", "非第一次调用：pic_no="+pic_no);
+                    //Log.i("el", "非第一次调用：pic_no="+pic_no);
                     switch (event.getAction()) {
                         case MotionEvent.ACTION_DOWN:
                             mPosX = event.getX();

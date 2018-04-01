@@ -792,4 +792,8 @@ public class Tools{
         return uri;
     }
 
+    public int createID() {
+        return (int)((Math.random()*9+1)*100000);
+    }
+
 }

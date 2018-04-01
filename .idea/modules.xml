@@ -4,7 +4,9 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/floatbtnsample/floatbtnsample.iml" filepath="$PROJECT_DIR$/floatbtnsample/floatbtnsample.iml" />
+      <module fileurl="file://F:\andoid\videoshotpro\floatbtnsample\floatbtnsample.iml" filepath="F:\andoid\videoshotpro\floatbtnsample\floatbtnsample.iml" />
       <module fileurl="file://$PROJECT_DIR$/library/library.iml" filepath="$PROJECT_DIR$/library/library.iml" />
+      <module fileurl="file://F:\andoid\videoshotpro\library\library.iml" filepath="F:\andoid\videoshotpro\library\library.iml" />
       <module fileurl="file://$PROJECT_DIR$/videoshotpro.iml" filepath="$PROJECT_DIR$/videoshotpro.iml" />
     </modules>
   </component>
