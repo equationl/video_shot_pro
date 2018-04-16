@@ -29,6 +29,8 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
@@ -52,6 +54,7 @@ import com.equationl.videoshotpro.rom.MeizuUtils;
 import com.equationl.videoshotpro.rom.MiuiUtils;
 import com.equationl.videoshotpro.rom.QikuUtils;
 import com.equationl.videoshotpro.rom.RomUtils;
+import com.equationl.videoshotpro.utils.WaterFallData;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
@@ -80,6 +83,7 @@ import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -109,6 +113,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     FloatingActionButton main_floatBtn_shotScreen;
     FloatingActionButton main_floatBtn_frameByFrame;
 
+    private RecyclerView mRecyclerView;
+    private RecyclerView.LayoutManager mLayoutManager;
+    private MainWaterFallAdapter mAdapter;
 
 
     private final MyHandler handler = new MyHandler(this);
@@ -192,6 +199,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         main_floatBtn_shotScreen = (FloatingActionButton) findViewById(R.id.main_floatBtn_shotScreen);
         main_floatBtn_frameByFrame = (FloatingActionButton) findViewById(R.id.main_floatBtn_frameByFrame);
 
+        mRecyclerView = (RecyclerView) findViewById(R.id.main_recyclerView);
+        initRecycleView();
 
         main_floatBtn_menu.setClosedOnTouchOutside(true);
         main_floatBtn_menu.hideMenuButton(false);
@@ -1179,5 +1188,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
     };
+
+    private void initRecycleView() {
+        mLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        mAdapter = new MainWaterFallAdapter(this, buildData());
+
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setAdapter(mAdapter);
+    }
+
+    private List<WaterFallData> buildData() {
+        String filepath =  tool.getSaveRootPath();
+        String[] files = tool.getFileOrderByName(filepath);
+
+        List<WaterFallData> list = new ArrayList<>();
+        for(int i=0;i<files.length;i++) {
+            WaterFallData data = new WaterFallData();
+            data.img = tool.getBitmapThumbnailFromFile(filepath+"/"+files[i], 400, 500);
+            data.text = files[i];
+            data.imgHeight = (i % 2)*100 + 400; //偶数和奇数的图片设置不同的高度，以到达错开的目的
+            list.add(data);
+        }
+
+        return list;
+    }
 }
 

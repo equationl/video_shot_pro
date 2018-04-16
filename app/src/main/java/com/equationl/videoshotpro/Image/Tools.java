@@ -796,4 +796,13 @@ public class Tools{
         return (int)((Math.random()*9+1)*100000);
     }
 
+    public String getSaveRootPath() {
+        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()+"/隐云图解制作/");
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+
+        return file.toString();
+    }
+
 }
