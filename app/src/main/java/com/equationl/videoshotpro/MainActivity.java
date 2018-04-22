@@ -29,6 +29,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.text.Html;
@@ -86,6 +87,8 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.solidev.loadmore.AutoLoadMoreAdapter;
+
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     //Button button_user;
@@ -113,10 +116,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     FloatingActionButton main_floatBtn_shotScreen;
     FloatingActionButton main_floatBtn_frameByFrame;
 
+    AutoLoadMoreAdapter mAutoLoadMoreAdapter;
+
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
     private MainWaterFallAdapter mAdapter;
 
+    List<WaterFallData> waterFallList = new ArrayList<>();
+    int waterFallDataPager = 0;
 
     private final MyHandler handler = new MyHandler(this);
     public static MainActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
@@ -1190,27 +1197,96 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     };
 
     private void initRecycleView() {
+        initWaterFallList();
         mLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
-        mAdapter = new MainWaterFallAdapter(this, buildData());
+        mAdapter = new MainWaterFallAdapter(this, waterFallList);
 
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mRecyclerView.setAdapter(mAdapter);
+        //mRecyclerView.setAdapter(mAdapter);
+
+
+        mAutoLoadMoreAdapter = new AutoLoadMoreAdapter(this, mAdapter);
+        mAutoLoadMoreAdapter.setOnLoadListener(new AutoLoadMoreAdapter.OnLoadListener() {
+            @Override
+            public void onRetry() {
+                //do retry
+                Log.i(TAG, "call  onRetry");
+                addWaterFallList();
+            }
+
+            @Override
+            public void onLoadMore() {
+                //do load more
+                Log.i(TAG, "call onLoadMore");
+                addWaterFallList();
+            }
+        });
+        mRecyclerView.setAdapter(mAutoLoadMoreAdapter);
     }
 
-    private List<WaterFallData> buildData() {
+    private List<WaterFallData> addWaterFallList() {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                String filepath =  tool.getSaveRootPath();
+                String[] files = tool.getFileOrderByName(filepath);
+
+                Log.i(TAG, "files length="+files.length);
+
+                int j = waterFallDataPager*10+10;
+                if (j > files.length) {
+                    j = files.length;
+                }
+                if (waterFallDataPager*10 > files.length) {
+                    Log.i(TAG, "index out");
+                    mAutoLoadMoreAdapter.showLoadComplete();
+                    j = waterFallDataPager*10;
+                }
+                Log.i(TAG, "waterFallDataPager="+waterFallDataPager);
+                Log.i(TAG, "j = "+j);
+                for(int i=waterFallDataPager*10;i<j;i++) {
+                    WaterFallData data = new WaterFallData();
+                    data.img = tool.getBitmapThumbnailFromFile(filepath+"/"+files[i], 400, 500);
+                    data.text = i+":"+files[i];
+                    data.imgHeight = (i % 2)*100 + 400;
+                    waterFallList.add(data);
+                }
+                waterFallDataPager++;
+                mAutoLoadMoreAdapter.finishLoading();
+                mRecyclerView.getAdapter().notifyDataSetChanged();
+            }
+        }, 1);
+        //mAutoLoadMoreAdapter.showLoadComplete();
+        //mAutoLoadMoreAdapter.showLoadError();
+        return waterFallList;
+    }
+
+    private List<WaterFallData> initWaterFallList() {
         String filepath =  tool.getSaveRootPath();
         String[] files = tool.getFileOrderByName(filepath);
 
-        List<WaterFallData> list = new ArrayList<>();
-        for(int i=0;i<files.length;i++) {
+        if (files.length <= 0) {
             WaterFallData data = new WaterFallData();
-            data.img = tool.getBitmapThumbnailFromFile(filepath+"/"+files[i], 400, 500);
-            data.text = files[i];
-            data.imgHeight = (i % 2)*100 + 400; //偶数和奇数的图片设置不同的高度，以到达错开的目的
-            list.add(data);
+            data.img = null;
+            data.text = "暂无作品，快点击右下角开始制作吧！";
+            data.imgHeight = 0;
+            waterFallList.add(data);
         }
 
-        return list;
+        int j = 10;
+        if (files.length < j) {
+            j = files.length;
+        }
+
+        for(int i=0;i<j;i++) {
+            WaterFallData data = new WaterFallData();
+            data.img = tool.getBitmapThumbnailFromFile(filepath+"/"+files[i], 400, 500);
+            data.text = i+":"+files[i];
+            data.imgHeight = (i % 2)*100 + 400;
+            waterFallList.add(data);
+        }
+        waterFallDataPager++;
+        return waterFallList;
     }
 }
 

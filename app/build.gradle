@@ -62,5 +62,6 @@ dependencies {
     compile 'com.huxq17.handygridview:handygridview:1.1.0'
     compile 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:+'
     compile 'com.github.clans:fab:1.6.4'
+    compile 'me.solidev.library:auto-loadmore:1.0.1'
     testCompile 'junit:junit:4.12'
 }
