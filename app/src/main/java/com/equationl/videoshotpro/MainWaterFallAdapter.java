@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.equationl.videoshotpro.Image.Tools;
 import com.equationl.videoshotpro.utils.WaterFallData;
 
@@ -38,7 +40,15 @@ public class MainWaterFallAdapter extends RecyclerView.Adapter {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         MyViewHolder holder2 = (MyViewHolder) holder;
         WaterFallData waterFallData= mData.get(position);
-        holder2.img.setImageBitmap(waterFallData.img);
+        //holder2.img.setImageBitmap(waterFallData.img);
+        RequestOptions options = new RequestOptions()
+                .placeholder(R.mipmap.gallery_pick_photo)
+                .centerCrop();
+        Glide.with(mContext)
+                .load(waterFallData.img)
+                .apply(options)
+                .thumbnail(0.1f)
+                .into(holder2.img);
         holder2.img.getLayoutParams().height = waterFallData.imgHeight; //从数据源中获取图片高度，动态设置到控件上
         holder2.text.setText(waterFallData.text);
     }

@@ -15,6 +15,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Build;
@@ -29,7 +30,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.text.Html;
@@ -46,15 +47,24 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.equationl.videoshotpro.Image.Tools;
 import com.equationl.videoshotpro.rom.HuaweiUtils;
 import com.equationl.videoshotpro.rom.MeizuUtils;
 import com.equationl.videoshotpro.rom.MiuiUtils;
 import com.equationl.videoshotpro.rom.QikuUtils;
 import com.equationl.videoshotpro.rom.RomUtils;
+import com.equationl.videoshotpro.utils.OnRecylerViewItemClickListener;
+import com.equationl.videoshotpro.utils.Utils;
 import com.equationl.videoshotpro.utils.WaterFallData;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
@@ -85,13 +95,14 @@ import org.json.JSONObject;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import ch.ielse.view.imagewatcher.ImageWatcher;
 import me.solidev.loadmore.AutoLoadMoreAdapter;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    //Button button_user;
     AlertDialog.Builder dialog;
     AlertDialog dialog2;
     android.support.design.widget.CoordinatorLayout container;
@@ -103,12 +114,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     List<String> FileList;
     String extension;
     ProgressDialog dialog_copyFile;
-    //Button button_splicing, button_floatBtn, button_ffmpeg,button_help, button_setting;
-    //TextView text_bottom;
     DrawerLayout drawer;
     ViewGroup bannerContainer;
     BannerView bv;
     int activityResultMode = 0;
+    Boolean isFirstBoot = false;
+    boolean isTranslucentStatus = false;
     IWXAPI wxApi;
     FloatingActionMenu   main_floatBtn_menu;
     FloatingActionButton main_floatBtn_quick;
@@ -117,6 +128,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     FloatingActionButton main_floatBtn_frameByFrame;
 
     AutoLoadMoreAdapter mAutoLoadMoreAdapter;
+
+    ImageWatcher vImageWatcher;
+    ImageWatcher.OnPictureLongPressListener mOnPictureLongPressListener;
 
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -141,6 +155,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(Color.TRANSPARENT);
+            window.setNavigationBarColor(Color.TRANSPARENT);
+            isTranslucentStatus = true;
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -159,6 +182,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (!sp_init.getBoolean("isCloseAd", false)) {
             initBanner();
             bv.loadAD();
+        } else {
+            mRecyclerView.setPadding(0,0,0,0);
         }
 
         container =  (android.support.design.widget.CoordinatorLayout)findViewById(R.id.container);
@@ -169,6 +194,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (sp_init.getBoolean("isFirstBoot", true)) {
             //FIXME 显示警告某些应用商城审核就不给过？？？？
             //showAlertDialog();
+            isFirstBoot = true;
             SharedPreferences.Editor editor = sp_init.edit();
             editor.putBoolean("isFirstBoot", false);
             editor.apply();
@@ -552,7 +578,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private boolean checkPermission(Context context) {
-        //6.0 版本之后由于 google 增加了对悬浮窗权限的管理，所以方式就统一了
         if (Build.VERSION.SDK_INT < 23) {
             if (RomUtils.checkIsMiuiRom()) {
                 return miuiPermissionCheck(context);
@@ -1135,6 +1160,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onADClosed() {
                 showCloseAdDialog();
+                mRecyclerView.setPadding(0,0,0,0);
             }
         });
         //bannerContainer.addView(bv);
@@ -1197,7 +1223,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     };
 
     private void initRecycleView() {
-        initWaterFallList();
+        if (!isFirstBoot) {    //如果时第一次启动可能会因为初始化时缺少储存权限而闪退
+            initWaterFallList();
+        }
+        else {
+            WaterFallData data = new WaterFallData();
+            data.img = null;
+            data.text = res.getString(R.string.main_text_waterFall_firstUse);
+            data.imgHeight = 0;
+            waterFallList.add(data);
+        }
         mLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         mAdapter = new MainWaterFallAdapter(this, waterFallList);
 
@@ -1222,6 +1257,67 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
         mRecyclerView.setAdapter(mAutoLoadMoreAdapter);
+
+        mRecyclerView.addOnItemTouchListener(new OnRecylerViewItemClickListener(mRecyclerView) {
+            @Override
+            public void onItemClick(RecyclerView.ViewHolder vh) {
+                //Toast.makeText(MainActivity.this,vh.getAdapterPosition()+"",Toast.LENGTH_SHORT).show();
+                String filepath =  tool.getSaveRootPath();
+                String[] files = tool.getFileOrderByName(filepath);
+                //ImageZoom.show(MainActivity.this, filepath+"/"+files[vh.getAdapterPosition()], ImageUrlType.LOCAL);
+                MainWaterFallAdapter.MyViewHolder holder2 = (MainWaterFallAdapter.MyViewHolder) vh;
+                showPicture(holder2.img, filepath+"/"+files[vh.getAdapterPosition()]);
+            }
+
+            @Override
+            public void onItemLongClick(RecyclerView.ViewHolder vh) {
+                /*if (vh.getLayoutPosition()!=waterFallList.size()-1) {
+                    //helper.startDrag(vh);
+                }
+                Toast.makeText(MainActivity.this,vh.getAdapterPosition()+"buke",Toast.LENGTH_SHORT).show();  */
+                //TODO 长按瀑布流图片
+                String filepath =  tool.getSaveRootPath();
+                String[] files = tool.getFileOrderByName(filepath);
+                MainWaterFallAdapter.MyViewHolder holder2 = (MainWaterFallAdapter.MyViewHolder) vh;
+                showPopupMenu(holder2.img, filepath+"/"+files[vh.getAdapterPosition()]);
+            }
+        });
+
+
+        initOnPictureLongPressListener();
+        vImageWatcher = ImageWatcher.Helper.with(this) // 一般来讲， ImageWatcher 需要占据全屏的位置
+                .setTranslucentStatus(!isTranslucentStatus ? Utils.calcStatusBarHeight(this) : 0) // 如果是透明状态栏，你需要给ImageWatcher标记 一个偏移值，以修正点击ImageView查看的启动动画的Y轴起点的不正确
+                .setErrorImageRes(R.mipmap.error_picture) // 配置error图标 如果不介意使用lib自带的图标，并不一定要调用这个API
+                .setOnPictureLongPressListener(mOnPictureLongPressListener) // 长按图片的回调，你可以显示一个框继续提供一些复制，发送等功能
+                .setLoader(new ImageWatcher.Loader() {
+                    @Override
+                    public void load(Context context, String url, final ImageWatcher.LoadCallback lc) {
+                        Log.i(TAG, "call load");
+                        RequestOptions options = new RequestOptions()
+                                .placeholder(R.mipmap.gallery_pick_photo);
+                        Glide.with(context).asBitmap().load(url).apply(options).into(new SimpleTarget<Bitmap>() {
+                            @Override
+                            public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+                                lc.onResourceReady(resource);
+                            }
+
+                            @Override
+                            public void onLoadStarted(Drawable placeholder) {
+                                lc.onLoadStarted(placeholder);
+                            }
+
+                            @Override
+                            public void onLoadFailed(Drawable errorDrawable) {
+                                lc.onLoadFailed(errorDrawable);
+                            }
+                        });
+                    }
+                })
+                .create();
+    }
+
+    private void showPicture(ImageView v, String file) {
+        vImageWatcher.show(v, Collections.singletonList(v),  Collections.singletonList(file));
     }
 
     private List<WaterFallData> addWaterFallList() {
@@ -1246,18 +1342,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Log.i(TAG, "j = "+j);
                 for(int i=waterFallDataPager*10;i<j;i++) {
                     WaterFallData data = new WaterFallData();
-                    data.img = tool.getBitmapThumbnailFromFile(filepath+"/"+files[i], 400, 500);
+                    //data.img = tool.getBitmapThumbnailFromFile(filepath+"/"+files[i], 400, 500);
+                    data.img = filepath+"/"+files[i];
                     data.text = i+":"+files[i];
                     data.imgHeight = (i % 2)*100 + 400;
                     waterFallList.add(data);
                 }
                 waterFallDataPager++;
+                Log.i(TAG, "add waterFall data finish");
                 mAutoLoadMoreAdapter.finishLoading();
                 mRecyclerView.getAdapter().notifyDataSetChanged();
             }
         }, 1);
-        //mAutoLoadMoreAdapter.showLoadComplete();
-        //mAutoLoadMoreAdapter.showLoadError();
         return waterFallList;
     }
 
@@ -1265,10 +1361,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         String filepath =  tool.getSaveRootPath();
         String[] files = tool.getFileOrderByName(filepath);
 
+        waterFallList.clear();
         if (files.length <= 0) {
             WaterFallData data = new WaterFallData();
             data.img = null;
-            data.text = "暂无作品，快点击右下角开始制作吧！";
+            data.text = res.getString(R.string.main_text_waterFall_noData);
             data.imgHeight = 0;
             waterFallList.add(data);
         }
@@ -1280,7 +1377,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         for(int i=0;i<j;i++) {
             WaterFallData data = new WaterFallData();
-            data.img = tool.getBitmapThumbnailFromFile(filepath+"/"+files[i], 400, 500);
+            //data.img = tool.getBitmapThumbnailFromFile(filepath+"/"+files[i], 400, 500);
+            data.img = filepath+"/"+files[i];
             data.text = i+":"+files[i];
             data.imgHeight = (i % 2)*100 + 400;
             waterFallList.add(data);
@@ -1288,5 +1386,68 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         waterFallDataPager++;
         return waterFallList;
     }
-}
 
+    private void initOnPictureLongPressListener() {
+        mOnPictureLongPressListener = new ImageWatcher.OnPictureLongPressListener() {
+            @Override
+            public void onPictureLongPress(ImageView v, final String url, int pos) {
+                //Toast.makeText(MainActivity.this, "call long press:"+url, Toast.LENGTH_SHORT).show();
+                String[] items = new String[] {"分享", "删除"};
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        switch (i) {
+                            case 0:
+                                sharePicture(url);
+                                //Toast.makeText(MainActivity.this, "分享 "+url, Toast.LENGTH_SHORT).show();
+                                break;
+                            case 1:
+                                deletePicture(url);
+                                //Toast.makeText(MainActivity.this, "删除 "+url, Toast.LENGTH_SHORT).show();
+                                break;
+                        }
+                    }
+                });
+                builder.create();
+                builder.show();
+            }
+        };
+    }
+
+    private void showPopupMenu(View view, final String img) {
+        PopupMenu popupMenu = new PopupMenu(MainActivity.this, view);
+        popupMenu.getMenuInflater().inflate(R.menu.main_card_popup_menu, popupMenu.getMenu());
+        popupMenu.show();
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.main_popupMenu_delete:
+                        deletePicture(img);
+                        //Toast.makeText(MainActivity.this, "删除 "+img, Toast.LENGTH_SHORT).show();
+                        break;
+                    case R.id.main_popupMenu_share:
+                        sharePicture(img);
+                        //Toast.makeText(MainActivity.this, "分享 "+img, Toast.LENGTH_SHORT).show();
+                        break;
+                }
+                return false;
+            }
+        });
+        popupMenu.setOnDismissListener(new PopupMenu.OnDismissListener() {
+            @Override
+            public void onDismiss(PopupMenu menu) {
+                // 控件消失时的事件
+            }
+        });
+        popupMenu.show();
+    }
+
+    private void deletePicture(String img) {
+    }
+
+    private void sharePicture(String img) {
+
+    }
+}

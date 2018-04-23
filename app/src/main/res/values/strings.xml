@@ -260,6 +260,12 @@
 
     <string name="main_toast_createThumb_fail">生成缩略图失败！</string>
 
+    <string name="main_text_waterFall_firstUse">首次启动需要初始化，请上滑屏幕刷新数据。</string>
+    <string name="main_text_waterFall_noData">暂无作品，快点击右下角开始制作吧！</string>
+
+    <string name="main_popupMenu_share">分享</string>
+    <string name="main_popupMenu_delete">删除</string>
+
     <string-array name="main_dialog_shareAPP_items">
         <item>QQ</item>
         <item>微信朋友圈</item>
