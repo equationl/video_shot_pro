@@ -34,6 +34,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.equationl.videoshotpro.Image.Tools;
+import com.equationl.videoshotpro.utils.Share;
 import com.qq.e.ads.interstitial.AbstractInterstitialADListener;
 import com.qq.e.ads.interstitial.InterstitialAD;
 import com.qq.e.comm.util.AdError;
@@ -210,7 +211,8 @@ public class BuildPictureActivity extends AppCompatActivity {
                     shareIntent.putExtra(Intent.EXTRA_STREAM, imageUri);
                     shareIntent.setType("image/*");
                     startActivity(Intent.createChooser(shareIntent, "分享到"));  */
-                    showShareDialog(v);
+                    //showShareDialog(v);
+                    Share.showSharePictureDialog(BuildPictureActivity.this, savePath, shareListener, BuildPictureActivity.this);
                 }
                 else {
                     t = new Thread(new MyThread());
@@ -676,7 +678,7 @@ public class BuildPictureActivity extends AppCompatActivity {
         return mode;
     }
 
-    private void showShareDialog(View view){
+    /*private void showShareDialog(View view){
         final String[] items = res.getStringArray(R.array.buildPicture_dialog_share_items);
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
         alertBuilder.setTitle(R.string.buildPicture_dialog_share_title);
@@ -722,7 +724,7 @@ public class BuildPictureActivity extends AppCompatActivity {
             }
         });
         alertBuilder.create().show();
-    }
+    }  */
 
 
     IUiListener shareListener = new BaseUiListener() {
@@ -800,7 +802,7 @@ public class BuildPictureActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void shareToWX(int shareTo) {
+    /*private void shareToWX(int shareTo) {
         wxApi = WXAPIFactory.createWXAPI(this, "wx45ceac6c6d2f1aff", true);
         wxApi.registerApp("wx45ceac6c6d2f1aff");
 
@@ -833,5 +835,5 @@ public class BuildPictureActivity extends AppCompatActivity {
         if (!wxApi.sendReq(req)) {
             Toast.makeText(this, R.string.buildPicture_toast_sharePicture_fail, Toast.LENGTH_LONG).show();
         }
-    }
+    }  */
 }

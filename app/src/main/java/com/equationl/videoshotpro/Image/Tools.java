@@ -343,6 +343,19 @@ public class Tools{
         out.close();
     }
 
+    public void deleteFile(File file) {
+        file.delete();
+    }
+
+    public void deleteDirectory(File directory) {
+        if (directory != null && directory.exists() && directory.isDirectory()) {
+            for (File item : directory.listFiles()) {
+                item.delete();
+            }
+        }
+        directory.delete();
+    }
+
     public void cleanExternalCache(Context context) {
         if (Environment.getExternalStorageState().equals(
                 Environment.MEDIA_MOUNTED)) {

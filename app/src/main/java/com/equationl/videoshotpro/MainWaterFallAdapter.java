@@ -15,6 +15,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.equationl.videoshotpro.Image.Tools;
 import com.equationl.videoshotpro.utils.WaterFallData;
 
+import java.io.File;
 import java.util.List;
 
 public class MainWaterFallAdapter extends RecyclerView.Adapter {

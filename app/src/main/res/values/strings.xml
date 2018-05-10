@@ -229,7 +229,10 @@
     <string name="main_snackbar_btn_retry">重试</string>
     <string name="main_snackbar_btn_contact">联系开发者</string>
     <string name="main_snackbar_so_notAble">很抱歉，无兼容您手机的so库</string>
-    <string name="main_snackbar_isPiracy">您下载的是非法打包版本，建议您前往正规渠道重新下载"</string>
+    <string name="main_snackbar_isPiracy">您下载的是非法打包版本，建议您前往正规渠道重新下载</string>
+    <string name="main_snackbar_deleteDirectoryTip">真的要删除这个文件夹下的所有文件？</string>
+    <string name="main_snackbar_deleteDirectorySure">是的</string>
+    <string name="main_snackbar_shareDirectoryTip">不能分享文件夹哦</string>
 
     <string name="main_toast_chooseFile_fail">未选择文件！</string>
     <string name="main_toast_getPermission_success">权限获取成功！</string>

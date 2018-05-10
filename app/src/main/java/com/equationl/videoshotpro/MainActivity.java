@@ -13,7 +13,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.projection.MediaProjectionManager;
@@ -64,6 +63,7 @@ import com.equationl.videoshotpro.rom.MiuiUtils;
 import com.equationl.videoshotpro.rom.QikuUtils;
 import com.equationl.videoshotpro.rom.RomUtils;
 import com.equationl.videoshotpro.utils.OnRecylerViewItemClickListener;
+import com.equationl.videoshotpro.utils.Share;
 import com.equationl.videoshotpro.utils.Utils;
 import com.equationl.videoshotpro.utils.WaterFallData;
 import com.github.clans.fab.FloatingActionButton;
@@ -76,13 +76,7 @@ import com.qq.e.ads.banner.AbstractBannerADListener;
 import com.qq.e.ads.banner.BannerView;
 import com.qq.e.comm.util.AdError;
 import com.tencent.bugly.Bugly;
-import com.tencent.bugly.crashreport.CrashReport;
-import com.tencent.connect.share.QQShare;
-import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
-import com.tencent.mm.opensdk.modelmsg.WXMediaMessage;
-import com.tencent.mm.opensdk.modelmsg.WXWebpageObject;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
-import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 import com.tencent.tauth.IUiListener;
 import com.tencent.tauth.Tencent;
 import com.tencent.tauth.UiError;
@@ -92,6 +86,7 @@ import com.yancy.gallerypick.inter.IHandlerCallBack;
 
 import org.json.JSONObject;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -179,13 +174,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         settings = PreferenceManager.getDefaultSharedPreferences(this);
         sp_init = getSharedPreferences("init", Context.MODE_PRIVATE);
 
-        if (!sp_init.getBoolean("isCloseAd", false)) {
-            initBanner();
-            bv.loadAD();
-        } else {
-            mRecyclerView.setPadding(0,0,0,0);
-        }
-
         container =  (android.support.design.widget.CoordinatorLayout)findViewById(R.id.container);
 
         tool = new Tools();
@@ -233,7 +221,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         main_floatBtn_frameByFrame = (FloatingActionButton) findViewById(R.id.main_floatBtn_frameByFrame);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.main_recyclerView);
-        initRecycleView();
 
         main_floatBtn_menu.setClosedOnTouchOutside(true);
         main_floatBtn_menu.hideMenuButton(false);
@@ -242,6 +229,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         main_floatBtn_splicing.setOnClickListener(clickListener);
         main_floatBtn_shotScreen.setOnClickListener(clickListener);
         main_floatBtn_frameByFrame.setOnClickListener(clickListener);
+
+        initRecycleView();
+
+        if (!sp_init.getBoolean("isCloseAd", false)) {
+            initBanner();
+            bv.loadAD();
+        } else {
+            mRecyclerView.setPadding(0,0,0,0);
+        }
+
 
         main_floatBtn_menu.showMenuButton(true);
 
@@ -355,16 +352,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         /*else {
             Toast.makeText(getApplicationContext(),R.string.main_toast_chooseFile_fail,Toast.LENGTH_LONG).show();
         }*/
-    }
-
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
     }
 
 
@@ -1033,7 +1020,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void shareAPP() {
-        final String[] items = res.getStringArray(R.array.main_dialog_shareAPP_items);
+        /*final String[] items = res.getStringArray(R.array.main_dialog_shareAPP_items);
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
         alertBuilder.setTitle(R.string.buildPicture_dialog_share_title);
         alertBuilder.setItems(items, new DialogInterface.OnClickListener() {
@@ -1055,10 +1042,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             }
         });
-        alertBuilder.create().show();
+        alertBuilder.create().show();  */
+        Share.showShareAppDialog(this, shareListener, MainActivity.this);
     }
 
-    private void shareAPPByWx(int shareTo) {
+    /*private void shareAPPByWx(int shareTo) {
         wxApi = WXAPIFactory.createWXAPI(this, "wx45ceac6c6d2f1aff", true);
         wxApi.registerApp("wx45ceac6c6d2f1aff");
 
@@ -1087,9 +1075,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // 调用api接口发送数据到微信
         wxApi.sendReq(req);
-    }
+        Share.shareAppToWx(this, shareTo);
+    }   */
 
-    private void shareAPPByQq() {
+    /*private void shareAPPByQq() {
         Tencent mTencent = Tencent.createInstance("1106257597", this);
         final Bundle params = new Bundle();
         params.putInt(QQShare.SHARE_TO_QQ_KEY_TYPE, QQShare.SHARE_TO_QQ_TYPE_APP);
@@ -1099,13 +1088,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         params.putString(QQShare.SHARE_TO_QQ_APP_NAME, res.getString(R.string.main_SHARE_TO_QQ_APP_NAME));
         //params.putInt(QQShare.SHARE_TO_QQ_EXT_INT, QQShare.SHARE_TO_QQ_FLAG_QZONE_AUTO_OPEN);
         mTencent.shareToQQ(MainActivity.this, params, shareListener);
-    }
+        Share.shareAppToQQ(this, shareListener, MainActivity.this);
+    }   */
 
     private void shareAPPSuccess() {
+        /*sp_init = getSharedPreferences("init", Context.MODE_PRIVATE);
         Toast.makeText(MainActivity.this, "分享成功！", Toast.LENGTH_SHORT).show();
         SharedPreferences.Editor editor = sp_init.edit();
         editor.putBoolean("isCloseAd", true);
-        editor.apply();
+        editor.apply();  */
+        Share.shareAppSuccess(this);
+        /*bv.destroy();
+        mRecyclerView.setPadding(0,0,0,0); */
     }
 
     IUiListener shareListener = new BaseUiListener() {
@@ -1185,15 +1179,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK
                 && event.getAction() == KeyEvent.ACTION_DOWN) {
-            if ((System.currentTimeMillis() - exitTime) > 2000) {
-                Toast.makeText(MainActivity.this,R.string.main_toast_confirmExit,Toast.LENGTH_SHORT).show();
-                exitTime = System.currentTimeMillis();
-            } else {
-                tool.cleanExternalCache(this);
-                finish();
-                System.exit(0);
+            if (!vImageWatcher.handleBackPressed() && !drawer.isDrawerOpen(GravityCompat.START)) {    //没有打开预览图片或者侧边栏
+                if ((System.currentTimeMillis() - exitTime) > 2000) {
+                    Toast.makeText(MainActivity.this,R.string.main_toast_confirmExit,Toast.LENGTH_SHORT).show();
+                    exitTime = System.currentTimeMillis();
+                } else {
+                    tool.cleanExternalCache(this);
+                    finish();
+                    System.exit(0);
+                }
+                return true;
             }
-            return true;
+
+            if (drawer.isDrawerOpen(GravityCompat.START)) {
+                drawer.closeDrawer(GravityCompat.START);
+            }
+
+            return false;
         }
         return super.onKeyDown(keyCode, event);
     }
@@ -1223,7 +1225,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     };
 
     private void initRecycleView() {
-        if (!isFirstBoot) {    //如果时第一次启动可能会因为初始化时缺少储存权限而闪退
+        if (!isFirstBoot) {    //如果是第一次启动可能会因为初始化时缺少储存权限而闪退
             initWaterFallList();
         }
         else {
@@ -1266,7 +1268,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 String[] files = tool.getFileOrderByName(filepath);
                 //ImageZoom.show(MainActivity.this, filepath+"/"+files[vh.getAdapterPosition()], ImageUrlType.LOCAL);
                 MainWaterFallAdapter.MyViewHolder holder2 = (MainWaterFallAdapter.MyViewHolder) vh;
-                showPicture(holder2.img, filepath+"/"+files[vh.getAdapterPosition()]);
+                if (files.length > 0) {
+                    showPicture(holder2.img, filepath+"/"+files[vh.getAdapterPosition()]);
+                }
             }
 
             @Override
@@ -1275,16 +1279,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     //helper.startDrag(vh);
                 }
                 Toast.makeText(MainActivity.this,vh.getAdapterPosition()+"buke",Toast.LENGTH_SHORT).show();  */
-                //TODO 长按瀑布流图片
                 String filepath =  tool.getSaveRootPath();
                 String[] files = tool.getFileOrderByName(filepath);
                 MainWaterFallAdapter.MyViewHolder holder2 = (MainWaterFallAdapter.MyViewHolder) vh;
-                showPopupMenu(holder2.img, filepath+"/"+files[vh.getAdapterPosition()]);
+                if (files.length > 0) {
+                    showPopupMenu(holder2.img, filepath+"/"+files[vh.getAdapterPosition()], vh.getAdapterPosition());
+                }
             }
         });
 
 
-        initOnPictureLongPressListener();
+        //initOnPictureLongPressListener();
         vImageWatcher = ImageWatcher.Helper.with(this) // 一般来讲， ImageWatcher 需要占据全屏的位置
                 .setTranslucentStatus(!isTranslucentStatus ? Utils.calcStatusBarHeight(this) : 0) // 如果是透明状态栏，你需要给ImageWatcher标记 一个偏移值，以修正点击ImageView查看的启动动画的Y轴起点的不正确
                 .setErrorImageRes(R.mipmap.error_picture) // 配置error图标 如果不介意使用lib自带的图标，并不一定要调用这个API
@@ -1324,6 +1329,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
+                if (isFirstBoot) {
+                    waterFallList.remove(0);
+                    mRecyclerView.getAdapter().notifyItemRemoved(0);
+                    mRecyclerView.getAdapter().notifyDataSetChanged();
+                    isFirstBoot = false;
+                }
+
                 String filepath =  tool.getSaveRootPath();
                 String[] files = tool.getFileOrderByName(filepath);
 
@@ -1387,10 +1399,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return waterFallList;
     }
 
-    private void initOnPictureLongPressListener() {
+    /*private void initOnPictureLongPressListener() {
         mOnPictureLongPressListener = new ImageWatcher.OnPictureLongPressListener() {
             @Override
-            public void onPictureLongPress(ImageView v, final String url, int pos) {
+            public void onPictureLongPress(ImageView v, final String url, final int pos) {
                 //Toast.makeText(MainActivity.this, "call long press:"+url, Toast.LENGTH_SHORT).show();
                 String[] items = new String[] {"分享", "删除"};
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -1403,7 +1415,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 //Toast.makeText(MainActivity.this, "分享 "+url, Toast.LENGTH_SHORT).show();
                                 break;
                             case 1:
-                                deletePicture(url);
+                                deletePicture(url, pos);
                                 //Toast.makeText(MainActivity.this, "删除 "+url, Toast.LENGTH_SHORT).show();
                                 break;
                         }
@@ -1413,9 +1425,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 builder.show();
             }
         };
-    }
+    }   */
 
-    private void showPopupMenu(View view, final String img) {
+    private void showPopupMenu(View view, final String img, final int pos) {
         PopupMenu popupMenu = new PopupMenu(MainActivity.this, view);
         popupMenu.getMenuInflater().inflate(R.menu.main_card_popup_menu, popupMenu.getMenu());
         popupMenu.show();
@@ -1424,7 +1436,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.main_popupMenu_delete:
-                        deletePicture(img);
+                        deletePicture(img, pos);
                         //Toast.makeText(MainActivity.this, "删除 "+img, Toast.LENGTH_SHORT).show();
                         break;
                     case R.id.main_popupMenu_share:
@@ -1444,10 +1456,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         popupMenu.show();
     }
 
-    private void deletePicture(String img) {
+    private void deletePicture(String img, final int pos) {
+        final File f = new File(img);
+        if (f.isDirectory()) {
+            Snackbar.make(getWindow().getDecorView(),R.string.main_snackbar_deleteDirectoryTip, Snackbar.LENGTH_LONG).setAction(R.string.main_snackbar_deleteDirectorySure, new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    tool.deleteDirectory(f);
+                    waterFallList.remove(pos);
+                    mRecyclerView.getAdapter().notifyDataSetChanged();
+                }
+            }).show();
+        }
+        else {
+            tool.deleteFile(f);
+            waterFallList.remove(pos);
+            mRecyclerView.getAdapter().notifyDataSetChanged();
+        }
     }
 
     private void sharePicture(String img) {
-
+        File f = new File(img);
+        if (f.isDirectory()) {
+            Snackbar.make(getWindow().getDecorView(),R.string.main_snackbar_shareDirectoryTip, Snackbar.LENGTH_LONG).show();
+        }
+        else {
+            Share.showSharePictureDialog(this, new File(img), shareListener, MainActivity.this);
+        }
     }
 }
