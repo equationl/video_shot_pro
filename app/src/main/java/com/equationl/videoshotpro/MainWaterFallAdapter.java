@@ -45,11 +45,20 @@ public class MainWaterFallAdapter extends RecyclerView.Adapter {
         RequestOptions options = new RequestOptions()
                 .placeholder(R.mipmap.gallery_pick_photo)
                 .centerCrop();
-        Glide.with(mContext)
-                .load(waterFallData.img)
-                .apply(options)
-                .thumbnail(0.1f)
-                .into(holder2.img);
+        if (waterFallData.img == null) {
+            Glide.with(mContext)
+                    .load(R.mipmap.error_picture)
+                    .apply(options)
+                    .thumbnail(0.1f)
+                    .into(holder2.img);
+        }
+        else {
+            Glide.with(mContext)
+                    .load(waterFallData.img)
+                    .apply(options)
+                    .thumbnail(0.1f)
+                    .into(holder2.img);
+        }
         holder2.img.getLayoutParams().height = waterFallData.imgHeight; //从数据源中获取图片高度，动态设置到控件上
         holder2.text.setText(waterFallData.text);
     }

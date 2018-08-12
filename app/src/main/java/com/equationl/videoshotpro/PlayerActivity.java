@@ -455,8 +455,7 @@ public class PlayerActivity extends AppCompatActivity {
             SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
             String date    =    sDateFormat.format(new    java.util.Date());
             date += "-by_EL.gif";
-            final String save_path =  Environment.getExternalStoragePublicDirectory(
-                    Environment.DIRECTORY_PICTURES).getPath() + "/" + date;
+            final String save_path =  tool.getSaveRootPath() + "/" + date;
             String cmd = "-ss "+(gif_start_time/1000.0)+" -t "+((gif_end_time-gif_start_time)/1000.0)+" -i "+video_path;
             Log.i(TAG, "gif start time(s)="+(gif_start_time/1000.0)+" time(ms)="+gif_start_time+" all="+((gif_end_time-gif_start_time)/1000.0));
             cmd += gif_RP.equals("-1")?"":" -s "+gif_RP;

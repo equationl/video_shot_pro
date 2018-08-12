@@ -230,8 +230,8 @@
     <string name="main_snackbar_btn_contact">联系开发者</string>
     <string name="main_snackbar_so_notAble">很抱歉，无兼容您手机的so库</string>
     <string name="main_snackbar_isPiracy">您下载的是非法打包版本，建议您前往正规渠道重新下载</string>
-    <string name="main_snackbar_deleteDirectoryTip">真的要删除这个文件夹下的所有文件？</string>
-    <string name="main_snackbar_deleteDirectorySure">是的</string>
+    <string name="main_snackbar_deleteTip">确定要删除吗？</string>
+    <string name="main_snackbar_deleteSure">是的</string>
     <string name="main_snackbar_shareDirectoryTip">不能分享文件夹哦</string>
 
     <string name="main_toast_chooseFile_fail">未选择文件！</string>
@@ -283,7 +283,7 @@
     <string name="WXEntry_toast_share_success">分享成功！</string>
 
 
-    <string name="player_toast_needMoreShot">至少需要截取两张图片！</string>
+    <string name="player_toast_needMoreShot">至少需要截取一张图片！</string>
     <string name="player_toast_shotGif_fail">截取动图失败！</string>
     <string name="player_toast_shotGif_success">动图已保存</string>
     <string name="player_toast_shotGif_start">开始截取动图</string>
@@ -304,6 +304,7 @@
     <string name="player_text_mark">标记</string>
     <string name="player_text_mark_end">结束</string>
     <string name="player_text_ok">确定</string>
+    <string name="player_text_back">返回</string>
     <string name="player_text_getCachePath_fail">获取缓存目录出错！</string>
 
     <string name="player_dialog_FBF_title">正在截取中……</string>

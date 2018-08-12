@@ -185,7 +185,8 @@ public class PlayerForDataActivity extends AppCompatActivity {
 
         if (do4Rasult.equals("FrameByFrame")) {
             Log.i(TAG, "逐帧截取模式，隐藏按钮");
-            btn_right.setVisibility(View.INVISIBLE);
+            //btn_right.setVisibility(View.INVISIBLE);
+            btn_right.setText(R.string.player_text_back);
             btn_bottom.setText(R.string.player_text_mark);
         }
 
@@ -197,7 +198,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
 
         btn_right   .setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (pic_num < 1) {
+                /*if (pic_num < 1) {
                     Toast.makeText(getApplicationContext(),R.string.player_toast_needMoreShot, Toast.LENGTH_LONG).show();
                 }
                 else {
@@ -209,6 +210,15 @@ public class PlayerForDataActivity extends AppCompatActivity {
                     isDone = true;
                     btn_bottom.setClickable(false);
                     btn_right.setClickable(false);
+                }   */
+                if (do4Rasult.equals("FrameByFrame")) {
+                    Log.i(TAG, "逐帧截取模式，点击按钮");
+                    try {
+                        MainActivity.instance.finish();
+                    } catch (NullPointerException e) {Log.e("el", e.toString());}
+                    Intent intent = new Intent(PlayerForDataActivity.this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
                 }
             }
         });
@@ -738,8 +748,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
         String video_path = tool.getImageAbsolutePath(PlayerForDataActivity.this,uri);
         SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
         String date    =    sDateFormat.format(new    java.util.Date());
-        final String save_path = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES)+"/"+date+"/";
+        final String save_path = tool.getSaveRootPath()+"/"+date+"/";
         File dirFirstFolder = new File(save_path);
         if(!dirFirstFolder.exists())
         {
@@ -962,6 +971,14 @@ public class PlayerForDataActivity extends AppCompatActivity {
                 player_controlBar_layout.setVisibility(View.INVISIBLE);
                 isORIENTATION_LANDSCAPE = false;
                 return true;
+            }
+            if (do4Rasult.equals("FrameByFrame")) {
+                try {
+                    MainActivity.instance.finish();
+                } catch (NullPointerException e) {Log.e("el", e.toString());}
+                Intent intent = new Intent(PlayerForDataActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
             }
             return super.onKeyDown(keyCode, event);
         }else {

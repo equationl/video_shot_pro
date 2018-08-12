@@ -47,12 +47,15 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    implementation 'com.github.iielse:ImageWatcher:1.1.1'
+    implementation 'com.github.bumptech.glide:glide:4.3.1'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.3.1'
     compile(name: 'FFmpegAndroid', ext: 'aar')
     compile 'com.android.support:appcompat-v7:26.1.0'
     compile 'com.android.support:cardview-v7:26.1.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:design:26.1.0'
-    compile 'com.github.bumptech.glide:glide:4.0.0'
+    //compile 'com.github.bumptech.glide:glide:4.0.0'
     compile 'com.github.YancyYe:GalleryPick:1.2.1'
     compile 'com.dingmouren.colorpicker:colorpicker:1.0.1'
     compile 'com.tencent.bugly:crashreport_upgrade:latest.release'
@@ -63,6 +66,6 @@ dependencies {
     compile 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:+'
     compile 'com.github.clans:fab:1.6.4'
     compile 'me.solidev.library:auto-loadmore:1.0.1'
-    compile 'ch.ielse:imagewatcher:1.0.3'
+    //compile 'ch.ielse:imagewatcher:1.0.3'
     testCompile 'junit:junit:4.12'
 }

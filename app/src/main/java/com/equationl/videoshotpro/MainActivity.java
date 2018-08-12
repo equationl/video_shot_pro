@@ -25,6 +25,7 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -34,6 +35,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.text.Html;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -71,6 +73,8 @@ import com.github.clans.fab.FloatingActionMenu;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
+import com.github.ielse.imagewatcher.ImageWatcher;
+import com.github.ielse.imagewatcher.ImageWatcherHelper;
 import com.qq.e.ads.banner.ADSize;
 import com.qq.e.ads.banner.AbstractBannerADListener;
 import com.qq.e.ads.banner.BannerView;
@@ -89,11 +93,12 @@ import org.json.JSONObject;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
-import ch.ielse.view.imagewatcher.ImageWatcher;
 import me.solidev.loadmore.AutoLoadMoreAdapter;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -191,14 +196,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     != PackageManager.PERMISSION_GRANTED) {
+                isFirstBoot = true;
                 showDialogTipUserRequestPermission();
             }
             else if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
                     != PackageManager.PERMISSION_GRANTED) {
+                isFirstBoot = true;
                 showDialogTipUserRequestPermission();
             }
             else if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED) {
+                isFirstBoot = true;
                 showDialogTipUserRequestPermission();
             }
         }
@@ -405,6 +413,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .setNegativeButton(R.string.main_dialog_btn_cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        SharedPreferences.Editor editor = sp_init.edit();
+                        editor.putBoolean("isFirstBoot", true);
+                        editor.apply();
                         finish();
                     }
                 }).setCancelable(false).show();
@@ -1233,6 +1244,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             data.img = null;
             data.text = res.getString(R.string.main_text_waterFall_firstUse);
             data.imgHeight = 0;
+            data.isDirectory = false;
             waterFallList.add(data);
         }
         mLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
@@ -1289,31 +1301,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
 
-        //initOnPictureLongPressListener();
-        vImageWatcher = ImageWatcher.Helper.with(this) // 一般来讲， ImageWatcher 需要占据全屏的位置
+        initOnPictureLongPressListener();
+        vImageWatcher = ImageWatcherHelper.with(this) // 一般来讲， ImageWatcher 需要占据全屏的位置
                 .setTranslucentStatus(!isTranslucentStatus ? Utils.calcStatusBarHeight(this) : 0) // 如果是透明状态栏，你需要给ImageWatcher标记 一个偏移值，以修正点击ImageView查看的启动动画的Y轴起点的不正确
                 .setErrorImageRes(R.mipmap.error_picture) // 配置error图标 如果不介意使用lib自带的图标，并不一定要调用这个API
                 .setOnPictureLongPressListener(mOnPictureLongPressListener) // 长按图片的回调，你可以显示一个框继续提供一些复制，发送等功能
                 .setLoader(new ImageWatcher.Loader() {
                     @Override
-                    public void load(Context context, String url, final ImageWatcher.LoadCallback lc) {
+                    public void load(Context context, Uri uri, final ImageWatcher.LoadCallback lc) {
                         Log.i(TAG, "call load");
-                        RequestOptions options = new RequestOptions()
-                                .placeholder(R.mipmap.gallery_pick_photo);
-                        Glide.with(context).asBitmap().load(url).apply(options).into(new SimpleTarget<Bitmap>() {
+                        //RequestOptions options = new RequestOptions().placeholder(R.mipmap.gallery_pick_photo);
+                        Glide.with(context).load(uri.toString()).into(new SimpleTarget<Drawable>() {   //不知道为什么直接用URI加载会 load fail
                             @Override
-                            public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+                            public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
                                 lc.onResourceReady(resource);
                             }
 
                             @Override
-                            public void onLoadStarted(Drawable placeholder) {
-                                lc.onLoadStarted(placeholder);
+                            public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                                lc.onLoadFailed(errorDrawable);
                             }
 
                             @Override
-                            public void onLoadFailed(Drawable errorDrawable) {
-                                lc.onLoadFailed(errorDrawable);
+                            public void onLoadStarted(@Nullable Drawable placeholder) {
+                                lc.onLoadStarted(placeholder);
                             }
                         });
                     }
@@ -1322,7 +1333,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void showPicture(ImageView v, String file) {
-        vImageWatcher.show(v, Collections.singletonList(v),  Collections.singletonList(file));
+        //vImageWatcher.show(v, );
+        Log.i(TAG, "showP file: "+file);
+        File f = new File(file);
+        SparseArray<ImageView> imageGroupList = new SparseArray<>();
+        imageGroupList.put(0, v);
+        if (f.isDirectory()) {
+            List<Uri> uriList = new LinkedList<>();
+            for (String s : tool.getFileOrderByName(file)) {
+                uriList.add(Uri.parse(file+"/"+s));
+            }
+            if (uriList.size() < 1) {
+                return;
+            }
+            vImageWatcher.show(v, imageGroupList,  uriList);
+        }
+        else {
+            vImageWatcher.show(v, imageGroupList,  Collections.singletonList(Uri.parse(file)));
+        }
     }
 
     private List<WaterFallData> addWaterFallList() {
@@ -1356,8 +1384,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     WaterFallData data = new WaterFallData();
                     //data.img = tool.getBitmapThumbnailFromFile(filepath+"/"+files[i], 400, 500);
                     data.img = filepath+"/"+files[i];
-                    data.text = i+":"+files[i];
+                    data.text = files[i];
                     data.imgHeight = (i % 2)*100 + 400;
+                    if (new File(data.img).isDirectory()) {
+                        data.text = "（合集）" + data.text;
+                        data.isDirectory = true;
+                        String[] imgs = tool.getFileOrderByName(data.img);
+                        if (imgs.length < 1) {
+                            data.img = null;
+                        }
+                        else {
+                            data.img = data.img+"/"+imgs[0];
+                        }
+                    }
                     waterFallList.add(data);
                 }
                 waterFallDataPager++;
@@ -1379,6 +1418,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             data.img = null;
             data.text = res.getString(R.string.main_text_waterFall_noData);
             data.imgHeight = 0;
+            data.isDirectory = false;
             waterFallList.add(data);
         }
 
@@ -1391,31 +1431,50 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             WaterFallData data = new WaterFallData();
             //data.img = tool.getBitmapThumbnailFromFile(filepath+"/"+files[i], 400, 500);
             data.img = filepath+"/"+files[i];
-            data.text = i+":"+files[i];
+            data.text = files[i];
             data.imgHeight = (i % 2)*100 + 400;
+            if (new File(data.img).isDirectory()) {
+                data.text = "（合集）" + data.text;
+                data.isDirectory = true;
+               //Log.i(TAG, "directory files:"+tool.getFileOrderByName(data.img)[0]);
+                String[] imgs = tool.getFileOrderByName(data.img);
+                if (imgs.length < 1) {
+                    data.img = null;
+                }
+                else {
+                    data.img = data.img+"/"+imgs[0];
+                }
+            }
             waterFallList.add(data);
         }
         waterFallDataPager++;
         return waterFallList;
     }
 
-    /*private void initOnPictureLongPressListener() {
+    private void initOnPictureLongPressListener() {
         mOnPictureLongPressListener = new ImageWatcher.OnPictureLongPressListener() {
             @Override
-            public void onPictureLongPress(ImageView v, final String url, final int pos) {
+            public void onPictureLongPress(ImageView v, final Uri url, final int pos) {
                 //Toast.makeText(MainActivity.this, "call long press:"+url, Toast.LENGTH_SHORT).show();
-                String[] items = new String[] {"分享", "删除"};
+                String[] items;
+                //Log.i(TAG, "in longPress path= "+new File(url.toString()).getParent()+" RootPath= "+tool.getSaveRootPath());
+                if (!new File(url.toString()).getParent().equals(tool.getSaveRootPath())) {
+                    items = new String[] {"分享", "删除"};
+                }
+                else {
+                    items = new String[] {"分享"};
+                }
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                 builder.setItems(items, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         switch (i) {
                             case 0:
-                                sharePicture(url);
+                                sharePicture(url.toString());
                                 //Toast.makeText(MainActivity.this, "分享 "+url, Toast.LENGTH_SHORT).show();
                                 break;
                             case 1:
-                                deletePicture(url, pos);
+                                deletePicture(url.toString(), pos, true);
                                 //Toast.makeText(MainActivity.this, "删除 "+url, Toast.LENGTH_SHORT).show();
                                 break;
                         }
@@ -1425,7 +1484,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 builder.show();
             }
         };
-    }   */
+    }
 
     private void showPopupMenu(View view, final String img, final int pos) {
         PopupMenu popupMenu = new PopupMenu(MainActivity.this, view);
@@ -1456,23 +1515,36 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         popupMenu.show();
     }
 
-    private void deletePicture(String img, final int pos) {
+    private void deletePicture(String img, final int pos, final boolean fromDir) {
         final File f = new File(img);
-        if (f.isDirectory()) {
-            Snackbar.make(getWindow().getDecorView(),R.string.main_snackbar_deleteDirectoryTip, Snackbar.LENGTH_LONG).setAction(R.string.main_snackbar_deleteDirectorySure, new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+
+        Snackbar.make(getWindow().getDecorView(),R.string.main_snackbar_deleteTip, Snackbar.LENGTH_LONG).setAction(R.string.main_snackbar_deleteSure, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (f.isDirectory()) {
                     tool.deleteDirectory(f);
+                }
+                else {
+                    tool.deleteFile(f);
+                }
+                if (fromDir) {
+                    //FIXME 应当改为直接退出imagewatcher界面而不是靠模拟返回键来退出
+                    try {
+                        Runtime.getRuntime().exec("input keyevent "+KeyEvent.KEYCODE_BACK);
+                    } catch (Exception e) {
+                        Log.e(TAG, "模拟返回键出错");
+                    }
+                }
+                else{
                     waterFallList.remove(pos);
                     mRecyclerView.getAdapter().notifyDataSetChanged();
                 }
-            }).show();
-        }
-        else {
-            tool.deleteFile(f);
-            waterFallList.remove(pos);
-            mRecyclerView.getAdapter().notifyDataSetChanged();
-        }
+            }
+        }).show();
+    }
+
+    private void deletePicture(String img, final int pos) {
+        deletePicture(img, pos, false);
     }
 
     private void sharePicture(String img) {

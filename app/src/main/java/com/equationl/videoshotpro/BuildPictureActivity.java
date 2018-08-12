@@ -443,12 +443,10 @@ public class BuildPictureActivity extends AppCompatActivity {
         try {
             if (isReduce) {
                 int quality = Integer.parseInt(settings.getString("reduce_value","100"));
-                savePath = tool.saveBitmap2png(bmp,bitName, Environment.getExternalStoragePublicDirectory(
-                        Environment.DIRECTORY_PICTURES), true, quality);
+                savePath = tool.saveBitmap2png(bmp,bitName, new File(tool.getSaveRootPath()), true, quality);
             }
             else {
-                savePath = tool.saveBitmap2png(bmp,bitName, Environment.getExternalStoragePublicDirectory(
-                        Environment.DIRECTORY_PICTURES));
+                savePath = tool.saveBitmap2png(bmp,bitName, new File(tool.getSaveRootPath()));
             }
             flag = true;
         } catch (Exception e) {
@@ -545,8 +543,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                         if (!activity.sp_init.getBoolean("isCloseAd", false)) {
                             activity.showAD();
                         }
-                        String temp_path = Environment.getExternalStoragePublicDirectory(
-                                Environment.DIRECTORY_PICTURES)+"/"+msg.obj.toString();
+                        String temp_path = activity.tool.getSaveRootPath()+"/"+msg.obj.toString();
                         temp_path += activity.settings.getBoolean("isReduce_switch", false) ? ".jpg":".png";
                         MediaScannerConnection.scanFile(activity, new String[]{temp_path}, null, null);
                         Toast.makeText(activity,"处理完成！图片已保存至 "+ temp_path +" 请进入图库查看", Toast.LENGTH_LONG).show();

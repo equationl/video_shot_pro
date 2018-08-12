@@ -9,4 +9,5 @@ public class WaterFallData implements Serializable{
     public String img;
     public String text;
     public int imgHeight;
+    public boolean isDirectory;
 }
