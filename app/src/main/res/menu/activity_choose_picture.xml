@@ -3,8 +3,13 @@
     xmlns:ActionBar2="http://schemas.android.com/apk/res-auto" >
 
     <item
+        android:id="@+id/choosePicture_menu_edit"
+        android:icon="@drawable/square_edit_outline"
+        ActionBar2:showAsAction="always" />
+
+    <item
         android:id="@+id/choosePicture_menu_done"
-        ActionBar2:showAsAction="always"
-        android:title="@string/choosePicture_menu_title_done"/>
+        android:icon="@drawable/check"
+        ActionBar2:showAsAction="always" />
 
 </menu>

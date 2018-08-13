@@ -9,12 +9,18 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,14 +31,25 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.dingmouren.colorpicker.ColorPickerDialog;
 import com.equationl.videoshotpro.Image.Tools;
+import com.equationl.videoshotpro.utils.Utils;
+import com.github.ielse.imagewatcher.ImageWatcher;
+import com.github.ielse.imagewatcher.ImageWatcherHelper;
 import com.huxq17.handygridview.HandyGridView;
 import com.huxq17.handygridview.listener.OnItemCapturedListener;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -51,6 +68,10 @@ public class ChooseActivity extends AppCompatActivity {
     ChoosePictureAdapter pictureAdapter;
     SharedPreferences sp_init;
     Boolean isFromExtra;
+    boolean isEditMode = false;
+
+    ImageWatcher vImageWatcher;
+    ImageWatcher.OnPictureLongPressListener mOnPictureLongPressListener;
 
     private final MyHandler handler = new MyHandler(this);
 
@@ -95,10 +116,20 @@ public class ChooseActivity extends AppCompatActivity {
         dialog.setProgress(0);
         new Thread(new LoadImageThread()).start();
 
+        initPictureWathcher();
+
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                showPictureDialog(position);
+                //showPictureDialog(position);
+                //ChoosePictureAdapter.ViewHolder viewHolder = (ChoosePictureAdapter.ViewHolder) pictureAdapter.getView(position, view, parent).getTag();
+                ImageView imageview = (ImageView) pictureAdapter.getView(position, view, parent);
+                SparseArray<ImageView> imageGroupList = new SparseArray<>();
+                imageGroupList.put(0, imageview);
+                imagePaths = pictureAdapter.getImagePaths();
+                String path = getExternalCacheDir().toString();
+                String file = path+"/"+imagePaths.get(position);
+                vImageWatcher.show(imageview, imageGroupList, Collections.singletonList(Uri.parse(file)));
             }
         });
 
@@ -177,6 +208,17 @@ public class ChooseActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (isEditMode) {
+            menu.findItem(R.id.choosePicture_menu_edit).setIcon(
+                    R.drawable.square_edit_outline_blank);
+        } else {
+            menu.findItem(R.id.choosePicture_menu_edit).setIcon(R.drawable.square_edit_outline);
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item){
         switch (item.getItemId()) {
             case R.id.choosePicture_menu_done:
@@ -188,11 +230,22 @@ public class ChooseActivity extends AppCompatActivity {
                 }
                 startActivity(intent);
                 break;
+            case R.id.choosePicture_menu_edit:
+                if (pictureAdapter.inEditMode) {
+                    isEditMode = false;
+                    pictureAdapter.setInEditMode(false);
+                }
+                else {
+                    isEditMode = true;
+                    pictureAdapter.setInEditMode(true);
+                }
+                invalidateOptionsMenu();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void showPictureDialog(int position) {
+   /* private void showPictureDialog(int position) {
         imagePaths = pictureAdapter.getImagePaths();
         //Log.i(TAG, imagePaths.toString());
         String path = getExternalCacheDir().toString();
@@ -219,7 +272,7 @@ public class ChooseActivity extends AppCompatActivity {
                 .setCancelable(true)
                 .create();
         builder.show();
-    }
+    }   */
 
     private void showGuideDialog() {
         Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
@@ -233,6 +286,71 @@ public class ChooseActivity extends AppCompatActivity {
                             }
                         }).create();
         dialog.show();
+    }
+
+    private void initPictureWathcher() {
+        mOnPictureLongPressListener = new ImageWatcher.OnPictureLongPressListener() {
+            @Override
+            public void onPictureLongPress(ImageView v, final Uri url, final int pos) {
+                //Toast.makeText(MainActivity.this, "call long press:"+url, Toast.LENGTH_SHORT).show();
+                String[] items;
+                //Log.i(TAG, "in longPress path= "+new File(url.toString()).getParent()+" RootPath= "+tool.getSaveRootPath());
+                items = new String[] {"保存"};
+                AlertDialog.Builder builder = new AlertDialog.Builder(ChooseActivity.this);
+                builder.setItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        switch (i) {
+                            case 0:
+                                SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
+                                String date    =    sDateFormat.format(new    java.util.Date());
+                                date += "-by_EL."+url.toString().substring(url.toString().lastIndexOf(".") + 1);
+                                String savePath =  tool.getSaveRootPath() + "/" + date;
+                                try {
+                                    tool.copyFile(new File(url.toString()), new File(savePath));
+                                    MediaScannerConnection.scanFile(ChooseActivity.this, new String[]{savePath}, null, null);
+                                    Toast.makeText(ChooseActivity.this, R.string.choosePicture_toast_saveSuccess, Toast.LENGTH_SHORT).show();
+                                } catch (IOException e) {
+                                    Toast.makeText(ChooseActivity.this, R.string.choosePicture_toast_saveFail, Toast.LENGTH_SHORT).show();
+                                }
+                                break;
+                        }
+                    }
+                });
+                builder.create();
+                builder.show();
+            }
+        };
+
+        vImageWatcher = ImageWatcherHelper.with(this)
+                .setTranslucentStatus(0)
+                .setErrorImageRes(R.mipmap.error_picture)
+                .setOnPictureLongPressListener(mOnPictureLongPressListener)
+                .setLoader(new ImageWatcher.Loader() {
+                    @Override
+                    public void load(Context context, Uri uri, final ImageWatcher.LoadCallback lc) {
+                        Log.i(TAG, "call load");
+                        RequestOptions options = new RequestOptions().placeholder(R.mipmap.gallery_pick_photo)
+                                .skipMemoryCache(true).diskCacheStrategy( DiskCacheStrategy.NONE );   //禁用磁盘缓存，否则多次使用时预览图片会出错
+                        Glide.with(context).load(uri.toString()).apply(options).into(new SimpleTarget<Drawable>() {   //不知道为什么直接用URI加载会 load fail
+                            @Override
+                            public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                                lc.onResourceReady(resource);
+                            }
+
+                            @Override
+                            public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                                lc.onLoadFailed(errorDrawable);
+                            }
+
+                            @Override
+                            public void onLoadStarted(@Nullable Drawable placeholder) {
+                                lc.onLoadStarted(placeholder);
+                            }
+                        });
+                    }
+                })
+                .create();
     }
 
 }

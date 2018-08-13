@@ -330,7 +330,7 @@ public class Tools{
         return true;
     }
 
-    private void copyFile(File fromFile,File toFile) throws IOException {
+    public void copyFile(File fromFile,File toFile) throws IOException {
         FileInputStream ins = new FileInputStream(fromFile);
         FileOutputStream out = new FileOutputStream(toFile);
         byte[] b = new byte[1024];

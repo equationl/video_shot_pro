@@ -23,6 +23,7 @@ import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -812,6 +813,20 @@ public class MarkPictureActivity extends AppCompatActivity {
                             }
                         }).create();
         dialog.show();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+            try {
+                ChooseActivity.instance.finish();
+            } catch (NullPointerException e){}
+            finish();
+            return false;
+        } else {
+            return super.onKeyDown(keyCode, event);
+        }
+
     }
 
 }

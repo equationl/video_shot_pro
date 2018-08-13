@@ -366,6 +366,8 @@
     当想要更改的顺序在屏幕外时，您可以将图片滑动至屏幕上边缘或下边缘，此时当前界面将会自动滚屏直至您将图片移出屏幕边缘。\n
     单击图片可以预览大图。</string>
     <string name="choosePicture_tip_dialog_btn_ok">我知道了</string>
+    <string name="choosePicture_toast_saveFail">保存失败</string>
+    <string name="choosePicture_toast_saveSuccess">保存成功</string>
 
 
     <string name="action_settings">设置</string>
