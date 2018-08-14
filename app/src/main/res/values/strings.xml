@@ -211,7 +211,7 @@
     <string name="main_dialog_shotFrame_title">温馨提示</string>
     <string name="main_dialog_shotFrame_content">使用本模式可以快速提取视频指定时间间隔的所有帧，方便用户从中选出满意的截图。\n使用方法：\n选择视频后点击按钮标记起始位置，再次点击按钮标记终止位置，并开始截取。截取后的图片在手机根目录的 /Pictures/截取时间 目录下。 </string>
 
-   <!-- <string name="main_view_button_start">快速开始</string>
+    <!-- <string name="main_view_button_start">快速开始</string>
     <string name="main_view_button_guide">说明</string>
     <string name="main_view_button_splicing">已有截图合成</string>
     <string name="main_view_button_floatBtn">外部程序截图（测试）</string>
@@ -222,7 +222,6 @@
     <string name="main_floatBtn_menu_splicing">合成截图</string>
     <string name="main_floatBtn_menu_shotScreen">外部程序截图</string>
     <string name="main_floatBtn_menu_frameByFrame">逐帧选优</string>
-
 
 
     <string name="main_snackbar_loadSo_fail">加载FFmpeg失败</string>

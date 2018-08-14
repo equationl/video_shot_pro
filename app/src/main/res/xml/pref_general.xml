@@ -171,6 +171,7 @@
                     android:maxLines="1"
                     android:selectAllOnFocus="true"
                     android:singleLine="true"
+                    android:dependency="isCheckBlankLines"
                     android:title="@string/pref_edit_AllowNotBlackNums_title" />
 
                 <EditTextPreference

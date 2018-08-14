@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ActionBar2="http://schemas.android.com/apk/res-auto" >
+
+    <item
+        android:id="@+id/markPicture_menu_guide"
+        android:icon="@drawable/lightbulb_on_outline"
+        ActionBar2:showAsAction="always" />
+
+    <item
+        android:id="@+id/markPicture_menu_done"
+        android:icon="@drawable/check"
+        ActionBar2:showAsAction="always" />
+
+</menu>
