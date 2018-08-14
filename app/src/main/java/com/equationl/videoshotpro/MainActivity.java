@@ -39,6 +39,7 @@ import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -68,8 +69,8 @@ import com.equationl.videoshotpro.utils.OnRecylerViewItemClickListener;
 import com.equationl.videoshotpro.utils.Share;
 import com.equationl.videoshotpro.utils.Utils;
 import com.equationl.videoshotpro.utils.WaterFallData;
-import com.github.clans.fab.FloatingActionButton;
-import com.github.clans.fab.FloatingActionMenu;
+import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
@@ -121,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Boolean isFirstBoot = false;
     boolean isTranslucentStatus = false;
     IWXAPI wxApi;
-    FloatingActionMenu   main_floatBtn_menu;
+    FloatingActionsMenu main_floatBtn_menu;
     FloatingActionButton main_floatBtn_quick;
     FloatingActionButton main_floatBtn_splicing;
     FloatingActionButton main_floatBtn_shotScreen;
@@ -221,8 +222,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //button_help = (Button)findViewById(R.id.btn_main_help);
         //button_setting = (Button)findViewById(R.id.btn_main_setting);
 
-        main_floatBtn_menu = (FloatingActionMenu) findViewById(R.id.main_floatBtn_menu);
-
+        main_floatBtn_menu = (FloatingActionsMenu) findViewById(R.id.main_floatBtn_menu);
         main_floatBtn_quick = (FloatingActionButton) findViewById(R.id.main_floatBtn_quick);
         main_floatBtn_splicing = (FloatingActionButton) findViewById(R.id.main_floatBtn_splicing);
         main_floatBtn_shotScreen = (FloatingActionButton) findViewById(R.id.main_floatBtn_shotScreen);
@@ -230,8 +230,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         mRecyclerView = (RecyclerView) findViewById(R.id.main_recyclerView);
 
-        main_floatBtn_menu.setClosedOnTouchOutside(true);
-        main_floatBtn_menu.hideMenuButton(false);
+        //main_floatBtn_menu.setClosedOnTouchOutside(true);
+        //main_floatBtn_menu.hideMenuButton(false);
 
         main_floatBtn_quick.setOnClickListener(clickListener);
         main_floatBtn_splicing.setOnClickListener(clickListener);
@@ -248,9 +248,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
 
-        main_floatBtn_menu.showMenuButton(true);
+        //main_floatBtn_menu.showMenuButton(true);
 
-        main_floatBtn_menu.setOnMenuButtonClickListener(new View.OnClickListener() {
+        /*main_floatBtn_menu.setOnMenuButtonClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (main_floatBtn_menu.isOpened()) {
@@ -259,7 +259,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 main_floatBtn_menu.toggle(true);
             }
-        });
+        });   */
 
 
         //text_bottom = (TextView)findViewById(R.id.text_main_bottom);
@@ -1215,6 +1215,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private View.OnClickListener clickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            main_floatBtn_menu.collapseImmediately();
             switch (v.getId()) {
                 case R.id.main_floatBtn_quick:
                     Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -1556,4 +1557,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Share.showSharePictureDialog(this, new File(img), shareListener, MainActivity.this);
         }
     }
+
+    /*@Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        switch (ev.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                if (main_floatBtn_menu.isExpanded()) {
+                    main_floatBtn_menu.setEnabled(false);
+                }
+                main_floatBtn_menu.collapse();
+                break;
+            case MotionEvent.ACTION_UP:
+                main_floatBtn_menu.setEnabled(true);
+                break;
+        }
+        return super.dispatchTouchEvent(ev);
+
+    }   */
+
 }

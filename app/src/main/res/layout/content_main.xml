@@ -25,53 +25,48 @@
         app:layout_constraintTop_toTopOf="parent"
         android:orientation="horizontal" />
 
-    <com.github.clans.fab.FloatingActionMenu
+    <com.getbase.floatingactionbutton.FloatingActionsMenu
         android:id="@+id/main_floatBtn_menu"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingRight="10dp"
         android:paddingBottom="10dp"
         android:paddingLeft="10dp"
-        fab:menu_labels_ellipsize="end"
-        fab:menu_labels_singleLine="true"
-        fab:menu_backgroundColor="#ccffffff">
+        fab:fab_labelsPosition="left"
+        fab:fab_labelStyle="@style/menu_labels_style">
 
-        <com.github.clans.fab.FloatingActionButton
+        <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/main_floatBtn_quick"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@mipmap/float_button"
-            fab:fab_size="mini"
-            fab:fab_label="@string/main_floatBtn_menu_quick"
-            style="@style/MainFloatButtonStyle"/>
+            android:src="@drawable/play_circle"
+            fab:fab_size="normal"
+            fab:fab_title="@string/main_floatBtn_menu_quick" />
 
-        <com.github.clans.fab.FloatingActionButton
+        <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/main_floatBtn_splicing"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@mipmap/ic_launcher"
-            fab:fab_size="mini"
-            fab:fab_label="@string/main_floatBtn_menu_splicing"
-            style="@style/MainFloatButtonStyle"/>
+            android:src="@drawable/image_multiple"
+            fab:fab_size="normal"
+            fab:fab_title="@string/main_floatBtn_menu_splicing" />
 
-        <com.github.clans.fab.FloatingActionButton
+        <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/main_floatBtn_shotScreen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@mipmap/ic_launcher_round"
-            fab:fab_size="mini"
-            fab:fab_label="@string/main_floatBtn_menu_shotScreen"
-            style="@style/MainFloatButtonStyle"/>
+            android:src="@drawable/cellphone_screenshot"
+            fab:fab_size="normal"
+            fab:fab_title="@string/main_floatBtn_menu_shotScreen" />
 
-        <com.github.clans.fab.FloatingActionButton
+        <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/main_floatBtn_frameByFrame"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@mipmap/float_button"
-            fab:fab_size="mini"
-            fab:fab_label="@string/main_floatBtn_menu_frameByFrame"
-            style="@style/MainFloatButtonStyle"/>
+            android:src="@drawable/animation_play"
+            fab:fab_size="normal"
+            fab:fab_title="@string/main_floatBtn_menu_frameByFrame" />
 
-    </com.github.clans.fab.FloatingActionMenu>
+    </com.getbase.floatingactionbutton.FloatingActionsMenu>
 
 </android.support.constraint.ConstraintLayout>

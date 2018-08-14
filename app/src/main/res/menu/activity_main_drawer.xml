@@ -5,11 +5,11 @@
         <menu>
             <item
                 android:id="@+id/main_nav_ffmpeg"
-                android:icon="?android:attr/actionModeCopyDrawable"
+                android:icon="@android:drawable/ic_menu_sort_by_size"
                 android:title="@string/main_nav_text_ffmpeg" />
             <item
                 android:id="@+id/main_nav_setting"
-                android:icon="?android:attr/actionModeCopyDrawable"
+                android:icon="@drawable/ic_menu_manage"
                 android:title="@string/main_nav_text_setting" />
         </menu>
     </item>

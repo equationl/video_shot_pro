@@ -3,8 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/autoLoadDemo/autoLoadDemo.iml" filepath="$PROJECT_DIR$/autoLoadDemo/autoLoadDemo.iml" />
-      <module fileurl="file://$PROJECT_DIR$/floatbtnsample/floatbtnsample.iml" filepath="$PROJECT_DIR$/floatbtnsample/floatbtnsample.iml" />
       <module fileurl="file://$PROJECT_DIR$/library/library.iml" filepath="$PROJECT_DIR$/library/library.iml" />
       <module fileurl="file://$PROJECT_DIR$/videoshotpro.iml" filepath="$PROJECT_DIR$/videoshotpro.iml" />
     </modules>

@@ -12,8 +12,6 @@ import android.widget.Toast;
 
 import com.equationl.videoshotpro.Adapter.markPictureAdapter;
 import com.equationl.videoshotpro.Image.Tools;
-import com.github.clans.fab.FloatingActionButton;
-import com.github.clans.fab.FloatingActionMenu;
 import com.huxq17.swipecardsview.SwipeCardsView;
 
 import java.util.ArrayList;
@@ -23,7 +21,6 @@ import java.util.List;
 public class MarkPictureActivity2 extends AppCompatActivity {
     SwipeCardsView swipeCardsView;
     markPictureAdapter adapter;
-    FloatingActionMenu fab;
     List <String> pictureList =  new ArrayList<>();
     int curIndex;
     Tools tool;

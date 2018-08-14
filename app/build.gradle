@@ -50,7 +50,8 @@ dependencies {
     implementation 'com.github.iielse:ImageWatcher:1.1.1'
     implementation 'com.github.bumptech.glide:glide:4.3.1'
     implementation 'com.huxq17.android:SwipeCardsView:1.3.5'
-    implementation 'com.ddz.materialdesign:FloatingActionButton:1.0.4'
+    //implementation 'com.ddz.materialdesign:FloatingActionButton:1.0.4'
+    implementation 'com.getbase:floatingactionbutton:1.10.1'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.3.1'
     compile(name: 'FFmpegAndroid', ext: 'aar')
     compile 'com.android.support:appcompat-v7:26.1.0'
@@ -66,7 +67,7 @@ dependencies {
     compile 'com.squareup.okio:okio:1.13.0'
     compile 'com.huxq17.handygridview:handygridview:1.1.0'
     compile 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:+'
-    compile 'com.github.clans:fab:1.6.4'
+    //compile 'com.github.clans:fab:1.6.4'
     compile 'me.solidev.library:auto-loadmore:1.0.1'
     //compile 'ch.ielse:imagewatcher:1.0.3'
     testCompile 'junit:junit:4.12'

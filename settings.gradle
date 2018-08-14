@@ -1,1 +1,1 @@
-include ':app', ':floatbtnsample', ':library', ':autoLoadDemo'
+include ':app', ':library'
