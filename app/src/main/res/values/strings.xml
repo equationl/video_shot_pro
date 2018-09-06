@@ -311,7 +311,7 @@
     <string name="player_dialog_FBF_content">截取已开始</string>
 
     <string name="markPicture_toast_readFile_fail">读取图片列表出错！</string>
-    <string name="markPicture_toast_markFinish">已是最后一张，请点击右下角“开始合成”</string>
+    <string name="markPicture_toast_markFinish">所有图片已经标记完成，请点击 右上角 开始合成</string>
     <string name="markPicture_ProgressDialog_msg">请稍候</string>
     <string name="markPicture_ProgressDialog_title">请稍候&#8230;</string>
     <string name="markPicture_ProgressDialog_msgOnRunning">正在处理第%1$s张图片&#8230;</string>
