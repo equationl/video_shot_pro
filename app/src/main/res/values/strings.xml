@@ -126,6 +126,10 @@
         --------------\n
         okHttp：https://github.com/square/okhttp/   \n
         --------------\n
+        floatingactionbutton: https://github.com/futuresimple/android-floating-action-button/  \n
+        --------------\n
+        FancyShowCaseView: https://github.com/faruktoptas/FancyShowCaseView \n
+        --------------\n
         特别感谢：\n
         --------------\n
         Bugly：https://bugly.qq.com   \n
@@ -269,6 +273,9 @@
     <string name="main_popupMenu_share">分享</string>
     <string name="main_popupMenu_delete">删除</string>
 
+    <string name="main_guideView_startBtn">点击该按钮开始制作哦~</string>
+    <string name="main_guideView_summary">你制作的作品将会在此显示\n点击可查看大图\n长按可分享和删除哦</string>
+
     <string-array name="main_dialog_shareAPP_items">
         <item>QQ</item>
         <item>微信朋友圈</item>
@@ -325,6 +332,13 @@
     <string name="markPicture_tip_dialog_btn_ok">我知道了</string>
     <string name="markPicture_toast_getPicture_fail">获取图片失败！</string>
 
+    <string name="markPicture_guide_undo">点击就能撤回上一步操作了~</string>
+    <string name="markPicture_guide_delete">点击就能删除这张截图了~</string>
+    <string name="markPicture_guide_addText">点击就能给图片添加文字了~</string>
+    <string name="markPicture_guide_moreTool">点击就能打开更多工具哦~</string>
+    <string name="markPicture_guide_swipeRight">图\n片\n滑\n向\n右\n边\n保\n留\n全\n图</string>
+    <string name="markPicture_guide_swipeLeft">图\n片\n滑\n向\n左\n边\n仅\n保\n留\n台\n词</string>
+
 
     <string name="floatWindowsService_notice_ticker_text">启动通知</string>
     <string name="floatWindowsService_notice_content">点击开始制作</string>
@@ -369,6 +383,10 @@
     <string name="choosePicture_toast_saveFail">保存失败</string>
     <string name="choosePicture_toast_saveSuccess">保存成功</string>
 
+    <string name="choosePicture_guideView_edit">点击就能打开编辑模式哦~</string>
+    <string name="choosePicture_guideView_done">点击进入下一步哦~</string>
+    <string name="choosePicture_guideView_editSummary">在编辑模式下可以点击删除多余的图片哦~\n再按一次编辑按钮即可退出编辑模式了~</string>
+    <string name="choosePicture_guideView_clickImage">长按并拖动可以更换图片顺序哦~\n单击就能打开预览哦~\n在预览界面长按可以保存单张图片了呢~</string>
 
     <string name="action_settings">设置</string>
     <string name="title_activity_settings">设置</string>

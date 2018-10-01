@@ -12,7 +12,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.projection.MediaProjectionManager;
@@ -39,7 +38,6 @@ import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -56,7 +54,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.equationl.videoshotpro.Image.Tools;
@@ -94,13 +91,14 @@ import org.json.JSONObject;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import me.solidev.loadmore.AutoLoadMoreAdapter;
+import me.toptas.fancyshowcase.FancyShowCaseQueue;
+import me.toptas.fancyshowcase.FancyShowCaseView;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -192,6 +190,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             SharedPreferences.Editor editor = sp_init.edit();
             editor.putBoolean("isFirstBoot", false);
             editor.apply();
+            //showGuide();
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -297,6 +296,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .provider("com.equationl.videoshotpro.fileprovider")
                 .multiSelect(true, 100)
                 .build();
+
+        showGuide();
     }
 
     @Override
@@ -1574,5 +1575,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return super.dispatchTouchEvent(ev);
 
     }   */
+
+
+    private void showGuide() {
+        final FancyShowCaseView fancyShowCaseView1 = new FancyShowCaseView.Builder(this)
+                .focusOn(findViewById(R.id.main_floatBtn_quick))
+                .title(res.getString(R.string.main_guideView_startBtn))
+                .showOnce("main_start")
+                .build();
+        final FancyShowCaseView fancyShowCaseView2 = new FancyShowCaseView.Builder(this)
+                .title(res.getString(R.string.main_guideView_summary))
+                .showOnce("main_summary")
+                .build();
+        FancyShowCaseQueue mQueue = new FancyShowCaseQueue()
+                .add(fancyShowCaseView1)
+                .add(fancyShowCaseView2);
+
+        mQueue.show();
+    }
 
 }

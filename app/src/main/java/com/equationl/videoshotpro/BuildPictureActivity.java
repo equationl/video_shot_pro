@@ -606,8 +606,10 @@ public class BuildPictureActivity extends AppCompatActivity {
                                     public void onClick(DialogInterface dialog, int which) {
                                         try {
                                             PlayerActivity.instance.finish();
-                                            MarkPictureActivity.instance.finish();
+                                            //FIXME
+                                            //MarkPictureActivity.instance.finish();
                                             MainActivity.instance.finish();
+                                            MarkPictureActivity2.instance.finish();
                                         } catch (NullPointerException e) {Log.e("el", e.toString());}
                                         Intent intent = new Intent(activity, MainActivity.class);
                                         activity.startActivity(intent);

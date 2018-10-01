@@ -20,6 +20,7 @@ import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -35,6 +36,7 @@ import com.dingmouren.colorpicker.OnColorPickerListener;
 import com.equationl.videoshotpro.Adapter.markPictureAdapter;
 import com.equationl.videoshotpro.Image.Tools;
 import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.huxq17.swipecardsview.SwipeCardsView;
 import com.tencent.bugly.crashreport.CrashReport;
 
@@ -44,6 +46,9 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import me.toptas.fancyshowcase.FancyShowCaseQueue;
+import me.toptas.fancyshowcase.FancyShowCaseView;
 
 public class MarkPictureActivity2 extends AppCompatActivity {
     SwipeCardsView swipeCardsView;
@@ -70,6 +75,8 @@ public class MarkPictureActivity2 extends AppCompatActivity {
 
 
     FloatingActionButton fab_undo, fab_delete, fab_addText;
+    FloatingActionsMenu fab_menu;
+
 
     private final MyHandler handler = new MyHandler(this);
 
@@ -97,6 +104,7 @@ public class MarkPictureActivity2 extends AppCompatActivity {
         fab_undo    = findViewById(R.id.markPicture_fab_undo);
         fab_delete  = findViewById(R.id.markPicture_fab_delete);
         fab_addText = findViewById(R.id.markPicture_fab_addText);
+        fab_menu    = findViewById(R.id.markPicture_fab_menu);
 
         fab_undo .setOnClickListener(clickListener);
         fab_delete.setOnClickListener(clickListener);
@@ -149,7 +157,8 @@ public class MarkPictureActivity2 extends AppCompatActivity {
                 }
                 break;
             case R.id.markPicture_menu_guide:
-                Toast.makeText(this, "帮助", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, "帮助", Toast.LENGTH_SHORT).show();
+                showGuide();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -236,6 +245,7 @@ public class MarkPictureActivity2 extends AppCompatActivity {
                     }
                     break;
                 case R.id.markPicture_fab_addText:
+                    Toast.makeText(MarkPictureActivity2.this, "该功能暂未开放，敬请期待！", Toast.LENGTH_SHORT).show();
                     //FIXME
                     //markPictureAddText();
                     break;
@@ -664,5 +674,48 @@ public class MarkPictureActivity2 extends AppCompatActivity {
             fileList[pic_no-1] = "del";
             pic_no--;
         }
+    }
+
+    private void showGuide() {
+        fab_menu.collapseImmediately();
+        fab_menu.expand();
+        final FancyShowCaseView fancyShowCaseView0 = new FancyShowCaseView.Builder(this)
+                .focusOn(fab_undo)
+                .title(res.getString(R.string.markPicture_guide_moreTool))
+                //.showOnce("choose_edit")
+                .build();
+        final FancyShowCaseView fancyShowCaseView1 = new FancyShowCaseView.Builder(this)
+                .focusOn(fab_undo)
+                .title(res.getString(R.string.markPicture_guide_undo))
+                //.showOnce("choose_edit")
+                .build();
+        final FancyShowCaseView fancyShowCaseView2 = new FancyShowCaseView.Builder(this)
+                .focusOn(fab_delete)
+                .title(res.getString(R.string.markPicture_guide_delete))
+                //.showOnce("choose_editSummary")
+                .build();
+        final FancyShowCaseView fancyShowCaseView3 = new FancyShowCaseView.Builder(this)
+                .focusOn(fab_addText)
+                .title(res.getString(R.string.markPicture_guide_addText))
+                //.showOnce("choose_done")
+                .build();
+        final FancyShowCaseView fancyShowCaseView4 = new FancyShowCaseView.Builder(this)
+                .titleStyle(R.style.GuideViewTextVertical,  Gravity.CENTER | Gravity.LEFT)
+                .title(res.getString(R.string.markPicture_guide_swipeLeft))
+                //.showOnce("choose_done")
+                .build();
+        final FancyShowCaseView fancyShowCaseView5 = new FancyShowCaseView.Builder(this)
+                .titleStyle(R.style.GuideViewTextVertical,  Gravity.CENTER | Gravity.RIGHT)
+                .title(res.getString(R.string.markPicture_guide_swipeRight))
+                //.showOnce("choose_done")
+                .build();
+        FancyShowCaseQueue mQueue = new FancyShowCaseQueue()
+                .add(fancyShowCaseView0)
+                .add(fancyShowCaseView1)
+                .add(fancyShowCaseView2)
+                .add(fancyShowCaseView3)
+                .add(fancyShowCaseView4)
+                .add(fancyShowCaseView5);
+        mQueue.show();
     }
 }

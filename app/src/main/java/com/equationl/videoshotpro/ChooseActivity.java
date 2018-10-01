@@ -29,6 +29,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -53,6 +54,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import me.toptas.fancyshowcase.FancyShowCaseQueue;
+import me.toptas.fancyshowcase.FancyShowCaseView;
+
 public class ChooseActivity extends AppCompatActivity {
 
     HandyGridView gridView;
@@ -72,6 +76,7 @@ public class ChooseActivity extends AppCompatActivity {
 
     ImageWatcher vImageWatcher;
     ImageWatcher.OnPictureLongPressListener mOnPictureLongPressListener;
+
 
     private final MyHandler handler = new MyHandler(this);
 
@@ -129,6 +134,12 @@ public class ChooseActivity extends AppCompatActivity {
                 imagePaths = pictureAdapter.getImagePaths();
                 String path = getExternalCacheDir().toString();
                 String file = path+"/"+imagePaths.get(position);
+                new FancyShowCaseView.Builder(ChooseActivity.this)
+                        .focusOn(imageview)
+                        .title(res.getString(R.string.choosePicture_guideView_clickImage))
+                        .showOnce("choose_clickImage")
+                        .build()
+                        .show();
                 vImageWatcher.show(imageview, imageGroupList, Collections.singletonList(Uri.parse(file)));
             }
         });
@@ -147,6 +158,8 @@ public class ChooseActivity extends AppCompatActivity {
             }
         });
 
+
+        //showGuideDialog();
     }
 
 
@@ -204,7 +217,34 @@ public class ChooseActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu){
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.activity_choose_picture, menu);
-        return true;
+        new Handler().postDelayed(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        final FancyShowCaseView fancyShowCaseView1 = new FancyShowCaseView.Builder(ChooseActivity.this)
+                                .focusOn(findViewById(R.id.choosePicture_menu_edit))
+                                .title(res.getString(R.string.choosePicture_guideView_edit))
+                                .showOnce("choose_edit")
+                                .build();
+                        final FancyShowCaseView fancyShowCaseView2 = new FancyShowCaseView.Builder(ChooseActivity.this)
+                                .title(res.getString(R.string.choosePicture_guideView_editSummary))
+                                .showOnce("choose_editSummary")
+                                .build();
+                        final FancyShowCaseView fancyShowCaseView3 = new FancyShowCaseView.Builder(ChooseActivity.this)
+                                .focusOn(findViewById(R.id.choosePicture_menu_done))
+                                .title(res.getString(R.string.choosePicture_guideView_done))
+                                .showOnce("choose_done")
+                                .build();
+                        FancyShowCaseQueue mQueue = new FancyShowCaseQueue()
+                                .add(fancyShowCaseView1)
+                                .add(fancyShowCaseView2)
+                                .add(fancyShowCaseView3);
+
+                        mQueue.show();
+                    }
+                }, 50
+        );
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -275,7 +315,7 @@ public class ChooseActivity extends AppCompatActivity {
     }   */
 
     private void showGuideDialog() {
-        Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
+        /*Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
                 .setTitle(R.string.choosePicture_tip_dialog_title)
                 .setMessage(R.string.choosePicture_tip_dialog_content)
                 .setPositiveButton(res.getString(R.string.choosePicture_tip_dialog_btn_ok),
@@ -285,7 +325,23 @@ public class ChooseActivity extends AppCompatActivity {
                                 dialog.dismiss();
                             }
                         }).create();
-        dialog.show();
+        dialog.show();   */
+        /*final FancyShowCaseView fancyShowCaseView1 = new FancyShowCaseView.Builder(this)
+                .focusOn(findViewById(R.id.main_guide_pos))
+                .title("Focus on View")
+                //.showOnce("fancy1")
+                .build();
+        final FancyShowCaseView fancyShowCaseView2 = new FancyShowCaseView.Builder(this)
+                .focusOn(findViewById(R.id.main_recyclerView))
+                .title("Focus on View")
+                .roundRectRadius(100)
+                //.showOnce("fancy1")
+                .build();
+        FancyShowCaseQueue mQueue = new FancyShowCaseQueue()
+                .add(fancyShowCaseView1)
+                .add(fancyShowCaseView2);
+
+        mQueue.show();   */
     }
 
     private void initPictureWathcher() {
