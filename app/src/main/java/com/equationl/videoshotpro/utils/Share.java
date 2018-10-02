@@ -105,9 +105,9 @@ public class Share {
     public static void shareAppSuccess(Context context) {
         SharedPreferences sp_init = context.getSharedPreferences("init", Context.MODE_PRIVATE);
         Toast.makeText(context, "分享成功！", Toast.LENGTH_SHORT).show();
-        SharedPreferences.Editor editor = sp_init.edit();
+        /*SharedPreferences.Editor editor = sp_init.edit();
         editor.putBoolean("isCloseAd", true);
-        editor.apply();
+        editor.apply();*/
     }
 
 

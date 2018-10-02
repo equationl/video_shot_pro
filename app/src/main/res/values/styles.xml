@@ -51,4 +51,12 @@
         <item name="android:ems">1</item>
     </style>
 
+    <style name="GuideViewTextTop" parent="@android:style/Widget.TextView">
+        <item name="android:textSize">40sp</item>
+        <item name="android:paddingTop">50dp</item>
+        <item name="android:layout_marginTop">50dp</item>
+        <item name="android:textColor">#c71585</item>
+        <item name="android:fontFamily">sans-serif-condensed</item>
+    </style>
+
 </resources>

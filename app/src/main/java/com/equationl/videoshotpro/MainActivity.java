@@ -381,9 +381,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 intent = new Intent(MainActivity.this, SettingsActivity.class);
                 startActivity(intent);
                 break;
-            case R.id.nav_support:
+            /*case R.id.nav_support:
                 showSupportDialog();
-                break;
+                break;   */
             case R.id.nav_about:
                 showAboutDialog();
                 break;
@@ -849,7 +849,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void showAboutDialog() {
-        String content = String.format(
+        /*String content = String.format(
                 res.getString(R.string.main_dialog_about_content),
                 res.getString(R.string.main_updateHistory_text),
                 res.getString(R.string.main_right_text));
@@ -863,7 +863,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 dialog.dismiss();
                             }
                         }).create();
-        dialog.show();
+        dialog.show();   */
+        Intent intent = new Intent(MainActivity.this, AboutActivity.class);
+        startActivity(intent);
     }
 
     /*@Override

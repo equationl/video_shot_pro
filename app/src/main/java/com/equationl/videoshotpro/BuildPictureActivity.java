@@ -172,9 +172,10 @@ public class BuildPictureActivity extends AppCompatActivity {
                 else {
                     try {
                         PlayerActivity.instance.finish();
-                        MarkPictureActivity.instance.finish();
+                        //MarkPictureActivity.instance.finish();
                         MainActivity.instance.finish();
                         ChooseActivity.instance.finish();
+                        MarkPictureActivity2.instance.finish();
                     } catch (NullPointerException e) {Log.e("el", e.toString());}
                     Intent intent = new Intent(BuildPictureActivity.this, MainActivity.class);
                     startActivity(intent);
@@ -231,9 +232,10 @@ public class BuildPictureActivity extends AppCompatActivity {
             if (isDone == 1) {
                 try {
                     PlayerActivity.instance.finish();
-                    MarkPictureActivity.instance.finish();
+                    //MarkPictureActivity.instance.finish();
                     MainActivity.instance.finish();
                     ChooseActivity.instance.finish();
+                    MarkPictureActivity2.instance.finish();
                 } catch (NullPointerException e){}
                 Intent intent = new Intent(BuildPictureActivity.this, MainActivity.class);
                 startActivity(intent);
@@ -782,7 +784,7 @@ public class BuildPictureActivity extends AppCompatActivity {
             }
             @Override
             public void onADClosed() {
-                showCloseAdDialog();
+                //showCloseAdDialog();
             }
         });
         iad.loadAD();

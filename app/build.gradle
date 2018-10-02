@@ -43,7 +43,7 @@ repositories {
 
 dependencies {
     implementation 'com.android.support:support-vector-drawable:26.1.0'
-    implementation  fileTree(include: ['*.jar'], dir: 'libs')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     //androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
     //    exclude group: 'com.android.support', module:compile 'support-annotations'
     //})
@@ -53,20 +53,20 @@ dependencies {
     //implementation 'com.ddz.materialdesign:FloatingActionButton:1.0.4'
     implementation 'com.getbase:floatingactionbutton:1.10.1'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.3.1'
-    implementation (name: 'FFmpegAndroid', ext: 'aar')
-    implementation  'com.android.support:appcompat-v7:26.1.0'
-    implementation  'com.android.support:cardview-v7:26.1.0'
-    implementation  'com.android.support.constraint:constraint-layout:1.0.2'
-    implementation  'com.android.support:design:26.1.0'
-    implementation  'com.github.YancyYe:GalleryPick:1.2.1'
-    implementation  'com.dingmouren.colorpicker:colorpicker:1.0.1'
-    implementation  'com.tencent.bugly:crashreport_upgrade:latest.release'
-    implementation  'com.tencent.bugly:nativecrashreport:latest.release'
-    implementation  'com.squareup.okhttp3:okhttp:3.9.0'
-    implementation  'com.squareup.okio:okio:1.13.0'
-    implementation  'com.huxq17.handygridview:handygridview:1.1.0'
-    implementation  'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:+'
-    implementation  'me.solidev.library:auto-loadmore:1.0.1'
+    implementation(name: 'FFmpegAndroid', ext: 'aar')
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.android.support:cardview-v7:26.1.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation 'com.android.support:design:26.1.0'
+    implementation 'com.github.YancyYe:GalleryPick:1.2.1'
+    implementation 'com.dingmouren.colorpicker:colorpicker:1.0.1'
+    implementation 'com.tencent.bugly:crashreport_upgrade:latest.release'
+    implementation 'com.tencent.bugly:nativecrashreport:latest.release'
+    implementation 'com.squareup.okhttp3:okhttp:3.9.0'
+    implementation 'com.squareup.okio:okio:1.13.0'
+    implementation 'com.huxq17.handygridview:handygridview:1.1.0'
+    implementation 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:+'
+    implementation 'me.solidev.library:auto-loadmore:1.0.1'
     implementation 'com.github.faruktoptas:FancyShowCaseView:1.0.1'
     testImplementation 'junit:junit:4.12'
 }

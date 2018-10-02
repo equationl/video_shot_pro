@@ -141,6 +141,9 @@
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.Fullscreen.Translucent" />
         <activity android:name=".ShortCutsActivity" />
+        <activity android:name=".AboutActivity"
+            android:label="@string/title_activity_about"
+            android:parentActivityName=".MainActivity"/>
     </application>
 
 </manifest>

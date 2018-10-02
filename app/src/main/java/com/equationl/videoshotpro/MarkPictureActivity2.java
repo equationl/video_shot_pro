@@ -177,13 +177,22 @@ public class MarkPictureActivity2 extends AppCompatActivity {
     }
 
     private void swipeToPre() {
-        //必须先改变adapter中的数据，然后才能由数据变化带动页面刷新
         if (pictureList != null) {
             adapter.setData(pictureList);
-            if (curIndex > 0) {
-                swipeCardsView.notifyDatasetChanged(curIndex - 1);
+            if (pic_no > 0) {
+                swipeCardsView.notifyDatasetChanged(pic_no - 1);    //此处使用 pos_no 代替 curIndex ，因为使用 cureIndex 时，在最后一张图片也标记后，curIndex的值会不正常
             }else{
-                //toast("已经是第一张卡片了");
+                //已经是第一张卡片
+            }
+        }
+    }
+
+    private void deleteImg() {
+        if (pic_no < pic_num) {
+            if (pictureList != null) {
+                pic_no++;
+                adapter.setData(pictureList);
+                swipeCardsView.notifyDatasetChanged(pic_no);
             }
         }
     }
@@ -198,10 +207,10 @@ public class MarkPictureActivity2 extends AppCompatActivity {
         swipeCardsView.setCardsSlideListener(new SwipeCardsView.CardsSlideListener() {
             @Override
             public void onShow(int index) {
-                if (index >= pic_num-1) {
+                /*if (index >= pic_num-1) {
                     Toast.makeText(MarkPictureActivity2.this, R.string.markPicture_toast_markFinish, Toast.LENGTH_SHORT).show();
                     return;
-                }
+                }*/
                 curIndex = index;
                 Log.i(TAG, "onShow "+index);
             }
@@ -209,6 +218,10 @@ public class MarkPictureActivity2 extends AppCompatActivity {
             @Override
             public void onCardVanish(int index, SwipeCardsView.SlideType type) {
                 //String orientation = "";
+                //Toast.makeText(MarkPictureActivity2.this, "index="+index, Toast.LENGTH_SHORT).show();
+                if (index >= pic_num-1) {
+                    Toast.makeText(MarkPictureActivity2.this, R.string.markPicture_toast_markFinish, Toast.LENGTH_SHORT).show();
+                }
                 switch (type){
                     case LEFT:
                         //orientation="向左飞出";
@@ -239,10 +252,7 @@ public class MarkPictureActivity2 extends AppCompatActivity {
                     chooseUndo();  //处理逻辑
                     break;
                 case R.id.markPicture_fab_delete:
-                    if (pic_no < pic_num) {
-                        swipeCardsView.slideCardOut(SwipeCardsView.SlideType.RIGHT);
-                        pic_no++;
-                    }
+                    deleteImg();
                     break;
                 case R.id.markPicture_fab_addText:
                     Toast.makeText(MarkPictureActivity2.this, "该功能暂未开放，敬请期待！", Toast.LENGTH_SHORT).show();
@@ -380,7 +390,7 @@ public class MarkPictureActivity2 extends AppCompatActivity {
 
 
     private void markPictureCut(int pos) {
-        if (fileList[pic_no].equals("text")) {
+        if (fileList[pos].equals("text")) {
             Toast.makeText(MarkPictureActivity2.this, "添加文字后不允许裁切！", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -666,11 +676,11 @@ public class MarkPictureActivity2 extends AppCompatActivity {
         if (pic_no<pic_num && fileList[pic_no].equals("text")) {
             fileList[pic_no] = "del";
         }
-        else if (pic_no>0 && pic_no<pic_num && fileList[pic_no-1].equals("text")) {
+        else if (pic_no<pic_num && fileList[pic_no-1].equals("text")) {
           fileList[pic_no] = "del";
           pic_no--;
         }
-        else {
+        else if (pic_no <= pic_num){
             fileList[pic_no-1] = "del";
             pic_no--;
         }
@@ -709,11 +719,16 @@ public class MarkPictureActivity2 extends AppCompatActivity {
                 .title(res.getString(R.string.markPicture_guide_swipeRight))
                 //.showOnce("choose_done")
                 .build();
+        final FancyShowCaseView fancyShowCaseView6 = new FancyShowCaseView.Builder(this)
+                .title(res.getString(R.string.markPicture_guide_summary))
+                //.showOnce("choose_done")
+                .build();
         FancyShowCaseQueue mQueue = new FancyShowCaseQueue()
                 .add(fancyShowCaseView0)
                 .add(fancyShowCaseView1)
                 .add(fancyShowCaseView2)
                 .add(fancyShowCaseView3)
+                .add(fancyShowCaseView6)
                 .add(fancyShowCaseView4)
                 .add(fancyShowCaseView5);
         mQueue.show();

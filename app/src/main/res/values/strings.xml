@@ -29,7 +29,7 @@
         \n\n\n
     </string>
 
-    <string name="main_updateHistory_text">
+    <string name="about_updateHistory_text">
          1.2 Fix 06:\n
         \t*优化反馈流程\n
         \t*修复因获取视频路径失败闪退的BUG（感谢 shizhan856****@163.com 的反馈）\n
@@ -107,7 +107,7 @@
         \t*优化部分手势的体验\n
     </string>
 
-    <string name="main_right_text">
+    <string name="about_right_text">
         FloatWindowPermission：https://github.com/zhaozepeng/FloatWindowPermission  \n
         -------------\n
         ScreenCapture ： https://github.com/goodbranch/ScreenCapture  \n
@@ -336,6 +336,7 @@
     <string name="markPicture_guide_delete">点击就能删除这张截图了~</string>
     <string name="markPicture_guide_addText">点击就能给图片添加文字了~</string>
     <string name="markPicture_guide_moreTool">点击就能打开更多工具哦~</string>
+    <string name="markPicture_guide_summary">单击图片就能查看大图哦~</string>
     <string name="markPicture_guide_swipeRight">图\n片\n滑\n向\n右\n边\n保\n留\n全\n图</string>
     <string name="markPicture_guide_swipeLeft">图\n片\n滑\n向\n左\n边\n仅\n保\n留\n台\n词</string>
 
@@ -572,4 +573,21 @@
     <string name="shortcut_float_ShortLabel">开始截图</string>
     <string name="shortcut_float_LongLabel">外部程序截图</string>
     <string name="title_activity_main2">Main2Activity</string>
+
+    <string name="title_activity_about">关于</string>
+    <string name="about_toast_checkUpdate">正在检查更新&#8230;</string>
+    <string name="about_toast_goToMarkPlay_fail">额，你手机上没有应用市场哦</string>
+    <string name="about_text_history">更新历史</string>
+    <string name="about_text_thanks">鸣谢</string>
+    <string name="about_text_right">© 2016&#8211;2018 Equationl.com \nAll rights reserved</string>
+    <string name="about_text_support">请作者喝奶茶</string>
+    <string name="about_text_adStatus">广告已%1$s</string>
+    <string name="about_text_donation">捐赠</string>
+    <string name="about_guide_text_logo">点击LOGO给作者五星好评哦~</string>
+    <string name="about_guide_text_update">点击版本可以检查更新哦~</string>
+    <string name="about_guide_text_history">点击查看更新记录哦~</string>
+    <string name="about_guide_text_support">点击可以开启/关闭广告哦~\n打开广告可以让作者有奶茶喝哦~\nTIPS:修改会在下次启动app时生效哦~</string>
+    <string name="about_guide_text_thanks">点击可以查看开源相关哦~</string>
+    <string name="about_dialog_title_history">更新历史</string>
+    <string name="about_dialog_text_donation">捐赠通道已经关闭了哦~如果你喜欢本APP的话请打开广告，让作者赚点广告费哦~</string>
 </resources>
