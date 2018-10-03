@@ -324,6 +324,7 @@
     <string name="markPicture_ProgressDialog_msgOnRunning">正在处理第%1$s张图片&#8230;</string>
     <string name="markPicture_btn_start">开始合成</string>
     <string name="markPicture_text_undo">撤销</string>
+    <string name="markPicture_text_markStatus">%1$d/%2$d</string>
     <string name="markPicture_tip_dialog_tittle">使用指南</string>
     <string name="markPicture_tip_dialog_content">选择添加文字后可以快捷的在图片任意位置添加任意大小任意颜色的文字。\n
     在弹出的对话框中您可以输入想要添加的文字和文字大小，亦可以选择文字颜色和文字背景颜色（日后将支持透明背景），输入完毕,点击 确定 后可更改添加文字位置。\n

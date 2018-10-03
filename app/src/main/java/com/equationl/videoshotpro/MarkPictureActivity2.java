@@ -2,6 +2,7 @@ package com.equationl.videoshotpro;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,9 +11,14 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,6 +26,7 @@ import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -29,22 +36,33 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.dingmouren.colorpicker.ColorPickerDialog;
 import com.dingmouren.colorpicker.OnColorPickerListener;
 import com.equationl.videoshotpro.Adapter.markPictureAdapter;
 import com.equationl.videoshotpro.Image.Tools;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.github.ielse.imagewatcher.ImageWatcher;
+import com.github.ielse.imagewatcher.ImageWatcherHelper;
 import com.huxq17.swipecardsview.SwipeCardsView;
 import com.tencent.bugly.crashreport.CrashReport;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import me.toptas.fancyshowcase.FancyShowCaseQueue;
@@ -72,11 +90,14 @@ public class MarkPictureActivity2 extends AppCompatActivity {
     int addTextStringSize;
     Bitmap TextImgTemp=null;
     boolean isLongPress=false;
+    TextView text_markStatus;
 
 
     FloatingActionButton fab_undo, fab_delete, fab_addText;
     FloatingActionsMenu fab_menu;
 
+    ImageWatcher vImageWatcher;
+    ImageWatcher.OnPictureLongPressListener mOnPictureLongPressListener;
 
     private final MyHandler handler = new MyHandler(this);
 
@@ -106,6 +127,8 @@ public class MarkPictureActivity2 extends AppCompatActivity {
         fab_addText = findViewById(R.id.markPicture_fab_addText);
         fab_menu    = findViewById(R.id.markPicture_fab_menu);
 
+        text_markStatus = findViewById(R.id.mark_text_markStatus);
+
         fab_undo .setOnClickListener(clickListener);
         fab_delete.setOnClickListener(clickListener);
         fab_addText.setOnClickListener(clickListener);
@@ -130,6 +153,9 @@ public class MarkPictureActivity2 extends AppCompatActivity {
 
         initCardView();
         showCardView();
+        initPictureWathcher();
+
+        text_markStatus.setText(String.format(res.getString(R.string.markPicture_text_markStatus), pic_no, pic_num));
     }
 
     @Override
@@ -188,12 +214,13 @@ public class MarkPictureActivity2 extends AppCompatActivity {
     }
 
     private void deleteImg() {
-        if (pic_no < pic_num) {
-            if (pictureList != null) {
-                pic_no++;
-                adapter.setData(pictureList);
-                swipeCardsView.notifyDatasetChanged(pic_no);
-            }
+            if (pic_no < pic_num) {
+                if (pictureList != null) {
+                    pic_no++;
+                    adapter.setData(pictureList);
+                    swipeCardsView.notifyDatasetChanged(pic_no);
+                    text_markStatus.setText(String.format(res.getString(R.string.markPicture_text_markStatus), pic_no, pic_num));
+                }
         }
     }
 
@@ -238,7 +265,15 @@ public class MarkPictureActivity2 extends AppCompatActivity {
 
             @Override
             public void onItemClick(View cardImageView, int index) {
-                Toast.makeText(MarkPictureActivity2.this, "点击"+index, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MarkPictureActivity2.this, "点击"+index, Toast.LENGTH_SHORT).show();
+                ImageView imageview = (ImageView) cardImageView.findViewById(R.id.markPictureImage);
+                SparseArray<ImageView> imageGroupList = new SparseArray<>();
+                imageGroupList.put(0, imageview);
+                String path = getExternalCacheDir().toString();
+                String extension = settings.getBoolean("isShotToJpg", true) ? "jpg":"png";
+                String file = path+"/"+index+"."+extension;
+                Log.i(TAG, file);
+                vImageWatcher.show(imageview, imageGroupList, Collections.singletonList(Uri.parse(file)));
             }
         });
     }
@@ -266,14 +301,16 @@ public class MarkPictureActivity2 extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-            try {
-                ChooseActivity.instance.finish();
-            } catch (NullPointerException e){}
-            finish();
+            if (!vImageWatcher.handleBackPressed()) {    //没有打开预览图片
+                try {
+                    ChooseActivity.instance.finish();
+                } catch (NullPointerException e){}
+                finish();
+                return true;
+            }
             return false;
-        } else {
-            return super.onKeyDown(keyCode, event);
         }
+        return super.onKeyDown(keyCode, event);
     }
 
     private void checkOrigin() {
@@ -401,6 +438,7 @@ public class MarkPictureActivity2 extends AppCompatActivity {
         //set_image(pic_no+1);
         fileList[pos] = "cut";
         pic_no++;
+        text_markStatus.setText(String.format(res.getString(R.string.markPicture_text_markStatus), pic_no, pic_num));
     }
 
     private void markPictureAll(int pos) {
@@ -413,6 +451,7 @@ public class MarkPictureActivity2 extends AppCompatActivity {
             fileList[pos] = "all";
         }
         pic_no++;
+        text_markStatus.setText(String.format(res.getString(R.string.markPicture_text_markStatus), pic_no, pic_num));
     }
 
     private void markPictureAddText() {
@@ -677,12 +716,14 @@ public class MarkPictureActivity2 extends AppCompatActivity {
             fileList[pic_no] = "del";
         }
         else if (pic_no<pic_num && fileList[pic_no-1].equals("text")) {
-          fileList[pic_no] = "del";
-          pic_no--;
+            fileList[pic_no] = "del";
+            pic_no--;
+            text_markStatus.setText(String.format(res.getString(R.string.markPicture_text_markStatus), pic_no, pic_num));
         }
         else if (pic_no <= pic_num){
             fileList[pic_no-1] = "del";
             pic_no--;
+            text_markStatus.setText(String.format(res.getString(R.string.markPicture_text_markStatus), pic_no, pic_num));
         }
     }
 
@@ -732,5 +773,43 @@ public class MarkPictureActivity2 extends AppCompatActivity {
                 .add(fancyShowCaseView4)
                 .add(fancyShowCaseView5);
         mQueue.show();
+    }
+
+    private void initPictureWathcher() {
+        mOnPictureLongPressListener = new ImageWatcher.OnPictureLongPressListener() {
+            @Override
+            public void onPictureLongPress(ImageView v, final Uri url, final int pos) {
+            }
+        };
+
+        vImageWatcher = ImageWatcherHelper.with(this)
+                .setTranslucentStatus(0)
+                .setErrorImageRes(R.mipmap.error_picture)
+                .setOnPictureLongPressListener(mOnPictureLongPressListener)
+                .setLoader(new ImageWatcher.Loader() {
+                    @Override
+                    public void load(Context context, Uri uri, final ImageWatcher.LoadCallback lc) {
+                        Log.i(TAG, "call load");
+                        RequestOptions options = new RequestOptions().placeholder(R.mipmap.gallery_pick_photo)
+                                .skipMemoryCache(true).diskCacheStrategy( DiskCacheStrategy.NONE );   //禁用磁盘缓存，否则多次使用时预览图片会出错
+                        Glide.with(context).load(uri.toString()).apply(options).into(new SimpleTarget<Drawable>() {   //不知道为什么直接用URI加载会 load fail
+                            @Override
+                            public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                                lc.onResourceReady(resource);
+                            }
+
+                            @Override
+                            public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                                lc.onLoadFailed(errorDrawable);
+                            }
+
+                            @Override
+                            public void onLoadStarted(@Nullable Drawable placeholder) {
+                                lc.onLoadStarted(placeholder);
+                            }
+                        });
+                    }
+                })
+                .create();
     }
 }

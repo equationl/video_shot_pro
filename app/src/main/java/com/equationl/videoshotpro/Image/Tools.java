@@ -753,16 +753,16 @@ public class Tools{
         Collections.sort(files, new Comparator< File>() {
             @Override
             public int compare(File o1, File o2) {
-                int i1 = getFileNameToInt(o1);
-                int i2 = getFileNameToInt(o2);
+                long i1 = getFileNameToLong(o1);
+                long i2 = getFileNameToLong(o2);
                 if (o1.isDirectory() && o2.isFile())
                     return -1;
                 if (o1.isFile() && o2.isDirectory())
                     return 1;
                 if (i1 > i2)
-                    return 1;
-                if (i1 < i2)
                     return -1;
+                if (i1 < i2)
+                    return 1;
                 if (i1 == i2)
                     return 0;
                 return o1.getName().compareTo(o2.getName());
@@ -775,19 +775,28 @@ public class Tools{
         return array;
     }
 
-    private int getFileNameToInt(File f1) {
-        String s = f1.getName();
-        s = s.split("\\.")[0];
+    private long getFileNameToLong(File f1) {
+        /*String s = f1.getName();
+        s = s.split("\\.")[0];     //去除扩展名
+
+        s = s.replaceAll("[^\\d]+", "");
+
         if (s.contains("_")) {
             s = s.split("_")[0];
-        }
-        int i=-1;
+        }   */
+
+        String s = f1.getName();
+        s = s.replaceAll("[^\\d]+", "");   //去除非数字字符
+        long i=-1;
         try {
-            i = Integer.valueOf(s);
+            i = Long.parseLong(s);
         }
         catch (Exception e) {
             CrashReport.postCatchedException(e);
+            Log.e("el,in tools", e.toString());
         }
+
+        Log.i("el,in tools", "in getFileNameToInt, i="+i);
         return  i;
     }
 
