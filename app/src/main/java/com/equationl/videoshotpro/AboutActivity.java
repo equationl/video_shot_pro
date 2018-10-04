@@ -26,6 +26,7 @@ import me.toptas.fancyshowcase.FancyShowCaseView;
 
 public class AboutActivity extends AppCompatActivity {
     TextView text_update, text_history, text_support, text_thanks, text_adStatus, text_adBtn, text_donation;
+    TextView text_adSplashStatus, text_adSplashBtn;
     ImageView img_logo;
     Tools tool;
     Resources res;
@@ -45,6 +46,8 @@ public class AboutActivity extends AppCompatActivity {
         text_donation = findViewById(R.id.about_text_donation);
         text_adBtn    = findViewById(R.id.about_text_adBtn);
         text_adStatus = findViewById(R.id.about_text_adStatus);
+        text_adSplashBtn = findViewById(R.id.about_text_splashAdBtn);
+        text_adSplashStatus = findViewById(R.id.about_text_splashAdStatus);
 
         text_update.setOnClickListener(clickListener);
         text_history.setOnClickListener(clickListener);
@@ -53,6 +56,7 @@ public class AboutActivity extends AppCompatActivity {
         img_logo.setOnClickListener(clickListener);
         text_donation.setOnClickListener(clickListener);
         text_adBtn.setOnClickListener(clickListener);
+        text_adSplashBtn.setOnClickListener(clickListener);
 
         tool = new Tools();
         res = getResources();
@@ -85,6 +89,9 @@ public class AboutActivity extends AppCompatActivity {
                     break;
                 case R.id.about_text_adBtn:
                     clickAdBtn();
+                    break;
+                case R.id.about_text_splashAdBtn:
+                    clickSplashBtn();
                     break;
                 case R.id.about_text_donation:
                     showTextDialog(R.string.about_text_donation, R.string.about_dialog_text_donation);
@@ -161,17 +168,26 @@ public class AboutActivity extends AppCompatActivity {
             text_adStatus.setVisibility(View.VISIBLE);
             text_adBtn.setVisibility(View.VISIBLE);
             text_donation.setVisibility(View.VISIBLE);
+            text_adSplashBtn.setVisibility(View.VISIBLE);
+            text_adSplashStatus.setVisibility(View.VISIBLE);
 
             String adStatus = sp_init.getBoolean("isCloseAd", false) ? "关闭" : "打开";
             String adBtnStatus = sp_init.getBoolean("isCloseAd", false) ? "打开" : "关闭";
             text_adStatus.setText(String.format(res.getString(R.string.about_text_adStatus), adStatus));
             text_adBtn.setText(adBtnStatus);
+
+            String adSplashStatus = sp_init.getBoolean("isCloseSplashAd", false) ? "关闭" : "打开";
+            String adSplashBtnStatus = sp_init.getBoolean("isCloseSplashAd", false) ? "打开" : "关闭";
+            text_adSplashStatus.setText(String.format(res.getString(R.string.about_text_splashAdStatus), adSplashStatus));
+            text_adSplashBtn.setText(adSplashBtnStatus);
             isShowSupport = true;
         }
         else {
             text_adStatus.setVisibility(View.GONE);
             text_adBtn.setVisibility(View.GONE);
             text_donation.setVisibility(View.GONE);
+            text_adSplashBtn.setVisibility(View.GONE);
+            text_adSplashStatus.setVisibility(View.GONE);
             isShowSupport = false;
         }
     }
@@ -188,6 +204,24 @@ public class AboutActivity extends AppCompatActivity {
             text_adBtn.setText("开启");
             text_adStatus.setText(String.format(res.getString(R.string.about_text_adStatus), "关闭"));
             editor.putBoolean("isCloseAd", true);
+        }
+
+        editor.apply();
+    }
+
+    private void clickSplashBtn() {
+        SharedPreferences.Editor editor = sp_init.edit();
+
+        Boolean isCloseSplashAd = sp_init.getBoolean("isCloseSplashAd", false);
+        if (isCloseSplashAd) {
+            text_adSplashBtn.setText("关闭");
+            text_adSplashStatus.setText(String.format(res.getString(R.string.about_text_splashAdStatus), "开启"));
+            editor.putBoolean("isCloseSplashAd", false);
+        }
+        else {
+            text_adSplashBtn.setText("开启");
+            text_adSplashStatus.setText(String.format(res.getString(R.string.about_text_splashAdStatus), "关闭"));
+            editor.putBoolean("isCloseSplashAd", true);
         }
 
         editor.apply();

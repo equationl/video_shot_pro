@@ -49,6 +49,7 @@ import com.dingmouren.colorpicker.ColorPickerDialog;
 import com.dingmouren.colorpicker.OnColorPickerListener;
 import com.equationl.videoshotpro.Adapter.markPictureAdapter;
 import com.equationl.videoshotpro.Image.Tools;
+import com.equationl.videoshotpro.utils.Utils;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.github.ielse.imagewatcher.ImageWatcher;
@@ -65,6 +66,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import me.toptas.fancyshowcase.DismissListener;
 import me.toptas.fancyshowcase.FancyShowCaseQueue;
 import me.toptas.fancyshowcase.FancyShowCaseView;
 
@@ -90,7 +92,8 @@ public class MarkPictureActivity2 extends AppCompatActivity {
     int addTextStringSize;
     Bitmap TextImgTemp=null;
     boolean isLongPress=false;
-    TextView text_markStatus;
+    TextView text_markStatus, text_markDoneTip;
+    Utils utils = new Utils();
 
 
     FloatingActionButton fab_undo, fab_delete, fab_addText;
@@ -128,13 +131,14 @@ public class MarkPictureActivity2 extends AppCompatActivity {
         fab_menu    = findViewById(R.id.markPicture_fab_menu);
 
         text_markStatus = findViewById(R.id.mark_text_markStatus);
+        text_markDoneTip = findViewById(R.id.mark_text_doneTip);
 
         fab_undo .setOnClickListener(clickListener);
         fab_delete.setOnClickListener(clickListener);
         fab_addText.setOnClickListener(clickListener);
 
         String filepath = getExternalCacheDir().toString();
-        fileList = tool.getFileOrderByName(filepath);
+        fileList = tool.getFileOrderByName(filepath, 1);
         for (String s: fileList) {
             s = filepath+"/"+s;
             Log.i(TAG, "S= "+s);
@@ -144,6 +148,7 @@ public class MarkPictureActivity2 extends AppCompatActivity {
 
         res = getResources();
         settings = PreferenceManager.getDefaultSharedPreferences(this);
+        sp_init = getSharedPreferences("init", Context.MODE_PRIVATE);
 
         checkOrigin();
 
@@ -156,13 +161,49 @@ public class MarkPictureActivity2 extends AppCompatActivity {
         initPictureWathcher();
 
         text_markStatus.setText(String.format(res.getString(R.string.markPicture_text_markStatus), pic_no, pic_num));
+        text_markDoneTip.setVisibility(View.GONE);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.activity_mark_picture, menu);
-        return true;
+
+        new Handler().postDelayed(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        final FancyShowCaseView fancyShowCaseView1 = new FancyShowCaseView.Builder(MarkPictureActivity2.this)
+                                .focusOn(findViewById(R.id.markPicture_menu_guide))
+                                .title(res.getString(R.string.markPicture_guide_guide))
+                                .showOnce("mark_guide")
+                                .build();
+                        final FancyShowCaseView fancyShowCaseView2 = new FancyShowCaseView.Builder(MarkPictureActivity2.this)
+                                .focusOn(findViewById(R.id.markPicture_menu_done))
+                                .title(res.getString(R.string.markPicture_guide_done))
+                                .showOnce("mark_done")
+                                .dismissListener(new DismissListener() {
+                                    @Override
+                                    public void onDismiss(String id) {
+                                        // FancyShowCaseView is dismissed by user
+                                        showGuide();
+                                    }
+
+                                    @Override
+                                    public void onSkipped(String id) {
+                                        // Skipped because it was setup to shown only once and shown before
+                                    }
+                                })
+                                .build();
+                        FancyShowCaseQueue mQueue = new FancyShowCaseQueue()
+                                .add(fancyShowCaseView1)
+                                .add(fancyShowCaseView2);
+                        mQueue.show();
+                    }
+                }, 50
+        );
+
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -211,6 +252,7 @@ public class MarkPictureActivity2 extends AppCompatActivity {
                 //已经是第一张卡片
             }
         }
+        text_markDoneTip.setVisibility(View.GONE);
     }
 
     private void deleteImg() {
@@ -220,6 +262,9 @@ public class MarkPictureActivity2 extends AppCompatActivity {
                     adapter.setData(pictureList);
                     swipeCardsView.notifyDatasetChanged(pic_no);
                     text_markStatus.setText(String.format(res.getString(R.string.markPicture_text_markStatus), pic_no, pic_num));
+                }
+                if (pic_no >= pic_num) {
+                    text_markDoneTip.setVisibility(View.VISIBLE);
                 }
         }
     }
@@ -247,7 +292,11 @@ public class MarkPictureActivity2 extends AppCompatActivity {
                 //String orientation = "";
                 //Toast.makeText(MarkPictureActivity2.this, "index="+index, Toast.LENGTH_SHORT).show();
                 if (index >= pic_num-1) {
-                    Toast.makeText(MarkPictureActivity2.this, R.string.markPicture_toast_markFinish, Toast.LENGTH_SHORT).show();
+                    text_markDoneTip.setVisibility(View.VISIBLE);
+                    //Toast.makeText(MarkPictureActivity2.this, R.string.markPicture_toast_markFinish, Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    text_markDoneTip.setVisibility(View.GONE);
                 }
                 switch (type){
                     case LEFT:
@@ -302,9 +351,7 @@ public class MarkPictureActivity2 extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK)) {
             if (!vImageWatcher.handleBackPressed()) {    //没有打开预览图片
-                try {
-                    ChooseActivity.instance.finish();
-                } catch (NullPointerException e){}
+                utils.finishActivity(ChooseActivity.instance);
                 finish();
                 return true;
             }

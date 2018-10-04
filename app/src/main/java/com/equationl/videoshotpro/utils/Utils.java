@@ -1,7 +1,9 @@
 package com.equationl.videoshotpro.utils;
 
 
+import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 
 
@@ -23,5 +25,13 @@ public class Utils {
             e.printStackTrace();
         }
         return statusHeight;
+    }
+
+    public void finishActivity(Activity context) {
+        try {
+            context.finish();
+        } catch (NullPointerException e) {
+            Log.e("el, in finishActivity", e.toString());
+        }
     }
 }

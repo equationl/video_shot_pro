@@ -251,6 +251,7 @@ public class PlayerActivity extends AppCompatActivity {
                     Log.d(TAG, "shot button ---> down");
                     btn_shot.setBackground(res.getDrawable(R.drawable.button_radius));
                     gif_start_time = videoview.getCurrentPosition();
+                    return true;
                 }
                 return false;
             }

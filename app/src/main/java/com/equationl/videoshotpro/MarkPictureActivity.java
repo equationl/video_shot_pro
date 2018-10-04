@@ -121,7 +121,7 @@ public class MarkPictureActivity extends AppCompatActivity {
         res = getResources();
 
         String filepath = getExternalCacheDir().toString();
-        fileList = tool.getFileOrderByName(filepath);
+        fileList = tool.getFileOrderByName(filepath, 1);
         pic_num = fileList.length;
 
         imageViewText.setVisibility(View.GONE);

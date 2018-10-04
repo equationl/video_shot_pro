@@ -14,7 +14,9 @@
         android:background="#f3f3f3"
         card:alphaOffsetStep="40"
         card:scaleOffsetStep="0.08"
-        card:yOffsetStep="20dp" />
+        card:yOffsetStep="20dp" >
+
+    </com.huxq17.swipecardsview.SwipeCardsView>
 
     <com.getbase.floatingactionbutton.FloatingActionsMenu
         android:id="@+id/markPicture_fab_menu"
@@ -58,6 +60,24 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:text="@string/markPicture_text_markStatus"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/mark_text_doneTip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="@string/markPicture_text_doneTip"
+        android:textAlignment="center"
+        android:textAllCaps="false"
+        android:textSize="12sp"
+        android:textStyle="italic"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

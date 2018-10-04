@@ -733,7 +733,7 @@ public class Tools{
     private void rename(List <String> newFileName, Context context) {
         String[] files;
         String path = context.getExternalCacheDir().toString();
-        files = getFileOrderByName(path);
+        files = getFileOrderByName(path, 1);
         for (int i=0; i<newFileName.size(); i++) {
             String oldFile = path+"/"+files[i]+"_c";
             renameFile(path+"/"+files[i], oldFile);
@@ -746,9 +746,10 @@ public class Tools{
     * 获取按照文件名排序的指定路径下所有文件（夹）名
      *
      * @param filePath 路径
+     * @param sort 排序方式（正序：1， 倒序：-1）
      * @return 返回文件名数组
     * */
-    public String[] getFileOrderByName(String filePath) {
+    public String[] getFileOrderByName(String filePath, final int sort) {
         List <File> files = Arrays.asList(new File(filePath).listFiles());
         Collections.sort(files, new Comparator< File>() {
             @Override
@@ -760,9 +761,9 @@ public class Tools{
                 if (o1.isFile() && o2.isDirectory())
                     return 1;
                 if (i1 > i2)
-                    return -1;
+                    return sort==1 ? 1:-1;
                 if (i1 < i2)
-                    return 1;
+                    return sort==1 ? -1:1;
                 if (i1 == i2)
                     return 0;
                 return o1.getName().compareTo(o2.getName());
@@ -796,7 +797,7 @@ public class Tools{
             Log.e("el,in tools", e.toString());
         }
 
-        Log.i("el,in tools", "in getFileNameToInt, i="+i);
+        //Log.i("el,in tools", "in getFileNameToInt, i="+i);
         return  i;
     }
 

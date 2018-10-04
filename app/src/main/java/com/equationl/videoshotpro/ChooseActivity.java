@@ -22,6 +22,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -110,7 +111,7 @@ public class ChooseActivity extends AppCompatActivity {
 
 
         String filepath = getExternalCacheDir().toString();
-        files = tool.getFileOrderByName(filepath);
+        files = tool.getFileOrderByName(filepath, 1);
 
         dialog = new ProgressDialog(this);
         dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
@@ -140,6 +141,7 @@ public class ChooseActivity extends AppCompatActivity {
                         .focusOn(imageview)
                         .title(res.getString(R.string.choosePicture_guideView_clickImage))
                         .showOnce("choose_clickImage")
+                        .titleStyle(R.style.GuideViewTextBlank, Gravity.CENTER)
                         .build()
                         .show();
                 vImageWatcher.show(imageview, imageGroupList, Collections.singletonList(Uri.parse(file)));

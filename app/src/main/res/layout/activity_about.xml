@@ -118,14 +118,36 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:text="@string/about_text_donation"
         android:textColor="@color/colorAccent"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/about_text_splashAdStatus" />
+
+    <TextView
+        android:id="@+id/about_text_splashAdStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/about_text_splashAdStatus"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="@+id/about_text_adStatus"
         app:layout_constraintTop_toBottomOf="@+id/about_text_adStatus" />
+
+    <TextView
+        android:id="@+id/about_text_splashAdBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:visibility="gone"
+        android:text="关闭"
+        app:layout_constraintStart_toEndOf="@+id/about_text_splashAdStatus"
+        app:layout_constraintTop_toBottomOf="@+id/about_text_adBtn" />
 
 
 </android.support.constraint.ConstraintLayout>

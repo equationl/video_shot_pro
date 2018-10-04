@@ -36,6 +36,7 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.equationl.videoshotpro.Image.Tools;
+import com.equationl.videoshotpro.utils.Utils;
 import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
@@ -82,6 +83,8 @@ public class PlayerForDataActivity extends AppCompatActivity {
     String do4Rasult;
     int markTime[] = {0,0};
     ProgressDialog dialog;
+
+    Utils utils = new Utils();
 
     public static PlayerForDataActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
 
@@ -213,9 +216,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
                 }   */
                 if (do4Rasult.equals("FrameByFrame")) {
                     Log.i(TAG, "逐帧截取模式，点击按钮");
-                    try {
-                        MainActivity.instance.finish();
-                    } catch (NullPointerException e) {Log.e("el", e.toString());}
+                    utils.finishActivity(MainActivity.instance);
                     Intent intent = new Intent(PlayerForDataActivity.this, MainActivity.class);
                     startActivity(intent);
                     finish();
@@ -973,9 +974,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
                 return true;
             }
             if (do4Rasult.equals("FrameByFrame")) {
-                try {
-                    MainActivity.instance.finish();
-                } catch (NullPointerException e) {Log.e("el", e.toString());}
+                utils.finishActivity(MainActivity.instance);
                 Intent intent = new Intent(PlayerForDataActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();

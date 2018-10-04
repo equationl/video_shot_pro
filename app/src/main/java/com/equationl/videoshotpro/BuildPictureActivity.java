@@ -35,6 +35,7 @@ import android.widget.Toast;
 
 import com.equationl.videoshotpro.Image.Tools;
 import com.equationl.videoshotpro.utils.Share;
+import com.equationl.videoshotpro.utils.Utils;
 import com.qq.e.ads.interstitial.AbstractInterstitialADListener;
 import com.qq.e.ads.interstitial.InterstitialAD;
 import com.qq.e.comm.util.AdError;
@@ -79,6 +80,7 @@ public class BuildPictureActivity extends AppCompatActivity {
     InterstitialAD iad;
     Bitmap final_bitmap;
     IWXAPI wxApi;
+    Utils utils = new Utils();
 
     private final MyHandler handler = new MyHandler(this);
 
@@ -170,13 +172,10 @@ public class BuildPictureActivity extends AppCompatActivity {
                     updateMemoryText();
                 }
                 else {
-                    try {
-                        PlayerActivity.instance.finish();
-                        //MarkPictureActivity.instance.finish();
-                        MainActivity.instance.finish();
-                        ChooseActivity.instance.finish();
-                        MarkPictureActivity2.instance.finish();
-                    } catch (NullPointerException e) {Log.e("el", e.toString());}
+                    utils.finishActivity(PlayerActivity.instance);
+                    utils.finishActivity(MainActivity.instance);
+                    utils.finishActivity(ChooseActivity.instance);
+                    utils.finishActivity(MarkPictureActivity2.instance);
                     Intent intent = new Intent(BuildPictureActivity.this, MainActivity.class);
                     startActivity(intent);
                     finish();
@@ -230,13 +229,10 @@ public class BuildPictureActivity extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK)) {
             if (isDone == 1) {
-                try {
-                    PlayerActivity.instance.finish();
-                    //MarkPictureActivity.instance.finish();
-                    MainActivity.instance.finish();
-                    ChooseActivity.instance.finish();
-                    MarkPictureActivity2.instance.finish();
-                } catch (NullPointerException e){}
+                utils.finishActivity(PlayerActivity.instance);
+                utils.finishActivity(MainActivity.instance);
+                utils.finishActivity(ChooseActivity.instance);
+                utils.finishActivity(MarkPictureActivity2.instance);
                 Intent intent = new Intent(BuildPictureActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
@@ -606,13 +602,9 @@ public class BuildPictureActivity extends AppCompatActivity {
                                 .setNegativeButton(R.string.buildPicture_btn_oom_exit, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        try {
-                                            PlayerActivity.instance.finish();
-                                            //FIXME
-                                            //MarkPictureActivity.instance.finish();
-                                            MainActivity.instance.finish();
-                                            MarkPictureActivity2.instance.finish();
-                                        } catch (NullPointerException e) {Log.e("el", e.toString());}
+                                        activity.utils.finishActivity(PlayerActivity.instance);
+                                        activity.utils.finishActivity(MainActivity.instance);
+                                        activity.utils.finishActivity(MarkPictureActivity2.instance);
                                         Intent intent = new Intent(activity, MainActivity.class);
                                         activity.startActivity(intent);
                                         activity.finish();

@@ -120,6 +120,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Boolean isFirstBoot = false;
     boolean isTranslucentStatus = false;
     IWXAPI wxApi;
+    Utils utils = new Utils();
     FloatingActionsMenu main_floatBtn_menu;
     FloatingActionButton main_floatBtn_quick;
     FloatingActionButton main_floatBtn_splicing;
@@ -307,12 +308,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == IntentResultCodeMediaProjection) {
                 Log.i("EL", "try Start Service");
-                try {
-                    BuildPictureActivity.instance.finish();
-                } catch (NullPointerException e){
-                    Log.i("EL", "try to finish BuildPictureActivity fail");
-                }
-
+                utils.finishActivity(BuildPictureActivity.instance);
                 FloatWindowsService.setResultData(data);
                 Intent startService = new Intent(this, FloatWindowsService.class);
                 startService(startService);
@@ -499,12 +495,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         public void run() {
             loadLib();
-            try {
-                MarkPictureActivity.instance.finish();
-                ChooseActivity.instance.finish();
-                BuildPictureActivity.instance.finish();
-                PlayerActivity.instance.finish();
-            } catch (Exception e) {}
+            utils.finishActivity(MarkPictureActivity.instance);
+            utils.finishActivity(ChooseActivity.instance);
+            utils.finishActivity(BuildPictureActivity.instance);
+            utils.finishActivity(PlayerActivity.instance);
             try {
                 String pkName = getApplicationContext().getPackageName();
                 if (!pkName.equals("com.equationl.videoshotpro")) {
@@ -1163,6 +1157,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onADReceiv() {
                 Log.i("AD_DEMO", "ONBannerReceive");
+                if (bannerContainer.getParent()!=null) {   //FIXME 不确定是否会影响正常计算广告
+                    bannerContainer.removeAllViews();
+                }
                 bannerContainer.addView(bv);
             }
             @Override
@@ -1281,7 +1278,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onItemClick(RecyclerView.ViewHolder vh) {
                 //Toast.makeText(MainActivity.this,vh.getAdapterPosition()+"",Toast.LENGTH_SHORT).show();
                 String filepath =  tool.getSaveRootPath();
-                String[] files = tool.getFileOrderByName(filepath);
+                String[] files = tool.getFileOrderByName(filepath, -1);
                 //ImageZoom.show(MainActivity.this, filepath+"/"+files[vh.getAdapterPosition()], ImageUrlType.LOCAL);
                 MainWaterFallAdapter.MyViewHolder holder2 = (MainWaterFallAdapter.MyViewHolder) vh;
                 if (files.length > 0) {
@@ -1296,7 +1293,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 Toast.makeText(MainActivity.this,vh.getAdapterPosition()+"buke",Toast.LENGTH_SHORT).show();  */
                 String filepath =  tool.getSaveRootPath();
-                String[] files = tool.getFileOrderByName(filepath);
+                String[] files = tool.getFileOrderByName(filepath, -1);
                 MainWaterFallAdapter.MyViewHolder holder2 = (MainWaterFallAdapter.MyViewHolder) vh;
                 if (files.length > 0) {
                     showPopupMenu(holder2.img, filepath+"/"+files[vh.getAdapterPosition()], vh.getAdapterPosition());
@@ -1344,7 +1341,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         imageGroupList.put(0, v);
         if (f.isDirectory()) {
             List<Uri> uriList = new LinkedList<>();
-            for (String s : tool.getFileOrderByName(file)) {
+            for (String s : tool.getFileOrderByName(file, -1)) {
                 uriList.add(Uri.parse(file+"/"+s));
             }
             if (uriList.size() < 1) {
@@ -1369,7 +1366,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
 
                 String filepath =  tool.getSaveRootPath();
-                String[] files = tool.getFileOrderByName(filepath);
+                String[] files = tool.getFileOrderByName(filepath, -1);
 
                 Log.i(TAG, "files length="+files.length);
 
@@ -1393,7 +1390,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     if (new File(data.img).isDirectory()) {
                         data.text = "（合集）" + data.text;
                         data.isDirectory = true;
-                        String[] imgs = tool.getFileOrderByName(data.img);
+                        String[] imgs = tool.getFileOrderByName(data.img, -1);
                         if (imgs.length < 1) {
                             data.img = null;
                         }
@@ -1414,7 +1411,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private List<WaterFallData> initWaterFallList() {
         String filepath =  tool.getSaveRootPath();
-        String[] files = tool.getFileOrderByName(filepath);
+        String[] files = tool.getFileOrderByName(filepath, -1);
 
         waterFallList.clear();
         if (files.length <= 0) {
@@ -1441,7 +1438,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 data.text = "（合集）" + data.text;
                 data.isDirectory = true;
                //Log.i(TAG, "directory files:"+tool.getFileOrderByName(data.img)[0]);
-                String[] imgs = tool.getFileOrderByName(data.img);
+                String[] imgs = tool.getFileOrderByName(data.img, -1);
                 if (imgs.length < 1) {
                     data.img = null;
                 }
