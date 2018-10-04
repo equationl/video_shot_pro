@@ -1,5 +1,6 @@
 package com.equationl.videoshotpro;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -35,6 +36,7 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.equationl.videoshotpro.Image.Tools;
+import com.equationl.videoshotpro.utils.Utils;
 import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
@@ -76,6 +78,7 @@ public class PlayerActivity extends AppCompatActivity {
     LinearLayout player_controlBar_layout;
     SeekBar play_seekbar;
     ImageView play_controlBar_play_pause_btn;
+    Utils utils = new Utils();
 
     public static PlayerActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
 
@@ -94,11 +97,13 @@ public class PlayerActivity extends AppCompatActivity {
 
     private final MyHandler handler = new MyHandler(this);
 
+    @SuppressLint("ClickableViewAccessibility")   //忽略同时使用 OnClickListener 和 OnTouchListener 产生的冲突警告
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //setRetainInstance(true);
         setContentView(R.layout.activity_player);
+
 
         instance = this;
 
@@ -232,25 +237,38 @@ public class PlayerActivity extends AppCompatActivity {
                     Log.i(TAG, "on btn_shot.onTouch, and is shotting gif");
                     return false;
                 }
-                if(motionEvent.getAction() == MotionEvent.ACTION_UP && isShotGif){
+                if(motionEvent.getAction() == MotionEvent.ACTION_UP){
                     Log.d(TAG, "shot button ---> up");
-                    gif_end_time = videoview.getCurrentPosition();
-                    shotToGifMinTime = Integer.valueOf(settings.getString("shotToGifMinTime", "3"));
-                    Log.i(TAG, "shotToGifMinTime="+shotToGifMinTime);
-                    if (gif_end_time-gif_start_time > shotToGifMinTime*1000) {
-                        btn_shot.setBackground(res.getDrawable(R.drawable.button_radius_up));
-                        isShotingGif = true;
-                        if (!gif_thread.isAlive()) {
-                            gif_thread = new Thread(new ThreadShotGif());
-                            gif_thread.start();
-                        }
-                        return true;
-                    }
+                    return false;
                 }
-                if(motionEvent.getAction() == MotionEvent.ACTION_DOWN && isShotGif){
+                if(motionEvent.getAction() == MotionEvent.ACTION_DOWN){
                     Log.d(TAG, "shot button ---> down");
-                    btn_shot.setBackground(res.getDrawable(R.drawable.button_radius));
-                    gif_start_time = videoview.getCurrentPosition();
+                    if (isShotGif) {
+                        btn_shot.setBackground(res.getDrawable(R.drawable.button_radius));
+                        gif_start_time = videoview.getCurrentPosition();
+                    }
+                    return false;
+                }
+                if (motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
+                    Log.d(TAG, "shot button ---> cacel");
+                    if (isShotGif) {
+                        gif_end_time = videoview.getCurrentPosition();
+                        shotToGifMinTime = Integer.valueOf(settings.getString("shotToGifMinTime", "3"));
+                        Log.i(TAG, "shotToGifMinTime="+shotToGifMinTime);
+                        if (gif_end_time-gif_start_time > shotToGifMinTime*1000) {
+                            btn_shot.setBackground(res.getDrawable(R.drawable.button_radius_up));
+                            isShotingGif = true;
+                            if (!gif_thread.isAlive()) {
+                                gif_thread = new Thread(new ThreadShotGif());
+                                gif_thread.start();
+                            }
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+                if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
+                    Log.d(TAG, "shot button ---> move");
                     return true;
                 }
                 return false;
@@ -734,6 +752,12 @@ public class PlayerActivity extends AppCompatActivity {
                 player_controlBar_layout.setVisibility(View.INVISIBLE);
                 isORIENTATION_LANDSCAPE = false;
                 return true;
+            }
+            else {
+                if (isShotGif) {
+                    utils.finishActivity(MainActivity.instance);
+                    startActivity(new Intent(this, MainActivity.class));   //被动刷新
+                }
             }
             return super.onKeyDown(keyCode, event);
         }else {
