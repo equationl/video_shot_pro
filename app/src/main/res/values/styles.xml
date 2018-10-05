@@ -37,6 +37,13 @@
     </style>
 
 
+    <style name="AppThemeLauncher" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:windowBackground">@drawable/launcher_bg</item>   //闪屏页图片
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+
     <style name="menu_labels_style">
         <item name="android:background">@drawable/fab_label_background</item>
         <item name="android:textColor">@color/white</item>

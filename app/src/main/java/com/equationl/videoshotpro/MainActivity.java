@@ -169,6 +169,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         instance = this;
 
+        utils.finishActivity(LauncherActivity.instance);
+
         dialog_copyFile = new ProgressDialog(this);
         dialog_copyFile.setProgressStyle(ProgressDialog.STYLE_SPINNER);// 设置样式
         dialog_copyFile.setIndeterminate(false);

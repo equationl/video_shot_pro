@@ -68,16 +68,8 @@ public class SplashActivity extends Activity implements SplashADListener {
         skipView = (TextView) findViewById(R.id.skip_view);
         splashHolder = (ImageView) findViewById(R.id.splash_holder);
 
-        sp_init = getSharedPreferences("init", Context.MODE_PRIVATE);
+        //findViewById(R.id.app_logo).setVisibility(View.GONE);
 
-        if (sp_init.getBoolean("isCloseSplashAd", false) || sp_init.getBoolean("isFirstBoot", true)) {
-            next();
-        }
-
-        boolean needLogo = getIntent().getBooleanExtra("need_logo", true);
-        if (!needLogo) {
-            findViewById(R.id.app_logo).setVisibility(View.GONE);
-        }
         // 如果targetSDKVersion >= 23，就要申请好权限。如果您的App没有适配到Android6.0（即targetSDKVersion < 23），那么只需要在这里直接调用fetchSplashAD接口。
         if (Build.VERSION.SDK_INT >= 23) {
             checkAndRequestPermission();
