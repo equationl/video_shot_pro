@@ -42,6 +42,7 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.dingmouren.colorpicker.ColorPickerDialog;
 import com.equationl.videoshotpro.Image.Tools;
+import com.equationl.videoshotpro.utils.GlideSimpleLoader;
 import com.equationl.videoshotpro.utils.Utils;
 import com.github.ielse.imagewatcher.ImageWatcher;
 import com.github.ielse.imagewatcher.ImageWatcherHelper;
@@ -77,7 +78,7 @@ public class ChooseActivity extends AppCompatActivity {
     Boolean isFromExtra;
     boolean isEditMode = false;
 
-    ImageWatcher vImageWatcher;
+    ImageWatcherHelper vImageWatcher;
     ImageWatcher.OnPictureLongPressListener mOnPictureLongPressListener;
 
 
@@ -382,35 +383,10 @@ public class ChooseActivity extends AppCompatActivity {
             }
         };
 
-        vImageWatcher = ImageWatcherHelper.with(this)
+        vImageWatcher = ImageWatcherHelper.with(this, new GlideSimpleLoader())
                 .setTranslucentStatus(0)
                 .setErrorImageRes(R.mipmap.error_picture)
-                .setOnPictureLongPressListener(mOnPictureLongPressListener)
-                .setLoader(new ImageWatcher.Loader() {
-                    @Override
-                    public void load(Context context, Uri uri, final ImageWatcher.LoadCallback lc) {
-                        Log.i(TAG, "call load");
-                        RequestOptions options = new RequestOptions().placeholder(R.mipmap.gallery_pick_photo)
-                                .skipMemoryCache(true).diskCacheStrategy( DiskCacheStrategy.NONE );   //禁用磁盘缓存，否则多次使用时预览图片会出错
-                        Glide.with(context).load(uri.toString()).apply(options).into(new SimpleTarget<Drawable>() {   //不知道为什么直接用URI加载会 load fail
-                            @Override
-                            public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                                lc.onResourceReady(resource);
-                            }
-
-                            @Override
-                            public void onLoadFailed(@Nullable Drawable errorDrawable) {
-                                lc.onLoadFailed(errorDrawable);
-                            }
-
-                            @Override
-                            public void onLoadStarted(@Nullable Drawable placeholder) {
-                                lc.onLoadStarted(placeholder);
-                            }
-                        });
-                    }
-                })
-                .create();
+                .setOnPictureLongPressListener(mOnPictureLongPressListener);
     }
 
     @Override

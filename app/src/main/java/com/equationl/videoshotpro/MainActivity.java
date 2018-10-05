@@ -62,6 +62,7 @@ import com.equationl.videoshotpro.rom.MeizuUtils;
 import com.equationl.videoshotpro.rom.MiuiUtils;
 import com.equationl.videoshotpro.rom.QikuUtils;
 import com.equationl.videoshotpro.rom.RomUtils;
+import com.equationl.videoshotpro.utils.GlideSimpleLoader;
 import com.equationl.videoshotpro.utils.OnRecylerViewItemClickListener;
 import com.equationl.videoshotpro.utils.Share;
 import com.equationl.videoshotpro.utils.Utils;
@@ -129,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     AutoLoadMoreAdapter mAutoLoadMoreAdapter;
 
-    ImageWatcher vImageWatcher;
+    ImageWatcherHelper vImageWatcher;
     ImageWatcher.OnPictureLongPressListener mOnPictureLongPressListener;
 
     private RecyclerView mRecyclerView;
@@ -1305,34 +1306,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
         initOnPictureLongPressListener();
-        vImageWatcher = ImageWatcherHelper.with(this) // 一般来讲， ImageWatcher 需要占据全屏的位置
+        vImageWatcher = ImageWatcherHelper.with(this, new GlideSimpleLoader()) // 一般来讲， ImageWatcher 需要占据全屏的位置
                 .setTranslucentStatus(!isTranslucentStatus ? Utils.calcStatusBarHeight(this) : 0) // 如果是透明状态栏，你需要给ImageWatcher标记 一个偏移值，以修正点击ImageView查看的启动动画的Y轴起点的不正确
                 .setErrorImageRes(R.mipmap.error_picture) // 配置error图标 如果不介意使用lib自带的图标，并不一定要调用这个API
-                .setOnPictureLongPressListener(mOnPictureLongPressListener) // 长按图片的回调，你可以显示一个框继续提供一些复制，发送等功能
-                .setLoader(new ImageWatcher.Loader() {
-                    @Override
-                    public void load(Context context, Uri uri, final ImageWatcher.LoadCallback lc) {
-                        Log.i(TAG, "call load");
-                        //RequestOptions options = new RequestOptions().placeholder(R.mipmap.gallery_pick_photo);
-                        Glide.with(context).load(uri.toString()).into(new SimpleTarget<Drawable>() {   //不知道为什么直接用URI加载会 load fail
-                            @Override
-                            public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                                lc.onResourceReady(resource);
-                            }
-
-                            @Override
-                            public void onLoadFailed(@Nullable Drawable errorDrawable) {
-                                lc.onLoadFailed(errorDrawable);
-                            }
-
-                            @Override
-                            public void onLoadStarted(@Nullable Drawable placeholder) {
-                                lc.onLoadStarted(placeholder);
-                            }
-                        });
-                    }
-                })
-                .create();
+                .setOnPictureLongPressListener(mOnPictureLongPressListener); // 长按图片的回调，你可以显示一个框继续提供一些复制，发送等功能
     }
 
     private void showPicture(ImageView v, String file) {
