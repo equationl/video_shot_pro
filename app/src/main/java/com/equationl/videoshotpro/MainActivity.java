@@ -1283,7 +1283,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 String filepath =  tool.getSaveRootPath();
                 String[] files = tool.getFileOrderByName(filepath, -1);
                 //ImageZoom.show(MainActivity.this, filepath+"/"+files[vh.getAdapterPosition()], ImageUrlType.LOCAL);
-                MainWaterFallAdapter.MyViewHolder holder2 = (MainWaterFallAdapter.MyViewHolder) vh;
+                Log.i(TAG, "ViewHolder object name="+vh.getClass().toString());
+                MainWaterFallAdapter.MyViewHolder holder2;
+                try {   //避免点击vh为autoLoadMore对象导致转换类型出错闪退
+                    holder2 = (MainWaterFallAdapter.MyViewHolder) vh;
+                } catch (Exception e) {
+                    return;
+                }
                 if (files.length > 0) {
                     showPicture(holder2.img, filepath+"/"+files[vh.getAdapterPosition()]);
                 }
@@ -1297,7 +1303,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Toast.makeText(MainActivity.this,vh.getAdapterPosition()+"buke",Toast.LENGTH_SHORT).show();  */
                 String filepath =  tool.getSaveRootPath();
                 String[] files = tool.getFileOrderByName(filepath, -1);
-                MainWaterFallAdapter.MyViewHolder holder2 = (MainWaterFallAdapter.MyViewHolder) vh;
+                MainWaterFallAdapter.MyViewHolder holder2;
+                try {     //避免长按vh为autoLoadMore对象导致转换类型出错闪退
+                    holder2 = (MainWaterFallAdapter.MyViewHolder) vh;
+                } catch (Exception e) {
+                    return;
+                }
                 if (files.length > 0) {
                     showPopupMenu(holder2.img, filepath+"/"+files[vh.getAdapterPosition()], vh.getAdapterPosition());
                 }
