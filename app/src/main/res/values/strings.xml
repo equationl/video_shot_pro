@@ -169,7 +169,7 @@
     </string>
 
     <string name="feedback_content_hint">请输入您的意见或在使用中遇到的问题</string>
-    <string name="feedback_email_hint">请务必留下您的邮箱</string>
+    <string name="feedback_email_hint">请务必留下您的联系方式（如邮箱）</string>
     <string name="feedback_button_submit_text">提交</string>
     <string name="feedback_button_posting_text">提交中&#8230;</string>
     <string name="feedback_toast_content_null">内容不能为空！</string>

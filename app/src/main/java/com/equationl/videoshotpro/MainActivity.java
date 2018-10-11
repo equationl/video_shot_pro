@@ -79,6 +79,7 @@ import com.qq.e.ads.banner.AbstractBannerADListener;
 import com.qq.e.ads.banner.BannerView;
 import com.qq.e.comm.util.AdError;
 import com.tencent.bugly.Bugly;
+import com.tencent.bugly.crashreport.CrashReport;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.tauth.IUiListener;
 import com.tencent.tauth.Tencent;
@@ -293,6 +294,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             editor.apply();
         }
         Bugly.init(getApplicationContext(), "41a66442fd", false);
+        CrashReport.setUserId(sp_init.getInt("userFlagID", 0)+"");
 
         galleryConfig = new GalleryConfig.Builder()
                 .imageLoader(new GlideImageLoader())
@@ -310,6 +312,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Tencent.onActivityResultData(requestCode,resultCode,data, shareListener);
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == IntentResultCodeMediaProjection) {
+                //外部程序截图
                 Log.i("EL", "try Start Service");
                 utils.finishActivity(BuildPictureActivity.instance);
                 FloatWindowsService.setResultData(data);
@@ -973,46 +976,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (activity != null) {
                 switch (msg.what) {
                     case HandlerStatusLoadLibsFailure:
-                        Snackbar snackbar = Snackbar.make(activity.container, R.string.main_snackbar_loadSo_fail, Snackbar.LENGTH_LONG);
+                        Snackbar snackbar = Snackbar.make(activity.getWindow().getDecorView(), R.string.main_snackbar_loadSo_fail, Snackbar.LENGTH_LONG);
                         snackbar.setAction(R.string.main_snackbar_btn_retry, new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 activity.loadLib();
                             }
                         });
-                        snackbar.setActionTextColor(Color.BLUE);
                         snackbar.show();
                         break;
                     case HandlerStatusFFmpegNotSupported:
-                        Snackbar snackbar2 = Snackbar.make(activity.container, R.string.main_snackbar_so_notAble, Snackbar.LENGTH_SHORT);
+                        Snackbar snackbar2 = Snackbar.make(activity.getWindow().getDecorView(), R.string.main_snackbar_so_notAble, Snackbar.LENGTH_LONG);
                         snackbar2.setAction(R.string.main_snackbar_btn_contact, new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                String versionName;
-                                int currentapiVersion=0;
-                                try {
-                                    PackageManager packageManager = activity.getPackageManager();
-                                    PackageInfo packInfo = packageManager.getPackageInfo(activity.getPackageName(),0);
-                                    versionName = packInfo.versionName;
-                                    currentapiVersion=android.os.Build.VERSION.SDK_INT;
-                                }
-                                catch (Exception ex) {
-                                    versionName = "NULL";
-                                }
-                                String mail_content = String.format(activity.getResources().getString(R.string.main_mail_content),
-                                        versionName, currentapiVersion+"", android.os.Build.MODEL);
-                                Intent data=new Intent(Intent.ACTION_SENDTO);
-                                data.setData(Uri.parse("mailto:admin@likehide.com"));
-                                data.putExtra(Intent.EXTRA_SUBJECT, activity.getResources().getString(R.string.main_mail_title));
-                                data.putExtra(Intent.EXTRA_TEXT, mail_content);
-                                activity.startActivity(data);
+                                activity.startActivity(new Intent(activity, FeedbackActivity.class));
                             }
                         });
-                        snackbar2.setActionTextColor(Color.BLUE);
                         snackbar2.show();
                         break;
                     case HandlerStatusPackageNameNotRight:
-                        Snackbar snackbar3 = Snackbar.make(activity.container, R.string.main_snackbar_isPiracy, Snackbar.LENGTH_LONG);
+                        Snackbar snackbar3 = Snackbar.make(activity.getWindow().getDecorView(), R.string.main_snackbar_isPiracy, Snackbar.LENGTH_LONG);
                         snackbar3.show();
                         break;
                     case HandlerStatusCopyFileDone:
@@ -1310,7 +1294,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     return;
                 }
                 if (files.length > 0) {
-                    showPopupMenu(holder2.img, filepath+"/"+files[vh.getAdapterPosition()], vh.getAdapterPosition());
+                    if (vh.getAdapterPosition() < files.length) {    //避免因为首次使用添加了一个 提示cardView 导致的闪退
+                        showPopupMenu(holder2.img, filepath+"/"+files[vh.getAdapterPosition()], vh.getAdapterPosition());
+                    }
                 }
             }
         });

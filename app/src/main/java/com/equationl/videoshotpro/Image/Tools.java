@@ -24,6 +24,7 @@ import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.equationl.videoshotpro.R;
 import com.tencent.bugly.crashreport.BuglyLog;
@@ -235,6 +236,13 @@ public class Tools{
                 }
             } else if (isDownloadsDocument(imageUri)) {
                 String id = DocumentsContract.getDocumentId(imageUri);
+
+                //解决华为手机URI不规范的问题
+                if (id.startsWith("raw:")) {
+                    final String path = id.replaceFirst("raw:", "");
+                    return path;
+                }
+
                 Uri contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
                 return getDataColumn(context, contentUri, null, null);
             } else if (isMediaDocument(imageUri)) {
@@ -734,6 +742,11 @@ public class Tools{
         String[] files;
         String path = context.getExternalCacheDir().toString();
         files = getFileOrderByName(path, 1);
+        if (files.length != newFileName.size()) {
+            Toast.makeText(context, "重命名文件错误：新旧文件数量不一致!", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "重命名文件错误：新旧文件数量不一致");
+            return;
+        }
         for (int i=0; i<newFileName.size(); i++) {
             String oldFile = path+"/"+files[i]+"_c";
             renameFile(path+"/"+files[i], oldFile);
