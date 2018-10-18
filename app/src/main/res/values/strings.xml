@@ -255,6 +255,7 @@
     <string name="main_toast_getPermission_success">权限获取成功！</string>
     <string name="main_toast_choosePictures_fail">选择图片出错！</string>
     <string name="main_toast_unSupportFloatBtn">当前系统版本过低，无法使用该功能！</string>
+    <string name="main_toast_canNotStartFloatBtn">无法启动屏幕截图，请联系开发者解决！</string>
     <string name="main_toast_getPermission_fail">获取权限失败！</string>
     <string name="main_toast_showNavigationGuider">向右滑动可以打开侧边栏哦~</string>
     <string name="main_toast_confirmExit">再按一次退出程序</string>

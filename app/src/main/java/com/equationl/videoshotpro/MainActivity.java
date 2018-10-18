@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -568,9 +569,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (checkPermission(this)) {
             MediaProjectionManager mediaProjectionManager = (MediaProjectionManager)
                     getSystemService(this.MEDIA_PROJECTION_SERVICE);
-            startActivityForResult(
-                    mediaProjectionManager.createScreenCaptureIntent(),
-                    IntentResultCodeMediaProjection);
+            try {
+                startActivityForResult(
+                        mediaProjectionManager.createScreenCaptureIntent(),
+                        IntentResultCodeMediaProjection);
+            } catch (ActivityNotFoundException e) {   //详见Bugly 异常id：11006
+                CrashReport.postCatchedException(e);
+                Toast.makeText(this, R.string.main_toast_canNotStartFloatBtn, Toast.LENGTH_SHORT).show();
+                return;
+            }
         } else {
             applyPermission(this);
         }
