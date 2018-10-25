@@ -30,6 +30,15 @@
     </string>
 
     <string name="about_updateHistory_text">
+        1.3 Chimérique Fix01-03:\n
+        \t*修复点击首页加载提示导致闪退的BUG\n
+        \t*修复某些机型获取视频或图片路径出错的BUG\n
+        \t*修复更改顺序后闪退的BUG\n
+        \t*修复首页预览图片错误\n
+        \t*修复首页 snackbar 弹出错误\n
+        \t*修复 Flyme 权限申请失败的BUG\n
+        \t*修复某些机型使用 外部程序截图 闪退的BUG\n
+        \t*修复某些ROM不支持截取屏幕导致闪退的 BUG\n
         1.3 Chimérique:\n
         \t*重构大量代码与UI\n
         \t*新增新手引导\n
