@@ -9,12 +9,21 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.SparseArray;
+import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,18 +32,34 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.dingmouren.colorpicker.ColorPickerDialog;
 import com.equationl.videoshotpro.Image.Tools;
+import com.equationl.videoshotpro.utils.GlideSimpleLoader;
+import com.equationl.videoshotpro.utils.Utils;
+import com.github.ielse.imagewatcher.ImageWatcher;
+import com.github.ielse.imagewatcher.ImageWatcherHelper;
 import com.huxq17.handygridview.HandyGridView;
 import com.huxq17.handygridview.listener.OnItemCapturedListener;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+
+import me.toptas.fancyshowcase.FancyShowCaseQueue;
+import me.toptas.fancyshowcase.FancyShowCaseView;
 
 public class ChooseActivity extends AppCompatActivity {
 
@@ -51,6 +76,11 @@ public class ChooseActivity extends AppCompatActivity {
     ChoosePictureAdapter pictureAdapter;
     SharedPreferences sp_init;
     Boolean isFromExtra;
+    boolean isEditMode = false;
+
+    ImageWatcherHelper vImageWatcher;
+    ImageWatcher.OnPictureLongPressListener mOnPictureLongPressListener;
+
 
     private final MyHandler handler = new MyHandler(this);
 
@@ -82,7 +112,7 @@ public class ChooseActivity extends AppCompatActivity {
 
 
         String filepath = getExternalCacheDir().toString();
-        files = tool.getFileOrderByName(filepath);
+        files = tool.getFileOrderByName(filepath, 1);
 
         dialog = new ProgressDialog(this);
         dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
@@ -95,10 +125,27 @@ public class ChooseActivity extends AppCompatActivity {
         dialog.setProgress(0);
         new Thread(new LoadImageThread()).start();
 
+        initPictureWathcher();
+
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                showPictureDialog(position);
+                //showPictureDialog(position);
+                //ChoosePictureAdapter.ViewHolder viewHolder = (ChoosePictureAdapter.ViewHolder) pictureAdapter.getView(position, view, parent).getTag();
+                ImageView imageview = (ImageView) pictureAdapter.getView(position, view, parent);
+                SparseArray<ImageView> imageGroupList = new SparseArray<>();
+                imageGroupList.put(0, imageview);
+                imagePaths = pictureAdapter.getImagePaths();
+                String path = getExternalCacheDir().toString();
+                String file = path+"/"+imagePaths.get(position);
+                new FancyShowCaseView.Builder(ChooseActivity.this)
+                        .focusOn(imageview)
+                        .title(res.getString(R.string.choosePicture_guideView_clickImage))
+                        .showOnce("choose_clickImage")
+                        .titleStyle(R.style.GuideViewTextBlank, Gravity.CENTER)
+                        .build()
+                        .show();
+                vImageWatcher.show(imageview, imageGroupList, Collections.singletonList(Uri.parse(file)));
             }
         });
 
@@ -116,6 +163,8 @@ public class ChooseActivity extends AppCompatActivity {
             }
         });
 
+
+        //showGuideDialog();
     }
 
 
@@ -173,7 +222,45 @@ public class ChooseActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu){
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.activity_choose_picture, menu);
-        return true;
+        new Handler().postDelayed(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        final FancyShowCaseView fancyShowCaseView1 = new FancyShowCaseView.Builder(ChooseActivity.this)
+                                .focusOn(findViewById(R.id.choosePicture_menu_edit))
+                                .title(res.getString(R.string.choosePicture_guideView_edit))
+                                .showOnce("choose_edit")
+                                .build();
+                        final FancyShowCaseView fancyShowCaseView2 = new FancyShowCaseView.Builder(ChooseActivity.this)
+                                .title(res.getString(R.string.choosePicture_guideView_editSummary))
+                                .showOnce("choose_editSummary")
+                                .build();
+                        final FancyShowCaseView fancyShowCaseView3 = new FancyShowCaseView.Builder(ChooseActivity.this)
+                                .focusOn(findViewById(R.id.choosePicture_menu_done))
+                                .title(res.getString(R.string.choosePicture_guideView_done))
+                                .showOnce("choose_done")
+                                .build();
+                        FancyShowCaseQueue mQueue = new FancyShowCaseQueue()
+                                .add(fancyShowCaseView1)
+                                .add(fancyShowCaseView2)
+                                .add(fancyShowCaseView3);
+
+                        mQueue.show();
+                    }
+                }, 50
+        );
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (isEditMode) {
+            menu.findItem(R.id.choosePicture_menu_edit).setIcon(
+                    R.drawable.square_edit_outline_blank);
+        } else {
+            menu.findItem(R.id.choosePicture_menu_edit).setIcon(R.drawable.square_edit_outline);
+        }
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -182,17 +269,28 @@ public class ChooseActivity extends AppCompatActivity {
             case R.id.choosePicture_menu_done:
                 imagePaths = pictureAdapter.getImagePaths();
                 tool.sortCachePicture(imagePaths, this);
-                Intent intent = new Intent(ChooseActivity.this, MarkPictureActivity.class);
+                Intent intent = new Intent(ChooseActivity.this, MarkPictureActivity2.class);   //FIXME
                 if (isFromExtra) {
                     intent.putExtra("isFromExtra", true);
                 }
                 startActivity(intent);
                 break;
+            case R.id.choosePicture_menu_edit:
+                if (pictureAdapter.inEditMode) {
+                    isEditMode = false;
+                    pictureAdapter.setInEditMode(false);
+                }
+                else {
+                    isEditMode = true;
+                    pictureAdapter.setInEditMode(true);
+                }
+                invalidateOptionsMenu();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void showPictureDialog(int position) {
+   /* private void showPictureDialog(int position) {
         imagePaths = pictureAdapter.getImagePaths();
         //Log.i(TAG, imagePaths.toString());
         String path = getExternalCacheDir().toString();
@@ -219,10 +317,10 @@ public class ChooseActivity extends AppCompatActivity {
                 .setCancelable(true)
                 .create();
         builder.show();
-    }
+    }   */
 
     private void showGuideDialog() {
-        Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
+        /*Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
                 .setTitle(R.string.choosePicture_tip_dialog_title)
                 .setMessage(R.string.choosePicture_tip_dialog_content)
                 .setPositiveButton(res.getString(R.string.choosePicture_tip_dialog_btn_ok),
@@ -232,7 +330,75 @@ public class ChooseActivity extends AppCompatActivity {
                                 dialog.dismiss();
                             }
                         }).create();
-        dialog.show();
+        dialog.show();   */
+        /*final FancyShowCaseView fancyShowCaseView1 = new FancyShowCaseView.Builder(this)
+                .focusOn(findViewById(R.id.main_guide_pos))
+                .title("Focus on View")
+                //.showOnce("fancy1")
+                .build();
+        final FancyShowCaseView fancyShowCaseView2 = new FancyShowCaseView.Builder(this)
+                .focusOn(findViewById(R.id.main_recyclerView))
+                .title("Focus on View")
+                .roundRectRadius(100)
+                //.showOnce("fancy1")
+                .build();
+        FancyShowCaseQueue mQueue = new FancyShowCaseQueue()
+                .add(fancyShowCaseView1)
+                .add(fancyShowCaseView2);
+
+        mQueue.show();   */
+    }
+
+    private void initPictureWathcher() {
+        mOnPictureLongPressListener = new ImageWatcher.OnPictureLongPressListener() {
+            @Override
+            public void onPictureLongPress(ImageView v, final Uri url, final int pos) {
+                //Toast.makeText(MainActivity.this, "call long press:"+url, Toast.LENGTH_SHORT).show();
+                String[] items;
+                //Log.i(TAG, "in longPress path= "+new File(url.toString()).getParent()+" RootPath= "+tool.getSaveRootPath());
+                items = new String[] {"保存"};
+                AlertDialog.Builder builder = new AlertDialog.Builder(ChooseActivity.this);
+                builder.setItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        switch (i) {
+                            case 0:
+                                SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
+                                String date    =    sDateFormat.format(new    java.util.Date());
+                                date += "-by_EL."+url.toString().substring(url.toString().lastIndexOf(".") + 1);
+                                String savePath =  tool.getSaveRootPath() + "/" + date;
+                                try {
+                                    tool.copyFile(new File(url.toString()), new File(savePath));
+                                    MediaScannerConnection.scanFile(ChooseActivity.this, new String[]{savePath}, null, null);
+                                    Toast.makeText(ChooseActivity.this, R.string.choosePicture_toast_saveSuccess, Toast.LENGTH_SHORT).show();
+                                } catch (IOException e) {
+                                    Toast.makeText(ChooseActivity.this, R.string.choosePicture_toast_saveFail, Toast.LENGTH_SHORT).show();
+                                }
+                                break;
+                        }
+                    }
+                });
+                builder.create();
+                builder.show();
+            }
+        };
+
+        vImageWatcher = ImageWatcherHelper.with(this, new GlideSimpleLoader())
+                .setTranslucentStatus(0)
+                .setErrorImageRes(R.mipmap.error_picture)
+                .setOnPictureLongPressListener(mOnPictureLongPressListener);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (!vImageWatcher.handleBackPressed()) {    //没有打开预览图片
+                finish();
+                return true;
+            }
+            return false;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
 }

@@ -31,12 +31,6 @@
             android:name=".MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-
             <meta-data
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
@@ -49,6 +43,9 @@
         <activity
             android:name=".MarkPictureActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <activity
+            android:name=".MarkPictureActivity2"
+            android:label="标记图片" />
         <activity android:name=".BuildPictureActivity" />
         <activity
             android:name=".SettingsActivity"
@@ -102,8 +99,8 @@
             android:theme="@style/AppTheme.Fullscreen" />
         <activity
             android:name=".FeedbackActivity"
-            android:parentActivityName=".MainActivity"
-            android:label="@string/title_activity_feedback" />
+            android:label="@string/title_activity_feedback"
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".ChooseActivity"
             android:label="@string/title_activity_choose" />
@@ -137,7 +134,21 @@
             android:exported="true"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.Fullscreen.Translucent" />
-        <activity android:name=".ShortCutsActivity"></activity>
+        <activity android:name=".ShortCutsActivity" />
+        <activity
+            android:name=".AboutActivity"
+            android:label="@string/title_activity_about"
+            android:parentActivityName=".MainActivity" />
+        <activity android:name=".SplashActivity">
+        </activity>
+        <activity android:name=".LauncherActivity"
+            android:theme="@style/AppThemeLauncher">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

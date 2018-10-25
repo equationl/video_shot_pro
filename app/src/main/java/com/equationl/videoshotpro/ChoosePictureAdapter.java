@@ -1,23 +1,29 @@
 package com.equationl.videoshotpro;
 
+import java.io.File;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Picture;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.equationl.videoshotpro.Image.Tools;
+import com.equationl.videoshotpro.utils.ChooseTagView;
 import com.huxq17.handygridview.scrollrunner.OnItemMovedListener;
 
-public class ChoosePictureAdapter extends BaseAdapter  implements OnItemMovedListener{
+public class ChoosePictureAdapter extends BaseAdapter  implements OnItemMovedListener, ChooseTagView.OnTagDeleteListener{
     private Context context;
 
     private List<Bitmap> pictures = new ArrayList<Bitmap>();
@@ -25,6 +31,9 @@ public class ChoosePictureAdapter extends BaseAdapter  implements OnItemMovedLis
     private final static String TAG = "EL,In ChooseAdapter";
 
     private List<String> imagePaths = new ArrayList<>();
+
+    private GridView mGridView;
+    public boolean inEditMode = false;
 
 
     public ChoosePictureAdapter( List<Bitmap> images, String[] files, Context context) {
@@ -40,6 +49,11 @@ public class ChoosePictureAdapter extends BaseAdapter  implements OnItemMovedLis
         }  */
 
         pictures = images;
+    }
+
+    public void setInEditMode(boolean inEditMode) {
+        this.inEditMode = inEditMode;
+        notifyDataSetChanged();
     }
 
     public List<String> getImagePaths() {
@@ -70,10 +84,32 @@ public class ChoosePictureAdapter extends BaseAdapter  implements OnItemMovedLis
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        if (mGridView == null) {
+            mGridView = (GridView) parent;
+        }
 
-        ViewHolder viewHolder = null;
+        ChooseTagView imageview;
 
         if (convertView == null) {
+            imageview = new ChooseTagView(context);
+            convertView = imageview;
+            //imageview.setGravity(Gravity.CENTER);
+            //imageview.setMinimumHeight(300);
+            //imageview.setMinimumWidth(300);
+            //imageview.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        } else {
+            imageview = (ChooseTagView) convertView;
+        }
+        /*if (!isFixed(position)) {
+            imageview.showDeleteIcon(inEditMode);
+        } else {
+            imageview.showDeleteIcon(false);
+        }  */
+        imageview.showDeleteIcon(inEditMode);
+        imageview.setImageBitmap(pictures.get(position));
+        imageview.setOnTagDeleteListener(this);
+        return convertView;
+        /*if (convertView == null) {
 
             viewHolder = new ViewHolder();
             // 获得容器
@@ -88,12 +124,18 @@ public class ChoosePictureAdapter extends BaseAdapter  implements OnItemMovedLis
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
+        if (!isFixed(position)) {
+            viewHolder.image.showDeleteIcon(inEditMode);
+        } else {
+            viewHolder.image.showDeleteIcon(false);
+        }
+
         // 给组件设置资源
         //Picture picture = pictures.get(position);
         //viewHolder.image.setImageResource(picture.getImageId());
         viewHolder.image.setImageBitmap(pictures.get(position));
 
-        return convertView;
+        return convertView;   */
     }
 
     @Override
@@ -113,13 +155,25 @@ public class ChoosePictureAdapter extends BaseAdapter  implements OnItemMovedLis
         //When postion==0,the item can not be dragged.
         /*if (position == 0) {
             return true;
-        }  */
+        }*/
         //Log.i(TAG, "fix: "+position);
         return false;
     }
 
     class ViewHolder {
         public ImageView image;
+    }
+
+    @Override
+    public void onDelete(View deleteView) {
+        int index = mGridView.indexOfChild(deleteView);
+        //if (index <= 0) return;
+        int position = index + mGridView.getFirstVisiblePosition();
+        Tools tool = new Tools();
+        tool.deleteFile(new File(ChooseActivity.instance.getExternalCacheDir().toString()+"/"+imagePaths.get(position)));
+        imagePaths.remove(position);
+        pictures.remove(position);
+        notifyDataSetChanged();
     }
 
    /* class Picture {

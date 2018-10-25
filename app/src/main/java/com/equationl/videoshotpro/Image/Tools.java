@@ -24,6 +24,7 @@ import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.equationl.videoshotpro.R;
 import com.tencent.bugly.crashreport.BuglyLog;
@@ -235,6 +236,13 @@ public class Tools{
                 }
             } else if (isDownloadsDocument(imageUri)) {
                 String id = DocumentsContract.getDocumentId(imageUri);
+
+                //解决华为手机URI不规范的问题
+                if (id.startsWith("raw:")) {
+                    final String path = id.replaceFirst("raw:", "");
+                    return path;
+                }
+
                 Uri contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
                 return getDataColumn(context, contentUri, null, null);
             } else if (isMediaDocument(imageUri)) {
@@ -330,7 +338,7 @@ public class Tools{
         return true;
     }
 
-    private void copyFile(File fromFile,File toFile) throws IOException {
+    public void copyFile(File fromFile,File toFile) throws IOException {
         FileInputStream ins = new FileInputStream(fromFile);
         FileOutputStream out = new FileOutputStream(toFile);
         byte[] b = new byte[1024];
@@ -341,6 +349,19 @@ public class Tools{
 
         ins.close();
         out.close();
+    }
+
+    public void deleteFile(File file) {
+        file.delete();
+    }
+
+    public void deleteDirectory(File directory) {
+        if (directory != null && directory.exists() && directory.isDirectory()) {
+            for (File item : directory.listFiles()) {
+                item.delete();
+            }
+        }
+        directory.delete();
     }
 
     public void cleanExternalCache(Context context) {
@@ -512,7 +533,7 @@ public class Tools{
      * @param  bitmap 源图片
      * @return 处理完成的bitmap
      *
-    * */
+     * */
     public Bitmap removeImgBlackSide(Bitmap bitmap) {
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
@@ -534,13 +555,13 @@ public class Tools{
 
 
     /**
-    * 检查指定行是否为无内容区域（仅检查横向）
-    *
-    * @param bitmap 源bitmap
+     * 检查指定行是否为无内容区域（仅检查横向）
+     *
+     * @param bitmap 源bitmap
      *@param y 欲检查的行的坐标
      * @return 是否为无内容区域
      *
-    * */
+     * */
     public boolean checkLineColorIsBlack(Bitmap bitmap, int y) {
         int len = bitmap.getWidth();
         int NotBlackNum = 0;
@@ -663,6 +684,7 @@ public class Tools{
         return i+AllowCheckBlackLines;
     }
 
+
     /**
     * 获取imageview实际绘制的图片大小
      *
@@ -719,7 +741,12 @@ public class Tools{
     private void rename(List <String> newFileName, Context context) {
         String[] files;
         String path = context.getExternalCacheDir().toString();
-        files = getFileOrderByName(path);
+        files = getFileOrderByName(path, 1);
+        if (files.length != newFileName.size()) {
+            Toast.makeText(context, "重命名文件错误：新旧文件数量不一致!", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "重命名文件错误：新旧文件数量不一致");
+            return;
+        }
         for (int i=0; i<newFileName.size(); i++) {
             String oldFile = path+"/"+files[i]+"_c";
             renameFile(path+"/"+files[i], oldFile);
@@ -732,23 +759,24 @@ public class Tools{
     * 获取按照文件名排序的指定路径下所有文件（夹）名
      *
      * @param filePath 路径
+     * @param sort 排序方式（正序：1， 倒序：-1）
      * @return 返回文件名数组
     * */
-    public String[] getFileOrderByName(String filePath) {
+    public String[] getFileOrderByName(String filePath, final int sort) {
         List <File> files = Arrays.asList(new File(filePath).listFiles());
         Collections.sort(files, new Comparator< File>() {
             @Override
             public int compare(File o1, File o2) {
-                int i1 = getFileNameToInt(o1);
-                int i2 = getFileNameToInt(o2);
+                long i1 = getFileNameToLong(o1);
+                long i2 = getFileNameToLong(o2);
                 if (o1.isDirectory() && o2.isFile())
                     return -1;
                 if (o1.isFile() && o2.isDirectory())
                     return 1;
                 if (i1 > i2)
-                    return 1;
+                    return sort==1 ? 1:-1;
                 if (i1 < i2)
-                    return -1;
+                    return sort==1 ? -1:1;
                 if (i1 == i2)
                     return 0;
                 return o1.getName().compareTo(o2.getName());
@@ -761,19 +789,28 @@ public class Tools{
         return array;
     }
 
-    private int getFileNameToInt(File f1) {
-        String s = f1.getName();
-        s = s.split("\\.")[0];
+    private long getFileNameToLong(File f1) {
+        /*String s = f1.getName();
+        s = s.split("\\.")[0];     //去除扩展名
+
+        s = s.replaceAll("[^\\d]+", "");
+
         if (s.contains("_")) {
             s = s.split("_")[0];
-        }
-        int i=-1;
+        }   */
+
+        String s = f1.getName();
+        s = s.replaceAll("[^\\d]+", "");   //去除非数字字符
+        long i=-1;
         try {
-            i = Integer.valueOf(s);
+            i = Long.parseLong(s);
         }
         catch (Exception e) {
             CrashReport.postCatchedException(e);
+            Log.e("el,in tools", e.toString());
         }
+
+        //Log.i("el,in tools", "in getFileNameToInt, i="+i);
         return  i;
     }
 
@@ -793,6 +830,52 @@ public class Tools{
 
     public int createID() {
         return (int)((Math.random()*9+1)*100000);
+    }
+
+
+    public String getSaveRootPath() {
+        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()+"/隐云图解制作/");
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+
+        return file.toString();
+    }
+
+
+    /**
+     * 获取当前本地apk的版本
+     *
+     * @param mContext
+     * @return
+     */
+    public static int getVersionCode(Context mContext) {
+        int versionCode = 0;
+        try {
+            //获取软件版本号，对应AndroidManifest.xml下android:versionCode
+            versionCode = mContext.getPackageManager().
+                    getPackageInfo(mContext.getPackageName(), 0).versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return versionCode;
+    }
+
+    /**
+     * 获取版本号名称
+     *
+     * @param context 上下文
+     * @return
+     */
+    public static String getVerName(Context context) {
+        String verName = "";
+        try {
+            verName = context.getPackageManager().
+                    getPackageInfo(context.getPackageName(), 0).versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return verName;
     }
 
 }

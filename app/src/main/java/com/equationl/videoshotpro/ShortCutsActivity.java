@@ -15,6 +15,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.equationl.videoshotpro.Image.Tools;
+import com.equationl.videoshotpro.utils.Utils;
 import com.tencent.tauth.Tencent;
 
 public class ShortCutsActivity extends AppCompatActivity {
@@ -22,6 +23,8 @@ public class ShortCutsActivity extends AppCompatActivity {
 
     private static final int RequestCodeQuickStart = 1000;
     private static final int IntentResultCodeMediaProjection = 10;
+
+    Utils utils = new Utils();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,11 +56,7 @@ public class ShortCutsActivity extends AppCompatActivity {
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == IntentResultCodeMediaProjection) {
                 Log.i("EL", "try Start Service");
-                try {
-                    BuildPictureActivity.instance.finish();
-                } catch (NullPointerException e){
-                    Log.i("EL", "try to finish BuildPictureActivity fail");
-                }
+                utils.finishActivity(BuildPictureActivity.instance);
 
                 FloatWindowsService.setResultData(data);
                 Intent startService = new Intent(this, FloatWindowsService.class);

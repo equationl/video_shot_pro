@@ -10,6 +10,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.equationl.videoshotpro.R;
+import com.equationl.videoshotpro.utils.Share;
 import com.tencent.bugly.crashreport.CrashReport;
 import com.tencent.mm.opensdk.modelbase.BaseReq;
 import com.tencent.mm.opensdk.modelbase.BaseResp;
@@ -51,10 +52,7 @@ public class WXEntryActivity extends AppCompatActivity implements IWXAPIEventHan
         switch (resp.errCode) { //根据需要的情况进行处理
             case BaseResp.ErrCode.ERR_OK:
                 //正确返回
-                Toast.makeText(this, R.string.WXEntry_toast_share_success, Toast.LENGTH_SHORT).show();
-                SharedPreferences.Editor editor = sp_init.edit();
-                editor.putBoolean("isCloseAd", true);
-                editor.apply();
+                Share.shareAppSuccess(this);
                 break;
             case BaseResp.ErrCode.ERR_USER_CANCEL:
                 //用户取消

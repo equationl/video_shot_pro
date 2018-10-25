@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,10 +13,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Build;
@@ -26,12 +25,17 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.PopupMenu;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.text.Html;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -44,32 +48,40 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.equationl.videoshotpro.Image.Tools;
 import com.equationl.videoshotpro.rom.HuaweiUtils;
 import com.equationl.videoshotpro.rom.MeizuUtils;
 import com.equationl.videoshotpro.rom.MiuiUtils;
 import com.equationl.videoshotpro.rom.QikuUtils;
 import com.equationl.videoshotpro.rom.RomUtils;
+import com.equationl.videoshotpro.utils.GlideSimpleLoader;
+import com.equationl.videoshotpro.utils.OnRecylerViewItemClickListener;
+import com.equationl.videoshotpro.utils.Share;
+import com.equationl.videoshotpro.utils.Utils;
+import com.equationl.videoshotpro.utils.WaterFallData;
+import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
+import com.github.ielse.imagewatcher.ImageWatcher;
+import com.github.ielse.imagewatcher.ImageWatcherHelper;
 import com.qq.e.ads.banner.ADSize;
 import com.qq.e.ads.banner.AbstractBannerADListener;
 import com.qq.e.ads.banner.BannerView;
 import com.qq.e.comm.util.AdError;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.crashreport.CrashReport;
-import com.tencent.connect.share.QQShare;
-import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
-import com.tencent.mm.opensdk.modelmsg.WXMediaMessage;
-import com.tencent.mm.opensdk.modelmsg.WXTextObject;
-import com.tencent.mm.opensdk.modelmsg.WXWebpageObject;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
-import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 import com.tencent.tauth.IUiListener;
 import com.tencent.tauth.Tencent;
 import com.tencent.tauth.UiError;
@@ -79,14 +91,20 @@ import com.yancy.gallerypick.inter.IHandlerCallBack;
 
 import org.json.JSONObject;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+
+import me.solidev.loadmore.AutoLoadMoreAdapter;
+import me.toptas.fancyshowcase.FancyShowCaseQueue;
+import me.toptas.fancyshowcase.FancyShowCaseView;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    Button button_user;
     AlertDialog.Builder dialog;
     AlertDialog dialog2;
     android.support.design.widget.CoordinatorLayout container;
@@ -98,13 +116,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     List<String> FileList;
     String extension;
     ProgressDialog dialog_copyFile;
-    Button button_splicing, button_floatBtn, button_ffmpeg,button_help, button_setting;
-    TextView text_bottom;
     DrawerLayout drawer;
     ViewGroup bannerContainer;
     BannerView bv;
     int activityResultMode = 0;
+    Boolean isFirstBoot = false;
+    boolean isTranslucentStatus = false;
     IWXAPI wxApi;
+    Utils utils = new Utils();
+    FloatingActionsMenu main_floatBtn_menu;
+    FloatingActionButton main_floatBtn_quick;
+    FloatingActionButton main_floatBtn_splicing;
+    FloatingActionButton main_floatBtn_shotScreen;
+    FloatingActionButton main_floatBtn_frameByFrame;
+
+    AutoLoadMoreAdapter mAutoLoadMoreAdapter;
+
+    ImageWatcherHelper vImageWatcher;
+    ImageWatcher.OnPictureLongPressListener mOnPictureLongPressListener;
+
+    private RecyclerView mRecyclerView;
+    private RecyclerView.LayoutManager mLayoutManager;
+    private MainWaterFallAdapter mAdapter;
+
+    List<WaterFallData> waterFallList = new ArrayList<>();
+    int waterFallDataPager = 0;
 
     private final MyHandler handler = new MyHandler(this);
     public static MainActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
@@ -122,10 +158,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(Color.TRANSPARENT);
+            window.setNavigationBarColor(Color.TRANSPARENT);
+            isTranslucentStatus = true;
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         instance = this;
+
+        utils.finishActivity(LauncherActivity.instance);
 
         dialog_copyFile = new ProgressDialog(this);
         dialog_copyFile.setProgressStyle(ProgressDialog.STYLE_SPINNER);// 设置样式
@@ -137,11 +184,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         settings = PreferenceManager.getDefaultSharedPreferences(this);
         sp_init = getSharedPreferences("init", Context.MODE_PRIVATE);
 
-        if (!sp_init.getBoolean("isCloseAd", false)) {
-            initBanner();
-            bv.loadAD();
-        }
-
         container =  (android.support.design.widget.CoordinatorLayout)findViewById(R.id.container);
 
         tool = new Tools();
@@ -150,22 +192,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (sp_init.getBoolean("isFirstBoot", true)) {
             //FIXME 显示警告某些应用商城审核就不给过？？？？
             //showAlertDialog();
+            isFirstBoot = true;
             SharedPreferences.Editor editor = sp_init.edit();
             editor.putBoolean("isFirstBoot", false);
             editor.apply();
+            //showGuide();
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     != PackageManager.PERMISSION_GRANTED) {
+                isFirstBoot = true;
                 showDialogTipUserRequestPermission();
             }
             else if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
                     != PackageManager.PERMISSION_GRANTED) {
+                isFirstBoot = true;
                 showDialogTipUserRequestPermission();
             }
             else if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED) {
+                isFirstBoot = true;
                 showDialogTipUserRequestPermission();
             }
         }
@@ -173,15 +220,55 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        button_user = findViewById(R.id.btn_main_quickStart);
-        button_splicing = (Button)findViewById(R.id.btn_main_splicing);
-        button_ffmpeg = (Button)findViewById(R.id.btn_main_ffmpeg);
-        button_floatBtn = (Button)findViewById(R.id.btn_main_floatBtn);
-        button_help = (Button)findViewById(R.id.btn_main_help);
-        button_setting = (Button)findViewById(R.id.btn_main_setting);
+        //button_user = findViewById(R.id.btn_main_quickStart);
+        //button_splicing = (Button)findViewById(R.id.btn_main_splicing);
+        //button_ffmpeg = (Button)findViewById(R.id.btn_main_ffmpeg);
+        //button_floatBtn = (Button)findViewById(R.id.btn_main_floatBtn);
+        //button_help = (Button)findViewById(R.id.btn_main_help);
+        //button_setting = (Button)findViewById(R.id.btn_main_setting);
 
-        text_bottom = (TextView)findViewById(R.id.text_main_bottom);
-        text_bottom.getPaint().setFlags(Paint. UNDERLINE_TEXT_FLAG );
+        main_floatBtn_menu = (FloatingActionsMenu) findViewById(R.id.main_floatBtn_menu);
+        main_floatBtn_quick = (FloatingActionButton) findViewById(R.id.main_floatBtn_quick);
+        main_floatBtn_splicing = (FloatingActionButton) findViewById(R.id.main_floatBtn_splicing);
+        main_floatBtn_shotScreen = (FloatingActionButton) findViewById(R.id.main_floatBtn_shotScreen);
+        main_floatBtn_frameByFrame = (FloatingActionButton) findViewById(R.id.main_floatBtn_frameByFrame);
+
+        mRecyclerView = (RecyclerView) findViewById(R.id.main_recyclerView);
+
+        //main_floatBtn_menu.setClosedOnTouchOutside(true);
+        //main_floatBtn_menu.hideMenuButton(false);
+
+        main_floatBtn_quick.setOnClickListener(clickListener);
+        main_floatBtn_splicing.setOnClickListener(clickListener);
+        main_floatBtn_shotScreen.setOnClickListener(clickListener);
+        main_floatBtn_frameByFrame.setOnClickListener(clickListener);
+
+        initRecycleView();
+
+        if (!sp_init.getBoolean("isCloseAd", false)) {
+            initBanner();
+            bv.loadAD();
+        } else {
+            mRecyclerView.setPadding(0,0,0,0);
+        }
+
+
+        //main_floatBtn_menu.showMenuButton(true);
+
+        /*main_floatBtn_menu.setOnMenuButtonClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (main_floatBtn_menu.isOpened()) {
+                    //Toast.makeText(MainActivity.this, main_floatBtn_menu.getMenuButtonLabelText(), Toast.LENGTH_SHORT).show();
+                }
+
+                main_floatBtn_menu.toggle(true);
+            }
+        });   */
+
+
+        //text_bottom = (TextView)findViewById(R.id.text_main_bottom);
+        //text_bottom.getPaint().setFlags(Paint. UNDERLINE_TEXT_FLAG );
 
         bannerContainer = (ViewGroup) findViewById(R.id.main_bannerContainer);
 
@@ -208,7 +295,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             editor.apply();
         }
         Bugly.init(getApplicationContext(), "41a66442fd", false);
-        CrashReport.setUserId(""+userFlagID);
+        CrashReport.setUserId(sp_init.getInt("userFlagID", 0)+"");
 
         galleryConfig = new GalleryConfig.Builder()
                 .imageLoader(new GlideImageLoader())
@@ -217,52 +304,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .multiSelect(true, 100)
                 .build();
 
-        text_bottom.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                drawer.openDrawer(Gravity.START);
-            }
-        });
-
-        button_user.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("video/*");
-                intent.addCategory(intent.CATEGORY_OPENABLE);
-                startActivityForResult(Intent.createChooser(intent, "请选择视频文件"),RequestCodeQuickStart);
-            }
-        });
-
-        button_splicing.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                btn_splicing();
-            }
-        });
-
-        button_floatBtn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                btn_floatBtn();
-            }
-        });
-
-        button_ffmpeg.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, CommandActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        button_help.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                btn_help();
-            }
-        });
-
-        button_setting.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
-                startActivity(intent);
-            }
-        });
+        showGuide();
     }
 
     @Override
@@ -271,13 +313,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Tencent.onActivityResultData(requestCode,resultCode,data, shareListener);
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == IntentResultCodeMediaProjection) {
+                //外部程序截图
                 Log.i("EL", "try Start Service");
-                try {
-                    BuildPictureActivity.instance.finish();
-                } catch (NullPointerException e){
-                    Log.i("EL", "try to finish BuildPictureActivity fail");
-                }
-
+                utils.finishActivity(BuildPictureActivity.instance);
                 FloatWindowsService.setResultData(data);
                 Intent startService = new Intent(this, FloatWindowsService.class);
                 startService(startService);
@@ -328,71 +366,37 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }*/
     }
 
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-    }
-
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
+        Intent intent;
         int id = item.getItemId();
-
         activityResultMode = 0;
 
-        if (id == R.id.nav_help) {
-            btn_help();
-        }
-        /*else if (id == R.id.nav_more) {
-            Intent intent = new Intent(MainActivity.this, CommandActivity.class);
-            startActivity(intent);
-        } */
-        else if (id == R.id.nav_feedback) {
-            String versionName;
-            int currentapiVersion=0;
-            try {
-                PackageManager packageManager = getPackageManager();
-                PackageInfo packInfo = packageManager.getPackageInfo(getPackageName(),0);
-                versionName = packInfo.versionName;
-                currentapiVersion=android.os.Build.VERSION.SDK_INT;
-            }
-            catch (Exception ex) {
-                versionName = "NULL";
-            }
-            String mail_content = String.format(getResources().getString(R.string.main_mail_content),
-                    versionName, currentapiVersion+"", android.os.Build.MODEL);
-
-            //Fixme
-            Intent intent = new Intent(MainActivity.this, FeedbackActivity.class);
-            startActivity(intent);
-            /*Intent data=new Intent(Intent.ACTION_SENDTO);
-            data.setData(Uri.parse("mailto:admin@likehide.com"));
-            data.putExtra(Intent.EXTRA_SUBJECT, this.getResources().getString(R.string.main_mail_title));
-            data.putExtra(Intent.EXTRA_TEXT, mail_content);
-            startActivity(data);   */
-        }
-        /*else if (id == R.id.nav_setting) {
-            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
-            startActivity(intent);
-        }
-        else if (id == R.id.nav_splicing) {
-            btn_splicing();
-        } else if (id == R.id.nav_floatBtn) {
-            btn_floatBtn();
-        }  */
-        else if (id == R.id.nav_support) {
-            showSupportDialog();
-        } else if (id == R.id.nav_about) {
-            showAboutDialog();
-        } else if (id == R.id.nav_frameByFrame) {
-            btn_shotFrame();
-        } else if (id == R.id.nav_share) {
-            shareAPP();
+        switch (id) {
+            case R.id.nav_help:
+                btn_help();
+                break;
+            case R.id.nav_feedback:
+                btn_feedback();
+                break;
+            case R.id.main_nav_setting:
+                intent = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivity(intent);
+                break;
+            /*case R.id.nav_support:
+                showSupportDialog();
+                break;   */
+            case R.id.nav_about:
+                showAboutDialog();
+                break;
+            case R.id.nav_share:
+                shareAPP();
+                break;
+            case R.id.main_nav_ffmpeg:
+                intent = new Intent(MainActivity.this, CommandActivity.class);
+                startActivity(intent);
+                break;
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -413,6 +417,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .setNegativeButton(R.string.main_dialog_btn_cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        SharedPreferences.Editor editor = sp_init.edit();
+                        editor.putBoolean("isFirstBoot", true);
+                        editor.apply();
                         finish();
                     }
                 }).setCancelable(false).show();
@@ -495,12 +502,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         public void run() {
             loadLib();
-            try {
-                MarkPictureActivity.instance.finish();
-                ChooseActivity.instance.finish();
-                BuildPictureActivity.instance.finish();
-                PlayerActivity.instance.finish();
-            } catch (Exception e) {}
+            utils.finishActivity(MarkPictureActivity.instance);
+            utils.finishActivity(ChooseActivity.instance);
+            utils.finishActivity(BuildPictureActivity.instance);
+            utils.finishActivity(PlayerActivity.instance);
             try {
                 String pkName = getApplicationContext().getPackageName();
                 if (!pkName.equals("com.equationl.videoshotpro")) {
@@ -564,16 +569,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (checkPermission(this)) {
             MediaProjectionManager mediaProjectionManager = (MediaProjectionManager)
                     getSystemService(this.MEDIA_PROJECTION_SERVICE);
-            startActivityForResult(
-                    mediaProjectionManager.createScreenCaptureIntent(),
-                    IntentResultCodeMediaProjection);
+            try {
+                startActivityForResult(
+                        mediaProjectionManager.createScreenCaptureIntent(),
+                        IntentResultCodeMediaProjection);
+            } catch (ActivityNotFoundException e) {   //详见Bugly 异常id：11006
+                CrashReport.postCatchedException(e);
+                Toast.makeText(this, R.string.main_toast_canNotStartFloatBtn, Toast.LENGTH_SHORT).show();
+                return;
+            }
         } else {
             applyPermission(this);
         }
     }
 
     private boolean checkPermission(Context context) {
-        //6.0 版本之后由于 google 增加了对悬浮窗权限的管理，所以方式就统一了
         if (Build.VERSION.SDK_INT < 23) {
             if (RomUtils.checkIsMiuiRom()) {
                 return miuiPermissionCheck(context);
@@ -846,7 +856,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void showAboutDialog() {
-        String content = String.format(
+        /*String content = String.format(
                 res.getString(R.string.main_dialog_about_content),
                 res.getString(R.string.main_updateHistory_text),
                 res.getString(R.string.main_right_text));
@@ -860,7 +870,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 dialog.dismiss();
                             }
                         }).create();
-        dialog.show();
+        dialog.show();   */
+        Intent intent = new Intent(MainActivity.this, AboutActivity.class);
+        startActivity(intent);
     }
 
     /*@Override
@@ -891,7 +903,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    private void btn_floatBtn() {
+    private void btn_shotScreen() {
         if (sp_init.getBoolean("isFirstUseFloat", true)) {
             showFloatDialog();
             SharedPreferences.Editor editor = sp_init.edit();
@@ -910,6 +922,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         dialog.setMessage(content);
         dialog.setIcon(R.mipmap.ic_launcher);
         dialog.create().show();
+    }
+
+    private void btn_feedback() {
+        String versionName;
+        int currentapiVersion=0;
+        try {
+            PackageManager packageManager = getPackageManager();
+            PackageInfo packInfo = packageManager.getPackageInfo(getPackageName(),0);
+            versionName = packInfo.versionName;
+            currentapiVersion=android.os.Build.VERSION.SDK_INT;
+        }
+        catch (Exception ex) {
+            versionName = "NULL";
+        }
+        String mail_content = String.format(getResources().getString(R.string.main_mail_content),
+                versionName, currentapiVersion+"", android.os.Build.MODEL);
+
+        //Fixme
+        Intent intent = new Intent(MainActivity.this, FeedbackActivity.class);
+        startActivity(intent);
+            /*Intent data=new Intent(Intent.ACTION_SENDTO);
+            data.setData(Uri.parse("mailto:admin@likehide.com"));
+            data.putExtra(Intent.EXTRA_SUBJECT, this.getResources().getString(R.string.main_mail_title));
+            data.putExtra(Intent.EXTRA_TEXT, mail_content);
+            startActivity(data);   */
     }
 
     private void btn_shotFrame() {
@@ -946,46 +983,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (activity != null) {
                 switch (msg.what) {
                     case HandlerStatusLoadLibsFailure:
-                        Snackbar snackbar = Snackbar.make(activity.container, R.string.main_snackbar_loadSo_fail, Snackbar.LENGTH_LONG);
+                        Snackbar snackbar = Snackbar.make(activity.getWindow().getDecorView(), R.string.main_snackbar_loadSo_fail, Snackbar.LENGTH_LONG);
                         snackbar.setAction(R.string.main_snackbar_btn_retry, new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 activity.loadLib();
                             }
                         });
-                        snackbar.setActionTextColor(Color.BLUE);
                         snackbar.show();
                         break;
                     case HandlerStatusFFmpegNotSupported:
-                        Snackbar snackbar2 = Snackbar.make(activity.container, R.string.main_snackbar_so_notAble, Snackbar.LENGTH_SHORT);
+                        Snackbar snackbar2 = Snackbar.make(activity.getWindow().getDecorView(), R.string.main_snackbar_so_notAble, Snackbar.LENGTH_LONG);
                         snackbar2.setAction(R.string.main_snackbar_btn_contact, new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                String versionName;
-                                int currentapiVersion=0;
-                                try {
-                                    PackageManager packageManager = activity.getPackageManager();
-                                    PackageInfo packInfo = packageManager.getPackageInfo(activity.getPackageName(),0);
-                                    versionName = packInfo.versionName;
-                                    currentapiVersion=android.os.Build.VERSION.SDK_INT;
-                                }
-                                catch (Exception ex) {
-                                    versionName = "NULL";
-                                }
-                                String mail_content = String.format(activity.getResources().getString(R.string.main_mail_content),
-                                        versionName, currentapiVersion+"", android.os.Build.MODEL);
-                                Intent data=new Intent(Intent.ACTION_SENDTO);
-                                data.setData(Uri.parse("mailto:admin@likehide.com"));
-                                data.putExtra(Intent.EXTRA_SUBJECT, activity.getResources().getString(R.string.main_mail_title));
-                                data.putExtra(Intent.EXTRA_TEXT, mail_content);
-                                activity.startActivity(data);
+                                activity.startActivity(new Intent(activity, FeedbackActivity.class));
                             }
                         });
-                        snackbar2.setActionTextColor(Color.BLUE);
                         snackbar2.show();
                         break;
                     case HandlerStatusPackageNameNotRight:
-                        Snackbar snackbar3 = Snackbar.make(activity.container, R.string.main_snackbar_isPiracy, Snackbar.LENGTH_LONG);
+                        Snackbar snackbar3 = Snackbar.make(activity.getWindow().getDecorView(), R.string.main_snackbar_isPiracy, Snackbar.LENGTH_LONG);
                         snackbar3.show();
                         break;
                     case HandlerStatusCopyFileDone:
@@ -1004,7 +1022,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void shareAPP() {
-        final String[] items = res.getStringArray(R.array.main_dialog_shareAPP_items);
+        /*final String[] items = res.getStringArray(R.array.main_dialog_shareAPP_items);
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
         alertBuilder.setTitle(R.string.buildPicture_dialog_share_title);
         alertBuilder.setItems(items, new DialogInterface.OnClickListener() {
@@ -1026,10 +1044,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             }
         });
-        alertBuilder.create().show();
+        alertBuilder.create().show();  */
+        Share.showShareAppDialog(this, shareListener, MainActivity.this);
     }
 
-    private void shareAPPByWx(int shareTo) {
+    /*private void shareAPPByWx(int shareTo) {
         wxApi = WXAPIFactory.createWXAPI(this, "wx45ceac6c6d2f1aff", true);
         wxApi.registerApp("wx45ceac6c6d2f1aff");
 
@@ -1058,9 +1077,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // 调用api接口发送数据到微信
         wxApi.sendReq(req);
-    }
+        Share.shareAppToWx(this, shareTo);
+    }   */
 
-    private void shareAPPByQq() {
+    /*private void shareAPPByQq() {
         Tencent mTencent = Tencent.createInstance("1106257597", this);
         final Bundle params = new Bundle();
         params.putInt(QQShare.SHARE_TO_QQ_KEY_TYPE, QQShare.SHARE_TO_QQ_TYPE_APP);
@@ -1070,13 +1090,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         params.putString(QQShare.SHARE_TO_QQ_APP_NAME, res.getString(R.string.main_SHARE_TO_QQ_APP_NAME));
         //params.putInt(QQShare.SHARE_TO_QQ_EXT_INT, QQShare.SHARE_TO_QQ_FLAG_QZONE_AUTO_OPEN);
         mTencent.shareToQQ(MainActivity.this, params, shareListener);
-    }
+        Share.shareAppToQQ(this, shareListener, MainActivity.this);
+    }   */
 
     private void shareAPPSuccess() {
+        /*sp_init = getSharedPreferences("init", Context.MODE_PRIVATE);
         Toast.makeText(MainActivity.this, "分享成功！", Toast.LENGTH_SHORT).show();
         SharedPreferences.Editor editor = sp_init.edit();
         editor.putBoolean("isCloseAd", true);
-        editor.apply();
+        editor.apply();  */
+        Share.shareAppSuccess(this);
+        /*bv.destroy();
+        mRecyclerView.setPadding(0,0,0,0); */
     }
 
     IUiListener shareListener = new BaseUiListener() {
@@ -1126,11 +1151,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onADReceiv() {
                 Log.i("AD_DEMO", "ONBannerReceive");
+                if (bannerContainer.getParent()!=null) {   //FIXME 不确定是否会影响正常计算广告
+                    bannerContainer.removeAllViews();
+                }
                 bannerContainer.addView(bv);
             }
             @Override
             public void onADClosed() {
                 showCloseAdDialog();
+                mRecyclerView.setPadding(0,0,0,0);
             }
         });
         //bannerContainer.addView(bv);
@@ -1155,17 +1184,396 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK
                 && event.getAction() == KeyEvent.ACTION_DOWN) {
-            if ((System.currentTimeMillis() - exitTime) > 2000) {
-                Toast.makeText(MainActivity.this,R.string.main_toast_confirmExit,Toast.LENGTH_SHORT).show();
-                exitTime = System.currentTimeMillis();
-            } else {
-                tool.cleanExternalCache(this);
-                finish();
-                System.exit(0);
+            if (!vImageWatcher.handleBackPressed() && !drawer.isDrawerOpen(GravityCompat.START)) {    //没有打开预览图片或者侧边栏
+                if ((System.currentTimeMillis() - exitTime) > 2000) {
+                    Toast.makeText(MainActivity.this,R.string.main_toast_confirmExit,Toast.LENGTH_SHORT).show();
+                    exitTime = System.currentTimeMillis();
+                } else {
+                    tool.cleanExternalCache(this);
+                    finish();
+                    System.exit(0);
+                }
+                return true;
             }
-            return true;
+
+            if (drawer.isDrawerOpen(GravityCompat.START)) {
+                drawer.closeDrawer(GravityCompat.START);
+            }
+
+            return false;
         }
         return super.onKeyDown(keyCode, event);
     }
-}
 
+
+    private View.OnClickListener clickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            main_floatBtn_menu.collapseImmediately();
+            switch (v.getId()) {
+                case R.id.main_floatBtn_quick:
+                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                    intent.setType("video/*");
+                    intent.addCategory(intent.CATEGORY_OPENABLE);
+                    startActivityForResult(Intent.createChooser(intent, "请选择视频文件"),RequestCodeQuickStart);
+                    break;
+                case R.id.main_floatBtn_splicing:
+                    btn_splicing();
+                    break;
+                case R.id.main_floatBtn_shotScreen:
+                    btn_shotScreen();
+                    break;
+                case R.id.main_floatBtn_frameByFrame:
+                    btn_shotFrame();
+                    break;
+            }
+        }
+    };
+
+    private void initRecycleView() {
+        if (!isFirstBoot) {    //如果是第一次启动可能会因为初始化时缺少储存权限而闪退
+            initWaterFallList();
+        }
+        else {
+            WaterFallData data = new WaterFallData();
+            data.img = null;
+            data.text = res.getString(R.string.main_text_waterFall_firstUse);
+            data.imgHeight = 0;
+            data.isDirectory = false;
+            waterFallList.add(data);
+        }
+        mLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        mAdapter = new MainWaterFallAdapter(this, waterFallList);
+
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        //mRecyclerView.setAdapter(mAdapter);
+
+
+        mAutoLoadMoreAdapter = new AutoLoadMoreAdapter(this, mAdapter);
+        mAutoLoadMoreAdapter.setOnLoadListener(new AutoLoadMoreAdapter.OnLoadListener() {
+            @Override
+            public void onRetry() {
+                //do retry
+                Log.i(TAG, "call  onRetry");
+                addWaterFallList();
+            }
+
+            @Override
+            public void onLoadMore() {
+                //do load more
+                Log.i(TAG, "call onLoadMore");
+                addWaterFallList();
+            }
+        });
+        mRecyclerView.setAdapter(mAutoLoadMoreAdapter);
+
+        mRecyclerView.addOnItemTouchListener(new OnRecylerViewItemClickListener(mRecyclerView) {
+            @Override
+            public void onItemClick(RecyclerView.ViewHolder vh) {
+                //Toast.makeText(MainActivity.this,vh.getAdapterPosition()+"",Toast.LENGTH_SHORT).show();
+                String filepath =  tool.getSaveRootPath();
+                String[] files = tool.getFileOrderByName(filepath, -1);
+                //ImageZoom.show(MainActivity.this, filepath+"/"+files[vh.getAdapterPosition()], ImageUrlType.LOCAL);
+                Log.i(TAG, "ViewHolder object name="+vh.getClass().toString());
+                MainWaterFallAdapter.MyViewHolder holder2;
+                try {   //避免点击vh为autoLoadMore对象导致转换类型出错闪退
+                    holder2 = (MainWaterFallAdapter.MyViewHolder) vh;
+                } catch (Exception e) {
+                    return;
+                }
+                if (files.length > 0) {
+                    showPicture(holder2.img, filepath+"/"+files[vh.getAdapterPosition()]);
+                }
+            }
+
+            @Override
+            public void onItemLongClick(RecyclerView.ViewHolder vh) {
+                /*if (vh.getLayoutPosition()!=waterFallList.size()-1) {
+                    //helper.startDrag(vh);
+                }
+                Toast.makeText(MainActivity.this,vh.getAdapterPosition()+"buke",Toast.LENGTH_SHORT).show();  */
+                String filepath =  tool.getSaveRootPath();
+                String[] files = tool.getFileOrderByName(filepath, -1);
+                MainWaterFallAdapter.MyViewHolder holder2;
+                try {     //避免长按vh为autoLoadMore对象导致转换类型出错闪退
+                    holder2 = (MainWaterFallAdapter.MyViewHolder) vh;
+                } catch (Exception e) {
+                    return;
+                }
+                if (files.length > 0) {
+                    if (vh.getAdapterPosition() < files.length) {    //避免因为首次使用添加了一个 提示cardView 导致的闪退
+                        showPopupMenu(holder2.img, filepath+"/"+files[vh.getAdapterPosition()], vh.getAdapterPosition());
+                    }
+                }
+            }
+        });
+
+
+        initOnPictureLongPressListener();
+        vImageWatcher = ImageWatcherHelper.with(this, new GlideSimpleLoader()) // 一般来讲， ImageWatcher 需要占据全屏的位置
+                .setTranslucentStatus(!isTranslucentStatus ? Utils.calcStatusBarHeight(this) : 0) // 如果是透明状态栏，你需要给ImageWatcher标记 一个偏移值，以修正点击ImageView查看的启动动画的Y轴起点的不正确
+                .setErrorImageRes(R.mipmap.error_picture) // 配置error图标 如果不介意使用lib自带的图标，并不一定要调用这个API
+                .setOnPictureLongPressListener(mOnPictureLongPressListener); // 长按图片的回调，你可以显示一个框继续提供一些复制，发送等功能
+    }
+
+    private void showPicture(ImageView v, String file) {
+        //vImageWatcher.show(v, );
+        Log.i(TAG, "showP file: "+file);
+        File f = new File(file);
+        SparseArray<ImageView> imageGroupList = new SparseArray<>();
+        imageGroupList.put(0, v);
+        if (f.isDirectory()) {
+            List<Uri> uriList = new LinkedList<>();
+            for (String s : tool.getFileOrderByName(file, -1)) {
+                uriList.add(Uri.parse(file+"/"+s));
+            }
+            if (uriList.size() < 1) {
+                return;
+            }
+            vImageWatcher.show(v, imageGroupList,  uriList);
+        }
+        else {
+            vImageWatcher.show(v, imageGroupList,  Collections.singletonList(Uri.parse(file)));
+        }
+    }
+
+    private List<WaterFallData> addWaterFallList() {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (isFirstBoot) {
+                    waterFallList.remove(0);
+                    mRecyclerView.getAdapter().notifyItemRemoved(0);
+                    mRecyclerView.getAdapter().notifyDataSetChanged();
+                    isFirstBoot = false;
+                }
+
+                String filepath =  tool.getSaveRootPath();
+                String[] files = tool.getFileOrderByName(filepath, -1);
+
+                Log.i(TAG, "files length="+files.length);
+
+                int j = waterFallDataPager*10+10;
+                if (j > files.length) {
+                    j = files.length;
+                }
+                if (waterFallDataPager*10 > files.length) {
+                    Log.i(TAG, "index out");
+                    mAutoLoadMoreAdapter.showLoadComplete();
+                    j = waterFallDataPager*10;
+                }
+                Log.i(TAG, "waterFallDataPager="+waterFallDataPager);
+                Log.i(TAG, "j = "+j);
+                for(int i=waterFallDataPager*10;i<j;i++) {
+                    WaterFallData data = new WaterFallData();
+                    //data.img = tool.getBitmapThumbnailFromFile(filepath+"/"+files[i], 400, 500);
+                    data.img = filepath+"/"+files[i];
+                    data.text = files[i];
+                    data.imgHeight = (i % 2)*100 + 400;
+                    if (new File(data.img).isDirectory()) {
+                        data.text = "（合集）" + data.text;
+                        data.isDirectory = true;
+                        String[] imgs = tool.getFileOrderByName(data.img, -1);
+                        if (imgs.length < 1) {
+                            data.img = null;
+                        }
+                        else {
+                            data.img = data.img+"/"+imgs[0];
+                        }
+                    }
+                    waterFallList.add(data);
+                }
+                waterFallDataPager++;
+                Log.i(TAG, "add waterFall data finish");
+                mAutoLoadMoreAdapter.finishLoading();
+                mRecyclerView.getAdapter().notifyDataSetChanged();
+            }
+        }, 1);
+        return waterFallList;
+    }
+
+    private List<WaterFallData> initWaterFallList() {
+        String filepath =  tool.getSaveRootPath();
+        String[] files = tool.getFileOrderByName(filepath, -1);
+
+        waterFallList.clear();
+        if (files.length <= 0) {
+            WaterFallData data = new WaterFallData();
+            data.img = null;
+            data.text = res.getString(R.string.main_text_waterFall_noData);
+            data.imgHeight = 0;
+            data.isDirectory = false;
+            waterFallList.add(data);
+        }
+
+        int j = 10;
+        if (files.length < j) {
+            j = files.length;
+        }
+
+        for(int i=0;i<j;i++) {
+            WaterFallData data = new WaterFallData();
+            //data.img = tool.getBitmapThumbnailFromFile(filepath+"/"+files[i], 400, 500);
+            data.img = filepath+"/"+files[i];
+            data.text = files[i];
+            data.imgHeight = (i % 2)*100 + 400;
+            if (new File(data.img).isDirectory()) {
+                data.text = "（合集）" + data.text;
+                data.isDirectory = true;
+               //Log.i(TAG, "directory files:"+tool.getFileOrderByName(data.img)[0]);
+                String[] imgs = tool.getFileOrderByName(data.img, -1);
+                if (imgs.length < 1) {
+                    data.img = null;
+                }
+                else {
+                    data.img = data.img+"/"+imgs[0];
+                }
+            }
+            waterFallList.add(data);
+        }
+        waterFallDataPager++;
+        return waterFallList;
+    }
+
+    private void initOnPictureLongPressListener() {
+        mOnPictureLongPressListener = new ImageWatcher.OnPictureLongPressListener() {
+            @Override
+            public void onPictureLongPress(ImageView v, final Uri url, final int pos) {
+                //Toast.makeText(MainActivity.this, "call long press:"+url, Toast.LENGTH_SHORT).show();
+                String[] items;
+                //Log.i(TAG, "in longPress path= "+new File(url.toString()).getParent()+" RootPath= "+tool.getSaveRootPath());
+                if (!new File(url.toString()).getParent().equals(tool.getSaveRootPath())) {
+                    items = new String[] {"分享", "删除"};
+                }
+                else {
+                    items = new String[] {"分享"};
+                }
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        switch (i) {
+                            case 0:
+                                sharePicture(url.toString());
+                                //Toast.makeText(MainActivity.this, "分享 "+url, Toast.LENGTH_SHORT).show();
+                                break;
+                            case 1:
+                                deletePicture(url.toString(), pos, true);
+                                //Toast.makeText(MainActivity.this, "删除 "+url, Toast.LENGTH_SHORT).show();
+                                break;
+                        }
+                    }
+                });
+                builder.create();
+                builder.show();
+            }
+        };
+    }
+
+    private void showPopupMenu(View view, final String img, final int pos) {
+        PopupMenu popupMenu = new PopupMenu(MainActivity.this, view);
+        popupMenu.getMenuInflater().inflate(R.menu.main_card_popup_menu, popupMenu.getMenu());
+        popupMenu.show();
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.main_popupMenu_delete:
+                        deletePicture(img, pos);
+                        //Toast.makeText(MainActivity.this, "删除 "+img, Toast.LENGTH_SHORT).show();
+                        break;
+                    case R.id.main_popupMenu_share:
+                        sharePicture(img);
+                        //Toast.makeText(MainActivity.this, "分享 "+img, Toast.LENGTH_SHORT).show();
+                        break;
+                }
+                return false;
+            }
+        });
+        popupMenu.setOnDismissListener(new PopupMenu.OnDismissListener() {
+            @Override
+            public void onDismiss(PopupMenu menu) {
+                // 控件消失时的事件
+            }
+        });
+        popupMenu.show();
+    }
+
+    private void deletePicture(String img, final int pos, final boolean fromDir) {
+        final File f = new File(img);
+
+        Snackbar.make(getWindow().getDecorView(),R.string.main_snackbar_deleteTip, Snackbar.LENGTH_LONG).setAction(R.string.main_snackbar_deleteSure, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (f.isDirectory()) {
+                    tool.deleteDirectory(f);
+                }
+                else {
+                    tool.deleteFile(f);
+                }
+                if (fromDir) {
+                    //FIXME 应当改为直接退出imagewatcher界面而不是靠模拟返回键来退出
+                    try {
+                        Runtime.getRuntime().exec("input keyevent "+KeyEvent.KEYCODE_BACK);
+                    } catch (Exception e) {
+                        Log.e(TAG, "模拟返回键出错");
+                    }
+                }
+                else{
+                    waterFallList.remove(pos);
+                    mRecyclerView.getAdapter().notifyDataSetChanged();
+                }
+            }
+        }).show();
+    }
+
+    private void deletePicture(String img, final int pos) {
+        deletePicture(img, pos, false);
+    }
+
+    private void sharePicture(String img) {
+        File f = new File(img);
+        if (f.isDirectory()) {
+            Snackbar.make(getWindow().getDecorView(),R.string.main_snackbar_shareDirectoryTip, Snackbar.LENGTH_LONG).show();
+        }
+        else {
+            Share.showSharePictureDialog(this, new File(img), shareListener, MainActivity.this);
+        }
+    }
+
+    /*@Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        switch (ev.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                if (main_floatBtn_menu.isExpanded()) {
+                    main_floatBtn_menu.setEnabled(false);
+                }
+                main_floatBtn_menu.collapse();
+                break;
+            case MotionEvent.ACTION_UP:
+                main_floatBtn_menu.setEnabled(true);
+                break;
+        }
+        return super.dispatchTouchEvent(ev);
+
+    }   */
+
+
+    private void showGuide() {
+        final FancyShowCaseView fancyShowCaseView1 = new FancyShowCaseView.Builder(this)
+                .focusOn(findViewById(R.id.main_floatBtn_quick))
+                .title(res.getString(R.string.main_guideView_startBtn))
+                .showOnce("main_start")
+                .build();
+        final FancyShowCaseView fancyShowCaseView2 = new FancyShowCaseView.Builder(this)
+                .title(res.getString(R.string.main_guideView_summary))
+                .showOnce("main_summary")
+                .build();
+        FancyShowCaseQueue mQueue = new FancyShowCaseQueue()
+                .add(fancyShowCaseView1)
+                .add(fancyShowCaseView2);
+
+        mQueue.show();
+    }
+
+}

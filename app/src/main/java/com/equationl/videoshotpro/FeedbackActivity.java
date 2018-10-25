@@ -68,7 +68,6 @@ public class FeedbackActivity extends AppCompatActivity {
 
         sp_init = getSharedPreferences("init", Context.MODE_PRIVATE);
 
-
         btn_submit.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 text_content = edit_content.getText().toString();

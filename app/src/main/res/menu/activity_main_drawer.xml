@@ -4,9 +4,13 @@
     <item android:title="@string/main_nav_title_more">
         <menu>
             <item
-                android:id="@+id/nav_frameByFrame"
-                android:icon="?android:attr/actionModeCopyDrawable"
-                android:title="@string/main_nav_text_frameByFrame" />
+                android:id="@+id/main_nav_ffmpeg"
+                android:icon="@android:drawable/ic_menu_sort_by_size"
+                android:title="@string/main_nav_text_ffmpeg" />
+            <item
+                android:id="@+id/main_nav_setting"
+                android:icon="@drawable/ic_menu_manage"
+                android:title="@string/main_nav_text_setting" />
         </menu>
     </item>
 
@@ -20,10 +24,10 @@
                 android:id="@+id/nav_feedback"
                 android:icon="@android:drawable/sym_action_email"
                 android:title="@string/main_nav_text_feedback" />
-            <item
+           <!-- <item
                 android:id="@+id/nav_support"
                 android:icon="@android:drawable/star_big_on"
-                android:title="@string/main_nav_text_support" />
+                android:title="@string/main_nav_text_support" />   -->
             <item
                 android:id="@+id/nav_about"
                 android:icon="@android:drawable/ic_dialog_info"

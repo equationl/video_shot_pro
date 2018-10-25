@@ -1,0 +1,44 @@
+ECLIPSE ANDROID PROJECT IMPORT SUMMARY
+======================================
+
+Ignored Files:
+--------------
+The following files were *not* copied into the new Gradle project; you
+should evaluate whether these are still needed in your project and if
+so manually move them:
+
+* R.txt
+* aapt\
+* aapt\AndroidManifest.xml
+* classes.jar
+* jni\
+* jni\armeabi-v7a\
+* jni\armeabi-v7a\libARM_ARCH.so
+* jni\armeabi\
+* jni\armeabi\libARM_ARCH.so
+* jni\x86\
+* jni\x86\libARM_ARCH.so
+
+Moved Files:
+------------
+Android Gradle projects use a different directory structure than ADT
+Eclipse projects. Here's how the projects were restructured:
+
+* AndroidManifest.xml => fFmpegAndroid\src\main\AndroidManifest.xml
+* assets\ => fFmpegAndroid\src\main\assets\
+* res\ => fFmpegAndroid\src\main\res\
+
+Next Steps:
+-----------
+You can now build the project. The Gradle project needs network
+connectivity to download dependencies.
+
+Bugs:
+-----
+If for some reason your project does not build, and you determine that
+it is due to a bug or limitation of the Eclipse to Gradle importer,
+please file a bug at http://b.android.com with category
+Component-Tools.
+
+(This import summary is for your information only, and can be deleted
+after import once you are satisfied with the results.)

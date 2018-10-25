@@ -36,6 +36,7 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.equationl.videoshotpro.Image.Tools;
+import com.equationl.videoshotpro.utils.Utils;
 import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
@@ -82,6 +83,8 @@ public class PlayerForDataActivity extends AppCompatActivity {
     String do4Rasult;
     int markTime[] = {0,0};
     ProgressDialog dialog;
+
+    Utils utils = new Utils();
 
     public static PlayerForDataActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
 
@@ -158,6 +161,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
             Toast.makeText(this, R.string.player_toast_loadUriFail_other, Toast.LENGTH_LONG).show();
             finish();
         }
+
         String meta_duration = rev.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION);
         long duration = 0;
         try {
@@ -184,7 +188,8 @@ public class PlayerForDataActivity extends AppCompatActivity {
 
         if (do4Rasult.equals("FrameByFrame")) {
             Log.i(TAG, "逐帧截取模式，隐藏按钮");
-            btn_right.setVisibility(View.INVISIBLE);
+            //btn_right.setVisibility(View.INVISIBLE);
+            btn_right.setText(R.string.player_text_back);
             btn_bottom.setText(R.string.player_text_mark);
         }
 
@@ -196,7 +201,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
 
         btn_right   .setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (pic_num < 1) {
+                /*if (pic_num < 1) {
                     Toast.makeText(getApplicationContext(),R.string.player_toast_needMoreShot, Toast.LENGTH_LONG).show();
                 }
                 else {
@@ -208,6 +213,13 @@ public class PlayerForDataActivity extends AppCompatActivity {
                     isDone = true;
                     btn_bottom.setClickable(false);
                     btn_right.setClickable(false);
+                }   */
+                if (do4Rasult.equals("FrameByFrame")) {
+                    Log.i(TAG, "逐帧截取模式，点击按钮");
+                    utils.finishActivity(MainActivity.instance);
+                    Intent intent = new Intent(PlayerForDataActivity.this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
                 }
             }
         });
@@ -737,8 +749,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
         String video_path = tool.getImageAbsolutePath(PlayerForDataActivity.this,uri);
         SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
         String date    =    sDateFormat.format(new    java.util.Date());
-        final String save_path = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES)+"/"+date+"/";
+        final String save_path = tool.getSaveRootPath()+"/"+date+"/";
         File dirFirstFolder = new File(save_path);
         if(!dirFirstFolder.exists())
         {
@@ -961,6 +972,12 @@ public class PlayerForDataActivity extends AppCompatActivity {
                 player_controlBar_layout.setVisibility(View.INVISIBLE);
                 isORIENTATION_LANDSCAPE = false;
                 return true;
+            }
+            if (do4Rasult.equals("FrameByFrame")) {
+                utils.finishActivity(MainActivity.instance);
+                Intent intent = new Intent(PlayerForDataActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
             }
             return super.onKeyDown(keyCode, event);
         }else {

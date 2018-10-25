@@ -44,6 +44,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.equationl.videoshotpro.Image.Tools;
+import com.tencent.bugly.crashreport.CrashReport;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -284,6 +285,7 @@ public class FloatWindowsService extends Service {
     public void setUpMediaProjection() {
         if (mResultData == null) {
             Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.addCategory(Intent.CATEGORY_LAUNCHER);
             startActivity(intent);
         } else {
@@ -297,9 +299,15 @@ public class FloatWindowsService extends Service {
     }
 
     private void virtualDisplay() {
-        mVirtualDisplay = mMediaProjection.createVirtualDisplay("screen-mirror",
-                mScreenWidth, mScreenHeight, mScreenDensity, DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
-                mImageReader.getSurface(), null, null);
+        try {
+            mVirtualDisplay = mMediaProjection.createVirtualDisplay("screen-mirror",
+                    mScreenWidth, mScreenHeight, mScreenDensity, DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+                    mImageReader.getSurface(), null, null);
+        } catch (NullPointerException e) {  //见 https://bbs.csdn.net/topics/391879153
+            CrashReport.postCatchedException(e);
+            setUpMediaProjection();   //FIXME 未测试
+            virtualDisplay();
+        }
     }
 
     private void startCapture() {

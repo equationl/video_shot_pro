@@ -34,6 +34,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.equationl.videoshotpro.Image.Tools;
+import com.equationl.videoshotpro.utils.Share;
+import com.equationl.videoshotpro.utils.Utils;
 import com.qq.e.ads.interstitial.AbstractInterstitialADListener;
 import com.qq.e.ads.interstitial.InterstitialAD;
 import com.qq.e.comm.util.AdError;
@@ -78,6 +80,7 @@ public class BuildPictureActivity extends AppCompatActivity {
     InterstitialAD iad;
     Bitmap final_bitmap;
     IWXAPI wxApi;
+    Utils utils = new Utils();
 
     private final MyHandler handler = new MyHandler(this);
 
@@ -169,12 +172,10 @@ public class BuildPictureActivity extends AppCompatActivity {
                     updateMemoryText();
                 }
                 else {
-                    try {
-                        PlayerActivity.instance.finish();
-                        MarkPictureActivity.instance.finish();
-                        MainActivity.instance.finish();
-                        ChooseActivity.instance.finish();
-                    } catch (NullPointerException e) {Log.e("el", e.toString());}
+                    utils.finishActivity(PlayerActivity.instance);
+                    utils.finishActivity(MainActivity.instance);
+                    utils.finishActivity(ChooseActivity.instance);
+                    utils.finishActivity(MarkPictureActivity2.instance);
                     Intent intent = new Intent(BuildPictureActivity.this, MainActivity.class);
                     startActivity(intent);
                     finish();
@@ -210,7 +211,8 @@ public class BuildPictureActivity extends AppCompatActivity {
                     shareIntent.putExtra(Intent.EXTRA_STREAM, imageUri);
                     shareIntent.setType("image/*");
                     startActivity(Intent.createChooser(shareIntent, "分享到"));  */
-                    showShareDialog(v);
+                    //showShareDialog(v);
+                    Share.showSharePictureDialog(BuildPictureActivity.this, savePath, shareListener, BuildPictureActivity.this);
                 }
                 else {
                     t = new Thread(new MyThread());
@@ -227,11 +229,10 @@ public class BuildPictureActivity extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK)) {
             if (isDone == 1) {
-                try {
-                    PlayerActivity.instance.finish();
-                    MarkPictureActivity.instance.finish();
-                    MainActivity.instance.finish();
-                } catch (NullPointerException e){}
+                utils.finishActivity(PlayerActivity.instance);
+                utils.finishActivity(MainActivity.instance);
+                utils.finishActivity(ChooseActivity.instance);
+                utils.finishActivity(MarkPictureActivity2.instance);
                 Intent intent = new Intent(BuildPictureActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
@@ -441,12 +442,10 @@ public class BuildPictureActivity extends AppCompatActivity {
         try {
             if (isReduce) {
                 int quality = Integer.parseInt(settings.getString("reduce_value","100"));
-                savePath = tool.saveBitmap2png(bmp,bitName, Environment.getExternalStoragePublicDirectory(
-                        Environment.DIRECTORY_PICTURES), true, quality);
+                savePath = tool.saveBitmap2png(bmp,bitName, new File(tool.getSaveRootPath()), true, quality);
             }
             else {
-                savePath = tool.saveBitmap2png(bmp,bitName, Environment.getExternalStoragePublicDirectory(
-                        Environment.DIRECTORY_PICTURES));
+                savePath = tool.saveBitmap2png(bmp,bitName, new File(tool.getSaveRootPath()));
             }
             flag = true;
         } catch (Exception e) {
@@ -543,8 +542,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                         if (!activity.sp_init.getBoolean("isCloseAd", false)) {
                             activity.showAD();
                         }
-                        String temp_path = Environment.getExternalStoragePublicDirectory(
-                                Environment.DIRECTORY_PICTURES)+"/"+msg.obj.toString();
+                        String temp_path = activity.tool.getSaveRootPath()+"/"+msg.obj.toString();
                         temp_path += activity.settings.getBoolean("isReduce_switch", false) ? ".jpg":".png";
                         MediaScannerConnection.scanFile(activity, new String[]{temp_path}, null, null);
                         Toast.makeText(activity,"处理完成！图片已保存至 "+ temp_path +" 请进入图库查看", Toast.LENGTH_LONG).show();
@@ -604,11 +602,9 @@ public class BuildPictureActivity extends AppCompatActivity {
                                 .setNegativeButton(R.string.buildPicture_btn_oom_exit, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        try {
-                                            PlayerActivity.instance.finish();
-                                            MarkPictureActivity.instance.finish();
-                                            MainActivity.instance.finish();
-                                        } catch (NullPointerException e) {Log.e("el", e.toString());}
+                                        activity.utils.finishActivity(PlayerActivity.instance);
+                                        activity.utils.finishActivity(MainActivity.instance);
+                                        activity.utils.finishActivity(MarkPictureActivity2.instance);
                                         Intent intent = new Intent(activity, MainActivity.class);
                                         activity.startActivity(intent);
                                         activity.finish();
@@ -676,7 +672,7 @@ public class BuildPictureActivity extends AppCompatActivity {
         return mode;
     }
 
-    private void showShareDialog(View view){
+    /*private void showShareDialog(View view){
         final String[] items = res.getStringArray(R.array.buildPicture_dialog_share_items);
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
         alertBuilder.setTitle(R.string.buildPicture_dialog_share_title);
@@ -722,7 +718,7 @@ public class BuildPictureActivity extends AppCompatActivity {
             }
         });
         alertBuilder.create().show();
-    }
+    }  */
 
 
     IUiListener shareListener = new BaseUiListener() {
@@ -780,7 +776,7 @@ public class BuildPictureActivity extends AppCompatActivity {
             }
             @Override
             public void onADClosed() {
-                showCloseAdDialog();
+                //showCloseAdDialog();
             }
         });
         iad.loadAD();
@@ -800,7 +796,7 @@ public class BuildPictureActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void shareToWX(int shareTo) {
+    /*private void shareToWX(int shareTo) {
         wxApi = WXAPIFactory.createWXAPI(this, "wx45ceac6c6d2f1aff", true);
         wxApi.registerApp("wx45ceac6c6d2f1aff");
 
@@ -833,5 +829,5 @@ public class BuildPictureActivity extends AppCompatActivity {
         if (!wxApi.sendReq(req)) {
             Toast.makeText(this, R.string.buildPicture_toast_sharePicture_fail, Toast.LENGTH_LONG).show();
         }
-    }
+    }  */
 }
