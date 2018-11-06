@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/markPictureCardView"
+    android:layout_width="270dp"
+    android:layout_height="480dp"
+    android:layout_gravity="center_horizontal"
+    android:layout_marginTop="50dp"
+    android:layout_marginBottom="100dp"
+    android:layout_marginLeft="20dp"
+    android:layout_marginRight="20dp"
+    android:foreground="?android:attr/selectableItemBackground"
+    card_view:cardCornerRadius="8dp"
+    card_view:cardElevation="3dp">
+
+    <ImageView
+        android:id="@+id/markPictureImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/load_image_fail"/>
+</android.support.v7.widget.CardView>

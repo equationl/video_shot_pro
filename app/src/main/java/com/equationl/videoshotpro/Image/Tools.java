@@ -15,6 +15,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -150,6 +151,33 @@ public class Tools{
             CrashReport.postCatchedException(ex);
         }
         return null;
+    }
+
+
+    /**
+     * 获取图片的尺寸
+     * */
+    public float[] getBitmapSize(String no, File dirPath, String extension) {
+        File path = new File(dirPath, no+"."+extension);
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(path);
+        } catch (Exception e) {
+            CrashReport.postCatchedException(e);
+        }
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        try {
+            BitmapFactory.decodeFileDescriptor(fis.getFD(), null, options);
+        } catch (Exception e) {
+            CrashReport.postCatchedException(e);
+        }
+        float srcWidth = options.outWidth;
+        float srcHeight = options.outHeight;
+
+        float size[] = {srcWidth, srcHeight};
+
+        return size;
     }
 
     /**
@@ -876,6 +904,45 @@ public class Tools{
             e.printStackTrace();
         }
         return verName;
+    }
+
+    /**
+    * 获取截取GIF时的分辨率
+     *
+     * @param videoPath 视频地址
+     * @param ratio 缩放比例
+    * */
+    public String getVideo2GifRP(String videoPath, String ratio) {
+        MediaMetadataRetriever retr = new MediaMetadataRetriever();
+        retr.setDataSource(videoPath);
+        String height = retr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT);
+        String width = retr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH);
+
+        float height_f = Float.parseFloat(height);
+        float width_f  = Float.parseFloat(width);
+
+        String RP = "-1";
+
+        switch (ratio) {
+            case "-1":
+                break;
+            case "2":
+                height_f = height_f/2;
+                width_f = width_f/2;
+                RP = (int)width_f+"x"+(int)height_f;
+                break;
+            case "4":
+                height_f = height_f/4;
+                width_f = width_f/4;
+                RP = (int)width_f+"x"+(int)height_f;
+                break;
+            case "8":
+                height_f = height_f/8;
+                width_f = width_f/8;
+                RP = (int)width_f+"x"+(int)height_f;
+                break;
+        }
+        return RP;
     }
 
 }

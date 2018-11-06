@@ -466,10 +466,11 @@ public class PlayerActivity extends AppCompatActivity {
     private class ThreadShotGif implements Runnable {
         @Override
         public void run() {
-            String gif_RP = settings.getString("gifRP_value", "320x240");
+            String video_path = tool.getImageAbsolutePath(PlayerActivity.this,uri);
+            String gif_RP = settings.getString("gifRP_value", "-1");
+            gif_RP = tool.getVideo2GifRP(video_path, gif_RP);
             String gif_frameRate = settings.getString("gifFrameRate_value", "14");
             Log.i(TAG, "RP="+gif_RP+" fraerate="+gif_frameRate);
-            String video_path = tool.getImageAbsolutePath(PlayerActivity.this,uri);
             SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
             String date    =    sDateFormat.format(new    java.util.Date());
             date += "-by_EL.gif";

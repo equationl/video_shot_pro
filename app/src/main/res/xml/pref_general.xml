@@ -116,7 +116,7 @@
             android:dependency="isShotGif"/>
 
         <ListPreference
-            android:defaultValue="320x240"
+            android:defaultValue="-1"
             android:entries="@array/pref_gif_RP_titles"
             android:entryValues="@array/pref_gif_RP_values"
             android:key="gifRP_value"
