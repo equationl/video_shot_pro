@@ -123,6 +123,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Boolean isFirstBoot = false;
     boolean isTranslucentStatus = false;
     IWXAPI wxApi;
+    Snackbar snackbar;
     Utils utils = new Utils();
     FloatingActionsMenu main_floatBtn_menu;
     FloatingActionButton main_floatBtn_quick;
@@ -153,6 +154,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final int ActivityResultFrameByFrame = 100;
 
     private static final int RequestCodeQuickStart = 1000;
+
+    private static final int SnackBarOnClickDoSure = 200;
+    private static final int SnackBarOnClickDoReloadFFmpeg = 201;
+    private static final int SnackBarOnClickDoDeletePicture = 202;
+    private static final int SnackBarOnClickDoFeedback = 203;
 
     private static final String TAG = "el,In MainActivity";
 
@@ -983,28 +989,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (activity != null) {
                 switch (msg.what) {
                     case HandlerStatusLoadLibsFailure:
-                        Snackbar snackbar = Snackbar.make(activity.getWindow().getDecorView(), R.string.main_snackbar_loadSo_fail, Snackbar.LENGTH_LONG);
-                        snackbar.setAction(R.string.main_snackbar_btn_retry, new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                activity.loadLib();
-                            }
-                        });
-                        snackbar.show();
+                        activity.showSnackBar( R.string.main_snackbar_loadSo_fail,  SnackBarOnClickDoReloadFFmpeg, R.string.main_snackbar_btn_retry);
                         break;
                     case HandlerStatusFFmpegNotSupported:
-                        Snackbar snackbar2 = Snackbar.make(activity.getWindow().getDecorView(), R.string.main_snackbar_so_notAble, Snackbar.LENGTH_LONG);
-                        snackbar2.setAction(R.string.main_snackbar_btn_contact, new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                activity.startActivity(new Intent(activity, FeedbackActivity.class));
-                            }
-                        });
-                        snackbar2.show();
+                        activity.showSnackBar(R.string.main_snackbar_so_notAble, SnackBarOnClickDoFeedback, R.string.main_snackbar_btn_contact);
                         break;
                     case HandlerStatusPackageNameNotRight:
-                        Snackbar snackbar3 = Snackbar.make(activity.getWindow().getDecorView(), R.string.main_snackbar_isPiracy, Snackbar.LENGTH_LONG);
-                        snackbar3.show();
+                        activity.showSnackBar(R.string.main_snackbar_isPiracy, SnackBarOnClickDoSure, R.string.main_snackbar_sure);
                         break;
                     case HandlerStatusCopyFileDone:
                         if (activity.settings.getBoolean("isSortPicture", true)) {
@@ -1502,29 +1493,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void deletePicture(String img, final int pos, final boolean fromDir) {
         final File f = new File(img);
 
-        Snackbar.make(getWindow().getDecorView(),R.string.main_snackbar_deleteTip, Snackbar.LENGTH_LONG).setAction(R.string.main_snackbar_deleteSure, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (f.isDirectory()) {
-                    tool.deleteDirectory(f);
-                }
-                else {
-                    tool.deleteFile(f);
-                }
-                if (fromDir) {
-                    //FIXME 应当改为直接退出imagewatcher界面而不是靠模拟返回键来退出
-                    try {
-                        Runtime.getRuntime().exec("input keyevent "+KeyEvent.KEYCODE_BACK);
-                    } catch (Exception e) {
-                        Log.e(TAG, "模拟返回键出错");
-                    }
-                }
-                else{
-                    waterFallList.remove(pos);
-                    mRecyclerView.getAdapter().notifyDataSetChanged();
-                }
-            }
-        }).show();
+        showSnackBar(R.string.main_snackbar_deleteTip, SnackBarOnClickDoDeletePicture, R.string.main_snackbar_deleteSure, f, pos, fromDir);
     }
 
     private void deletePicture(String img, final int pos) {
@@ -1534,7 +1503,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void sharePicture(String img) {
         File f = new File(img);
         if (f.isDirectory()) {
-            Snackbar.make(getWindow().getDecorView(),R.string.main_snackbar_shareDirectoryTip, Snackbar.LENGTH_LONG).show();
+            showSnackBar(R.string.main_snackbar_shareDirectoryTip, SnackBarOnClickDoSure, R.string.main_snackbar_sure);
         }
         else {
             Share.showSharePictureDialog(this, new File(img), shareListener, MainActivity.this);
@@ -1576,4 +1545,96 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mQueue.show();
     }
 
+    /*
+    * From: https://www.jianshu.com/p/4e7b26c8afca
+    * */
+    public void showSnackBar(int message, final int onClick, int  tipText) {
+        //去掉虚拟按键
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION //隐藏虚拟按键栏
+                | View.SYSTEM_UI_FLAG_IMMERSIVE //防止点击屏幕时,隐藏虚拟按键栏又弹了出来
+        );
+        snackbar = Snackbar.make(getWindow().getDecorView(), message, Snackbar.LENGTH_INDEFINITE);
+        snackbar.setAction(tipText, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dismissSnackBar();
+                switch (onClick) {
+                    case SnackBarOnClickDoSure:
+                        break;
+                    case SnackBarOnClickDoReloadFFmpeg:
+                        loadLib();
+                        break;
+                    case SnackBarOnClickDoFeedback:
+                        startActivity(new Intent(MainActivity.this, FeedbackActivity.class));
+                        break;
+                }
+            }
+        });
+        snackbar.setCallback(new Snackbar.Callback() {
+            @Override
+            public void onDismissed(Snackbar snackbar, int event) {
+                super.onDismissed(snackbar, event);
+                dismissSnackBar();
+            }
+        });
+        snackbar.show();
+    }
+
+    /**
+     * 隐藏一个SnackBar
+     */
+    public void dismissSnackBar() {
+        if (snackbar != null && snackbar.isShownOrQueued()) {//不为空，是否正在显示或者排队等待即将要显示
+            snackbar.dismiss();
+            snackbar = null;
+        }
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+    }
+
+    public void showSnackBar(int message, final int onClick, int  tipText, final File f, final int pos, final boolean fromDir) {
+        //去掉虚拟按键
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION //隐藏虚拟按键栏
+                | View.SYSTEM_UI_FLAG_IMMERSIVE //防止点击屏幕时,隐藏虚拟按键栏又弹了出来
+        );
+        snackbar = Snackbar.make(getWindow().getDecorView(), message, Snackbar.LENGTH_LONG);
+        snackbar.setActionTextColor(Color.RED);
+        snackbar.setAction(tipText, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dismissSnackBar();
+                switch (onClick) {
+                    case SnackBarOnClickDoDeletePicture:
+                        if (f.isDirectory()) {
+                            tool.deleteDirectory(f);
+                        }
+                        else {
+                            tool.deleteFile(f);
+                        }
+                        if (fromDir) {
+                            //FIXME 应当改为直接退出imagewatcher界面而不是靠模拟返回键来退出
+                            try {
+                                Runtime.getRuntime().exec("input keyevent "+KeyEvent.KEYCODE_BACK);
+                            } catch (Exception e) {
+                                Log.e(TAG, "模拟返回键出错");
+                            }
+                        }
+                        else{
+                            waterFallList.remove(pos);
+                            mRecyclerView.getAdapter().notifyDataSetChanged();
+                        }
+                        break;
+                }
+            }
+        });
+        snackbar.setCallback(new Snackbar.Callback() {
+            @Override
+            public void onDismissed(Snackbar snackbar, int event) {
+                super.onDismissed(snackbar, event);
+                dismissSnackBar();
+            }
+        });
+        snackbar.show();
+    }
 }

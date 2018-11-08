@@ -262,6 +262,7 @@
     <string name="main_snackbar_deleteTip">确定要删除吗？</string>
     <string name="main_snackbar_deleteSure">是的</string>
     <string name="main_snackbar_shareDirectoryTip">不能分享文件夹哦</string>
+    <string name="main_snackbar_sure">确定</string>
 
     <string name="main_toast_chooseFile_fail">未选择文件！</string>
     <string name="main_toast_getPermission_success">权限获取成功！</string>
