@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -66,20 +67,23 @@ public class CommandActivity extends AppCompatActivity {
                             public void onFailure(String message) {
                                 message = blank2n(message);
                                 textview.setText(message+"\n执行失败");
-                                sv.fullScroll(ScrollView.FOCUS_DOWN);
+                                //sv.fullScroll(ScrollView.FOCUS_DOWN);
+                                scrollToBottom(sv, textview);
                             }
                             @Override
                             public void onSuccess(String message) {
                                 message = blank2n(message);
                                 Log.i("el_test", message);
                                 textview.setText(message+"\n执行成功");
-                                sv.fullScroll(ScrollView.FOCUS_DOWN);
+                                //sv.fullScroll(ScrollView.FOCUS_DOWN);
+                                scrollToBottom(sv, textview);
                             }
                             @Override
                             public void onProgress(String message) {
                                 message = blank2n(message);
                                 textview.setText(textview.getText().toString()+message);
-                                sv.fullScroll(ScrollView.FOCUS_DOWN);
+                                //sv.fullScroll(ScrollView.FOCUS_DOWN);
+                                scrollToBottom(sv, textview);
                             }
                             @Override
                             public void onFinish() {
@@ -174,6 +178,26 @@ public class CommandActivity extends AppCompatActivity {
         }else {
             return str;
         }
+    }
+
+    /**
+    *  作者：gundumw100
+     *  原文：https://blog.csdn.net/gundumw100/article/details/69983948
+    * */
+    public static void scrollToBottom(final View scroll, final View inner) {
+        Handler mHandler = new Handler();
+        mHandler.post(new Runnable() {
+            public void run() {
+                if (scroll == null || inner == null) {
+                    return;
+                }
+                int offset = inner.getMeasuredHeight() - scroll.getHeight();
+                if (offset < 0) {
+                    offset = 0;
+                }
+                scroll.scrollTo(0, offset);
+            }
+        });
     }
 
 }

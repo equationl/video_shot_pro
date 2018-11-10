@@ -1,6 +1,5 @@
 package com.equationl.videoshotpro;
 
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -8,42 +7,26 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.RequestOptions;
-import com.bumptech.glide.request.target.SimpleTarget;
-import com.bumptech.glide.request.transition.Transition;
-import com.dingmouren.colorpicker.ColorPickerDialog;
 import com.equationl.videoshotpro.Image.Tools;
 import com.equationl.videoshotpro.utils.GlideSimpleLoader;
-import com.equationl.videoshotpro.utils.Utils;
 import com.github.ielse.imagewatcher.ImageWatcher;
 import com.github.ielse.imagewatcher.ImageWatcherHelper;
 import com.huxq17.handygridview.HandyGridView;
@@ -56,7 +39,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 import me.toptas.fancyshowcase.FancyShowCaseQueue;
 import me.toptas.fancyshowcase.FancyShowCaseView;
@@ -70,9 +52,7 @@ public class ChooseActivity extends AppCompatActivity {
     ProgressDialog dialog;
     Resources res;
     Tools tool = new Tools();
-    LayoutInflater mLayoutInflater;
     View view;
-    AlertDialog.Builder builder;
     ChoosePictureAdapter pictureAdapter;
     SharedPreferences sp_init;
     Boolean isFromExtra;
@@ -175,7 +155,7 @@ public class ChooseActivity extends AppCompatActivity {
             for (int i = 0; i < files.length; i++) {
                 Bitmap bitmap = tool.getBitmapThumbnailFromFile(path+"/"+files[i], 128, 160);
                 if (bitmap == null) {
-                    bitmap = tool.drawableToBitmap(R.drawable.load_image_fail, ChooseActivity.this);
+                    bitmap = tool.drawableToBitmap(R.mipmap.error_picture, ChooseActivity.this);
                 }
                 images.add(bitmap);
                 handler.sendEmptyMessage(HandlerStatusLoadImageNext);
@@ -269,7 +249,7 @@ public class ChooseActivity extends AppCompatActivity {
             case R.id.choosePicture_menu_done:
                 imagePaths = pictureAdapter.getImagePaths();
                 tool.sortCachePicture(imagePaths, this);
-                Intent intent = new Intent(ChooseActivity.this, MarkPictureActivity2.class);   //FIXME
+                Intent intent = new Intent(ChooseActivity.this, MarkPictureActivity2.class);
                 if (isFromExtra) {
                     intent.putExtra("isFromExtra", true);
                 }

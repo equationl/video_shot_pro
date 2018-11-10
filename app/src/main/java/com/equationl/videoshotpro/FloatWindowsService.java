@@ -126,7 +126,7 @@ public class FloatWindowsService extends Service {
             appIntent = new Intent(this,ChooseActivity.class);
         }
         else {
-            appIntent = new Intent(this,MarkPictureActivity.class);
+            appIntent = new Intent(this,MarkPictureActivity2.class);
         }
         appIntent.setAction(Intent.ACTION_MAIN);
         appIntent.addCategory(Intent.CATEGORY_LAUNCHER);
@@ -464,6 +464,8 @@ public class FloatWindowsService extends Service {
                 }
             }
         }.start();    //FIXME 临时解决方案，不靠谱
+        //以上代码用来避免使用外部程序截图时确定后部分Acticity未正常关闭的问题
+        //2018.11.10注
 
         return super.onStartCommand(intent, flags, startId);
     }

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.Uri;
+import android.os.Environment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import android.widget.Toast;
 import android.widget.Toolbar;
 
 import com.equationl.videoshotpro.Image.Tools;
+import com.equationl.videoshotpro.utils.Utils;
 import com.huxq17.swipecardsview.SwipeCardsView;
 import com.tencent.bugly.beta.Beta;
 
@@ -25,13 +27,12 @@ import me.toptas.fancyshowcase.FancyShowCaseQueue;
 import me.toptas.fancyshowcase.FancyShowCaseView;
 
 public class AboutActivity extends AppCompatActivity {
-    TextView text_update, text_history, text_support, text_thanks, text_adStatus, text_adBtn, text_donation;
-    TextView text_adSplashStatus, text_adSplashBtn;
+    TextView text_update, text_history, text_support, text_thanks;
     ImageView img_logo;
     Tools tool;
     Resources res;
-    Boolean isShowSupport = false;
     SharedPreferences sp_init;
+    Utils utils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,22 +44,15 @@ public class AboutActivity extends AppCompatActivity {
         text_support  = findViewById(R.id.about_text_support);
         text_thanks   = findViewById(R.id.about_text_thanks);
         img_logo      = findViewById(R.id.about_img_logo);
-        text_donation = findViewById(R.id.about_text_donation);
-        text_adBtn    = findViewById(R.id.about_text_adBtn);
-        text_adStatus = findViewById(R.id.about_text_adStatus);
-        text_adSplashBtn = findViewById(R.id.about_text_splashAdBtn);
-        text_adSplashStatus = findViewById(R.id.about_text_splashAdStatus);
 
         text_update.setOnClickListener(clickListener);
         text_history.setOnClickListener(clickListener);
         text_support.setOnClickListener(clickListener);
         text_thanks.setOnClickListener(clickListener);
         img_logo.setOnClickListener(clickListener);
-        text_donation.setOnClickListener(clickListener);
-        text_adBtn.setOnClickListener(clickListener);
-        text_adSplashBtn.setOnClickListener(clickListener);
 
         tool = new Tools();
+        utils = new Utils();
         res = getResources();
         sp_init = getSharedPreferences("init", Context.MODE_PRIVATE);
 
@@ -86,15 +80,6 @@ public class AboutActivity extends AppCompatActivity {
                     break;
                 case R.id.about_img_logo:
                     goToMarkPlay();
-                    break;
-                case R.id.about_text_adBtn:
-                    clickAdBtn();
-                    break;
-                case R.id.about_text_splashAdBtn:
-                    clickSplashBtn();
-                    break;
-                case R.id.about_text_donation:
-                    showTextDialog(R.string.about_text_donation, R.string.about_dialog_text_donation);
                     break;
             }
         }
@@ -152,79 +137,11 @@ public class AboutActivity extends AppCompatActivity {
     }
 
     private void goToMarkPlay() {
-        try{
-            Uri uri = Uri.parse("market://details?id="+getPackageName());
-            Intent intent = new Intent(Intent.ACTION_VIEW,uri);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-        }catch(Exception e){
-            Toast.makeText(AboutActivity.this, R.string.about_toast_goToMarkPlay_fail, Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-        }
+        utils.goToMarkPlay(this);
     }
 
     private void clickSupport() {
-        if (!isShowSupport) {
-            text_adStatus.setVisibility(View.VISIBLE);
-            text_adBtn.setVisibility(View.VISIBLE);
-            text_donation.setVisibility(View.VISIBLE);
-            text_adSplashBtn.setVisibility(View.VISIBLE);
-            text_adSplashStatus.setVisibility(View.VISIBLE);
-
-            String adStatus = sp_init.getBoolean("isCloseAd", false) ? "关闭" : "打开";
-            String adBtnStatus = sp_init.getBoolean("isCloseAd", false) ? "打开" : "关闭";
-            text_adStatus.setText(String.format(res.getString(R.string.about_text_adStatus), adStatus));
-            text_adBtn.setText(adBtnStatus);
-
-            String adSplashStatus = sp_init.getBoolean("isCloseSplashAd", false) ? "关闭" : "打开";
-            String adSplashBtnStatus = sp_init.getBoolean("isCloseSplashAd", false) ? "打开" : "关闭";
-            text_adSplashStatus.setText(String.format(res.getString(R.string.about_text_splashAdStatus), adSplashStatus));
-            text_adSplashBtn.setText(adSplashBtnStatus);
-            isShowSupport = true;
-        }
-        else {
-            text_adStatus.setVisibility(View.GONE);
-            text_adBtn.setVisibility(View.GONE);
-            text_donation.setVisibility(View.GONE);
-            text_adSplashBtn.setVisibility(View.GONE);
-            text_adSplashStatus.setVisibility(View.GONE);
-            isShowSupport = false;
-        }
-    }
-
-    private void clickAdBtn() {
-        SharedPreferences.Editor editor = sp_init.edit();
-        Boolean isCloseAd = sp_init.getBoolean("isCloseAd", false);
-        if (isCloseAd) {
-            text_adBtn.setText("关闭");
-            text_adStatus.setText(String.format(res.getString(R.string.about_text_adStatus), "开启"));
-            editor.putBoolean("isCloseAd", false);
-        }
-        else {
-            text_adBtn.setText("开启");
-            text_adStatus.setText(String.format(res.getString(R.string.about_text_adStatus), "关闭"));
-            editor.putBoolean("isCloseAd", true);
-        }
-
-        editor.apply();
-    }
-
-    private void clickSplashBtn() {
-        SharedPreferences.Editor editor = sp_init.edit();
-
-        Boolean isCloseSplashAd = sp_init.getBoolean("isCloseSplashAd", false);
-        if (isCloseSplashAd) {
-            text_adSplashBtn.setText("关闭");
-            text_adSplashStatus.setText(String.format(res.getString(R.string.about_text_splashAdStatus), "开启"));
-            editor.putBoolean("isCloseSplashAd", false);
-        }
-        else {
-            text_adSplashBtn.setText("开启");
-            text_adSplashStatus.setText(String.format(res.getString(R.string.about_text_splashAdStatus), "关闭"));
-            editor.putBoolean("isCloseSplashAd", true);
-        }
-
-        editor.apply();
+        showTextDialog(R.string.about_dialog_title_support, R.string.about_dialog_text_support);
     }
 
 }

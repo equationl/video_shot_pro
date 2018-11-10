@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/markPictureCardView"
     android:layout_width="320dp"
     android:layout_height="320dp"
     android:layout_gravity="center_vertical"
@@ -18,5 +17,5 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:src="@drawable/load_image_fail"/>
+        android:src="@mipmap/error_picture"/>
 </android.support.v7.widget.CardView>

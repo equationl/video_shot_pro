@@ -8,12 +8,6 @@
     <color name="white">#ffffff</color>
 
     <color name="grey">#DDDDDD</color>
-    <color name="light_grey">#EEEEEE</color>
-    <color name="white_transparent">#99FFFFFF</color>
-    <color name="black">#000</color>
-
-    <color name="transparent">#00000000</color>
-    <color name="shadow">#cc222222</color>
 
 
 </resources>

@@ -10,11 +10,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Build;
@@ -25,7 +23,6 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -33,12 +30,10 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.text.Html;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -47,16 +42,11 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.SimpleTarget;
-import com.bumptech.glide.request.transition.Transition;
 import com.equationl.videoshotpro.Image.Tools;
 import com.equationl.videoshotpro.rom.HuaweiUtils;
 import com.equationl.videoshotpro.rom.MeizuUtils;
@@ -75,13 +65,8 @@ import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
 import com.github.ielse.imagewatcher.ImageWatcher;
 import com.github.ielse.imagewatcher.ImageWatcherHelper;
-import com.qq.e.ads.banner.ADSize;
-import com.qq.e.ads.banner.AbstractBannerADListener;
-import com.qq.e.ads.banner.BannerView;
-import com.qq.e.comm.util.AdError;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.crashreport.CrashReport;
-import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.tauth.IUiListener;
 import com.tencent.tauth.Tencent;
 import com.tencent.tauth.UiError;
@@ -117,12 +102,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     String extension;
     ProgressDialog dialog_copyFile;
     DrawerLayout drawer;
-    ViewGroup bannerContainer;
-    BannerView bv;
     int activityResultMode = 0;
     Boolean isFirstBoot = false;
     boolean isTranslucentStatus = false;
-    IWXAPI wxApi;
     Snackbar snackbar;
     Utils utils = new Utils();
     FloatingActionsMenu main_floatBtn_menu;
@@ -150,6 +132,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final int HandlerStatusFFmpegNotSupported = 1;
     private static final int HandlerStatusPackageNameNotRight = 2;
     private static final int HandlerStatusCopyFileDone = 3;
+    private static final int HandlerStatusCopyFileFail = 4;
     private static final int IntentResultCodeMediaProjection = 10;
     private static final int ActivityResultFrameByFrame = 100;
 
@@ -171,14 +154,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(Color.TRANSPARENT);
             window.setNavigationBarColor(Color.TRANSPARENT);
+            window.setBackgroundDrawable(null);
             isTranslucentStatus = true;
         }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         instance = this;
-
-        utils.finishActivity(LauncherActivity.instance);
 
         dialog_copyFile = new ProgressDialog(this);
         dialog_copyFile.setProgressStyle(ProgressDialog.STYLE_SPINNER);// 设置样式
@@ -211,27 +193,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 isFirstBoot = true;
                 showDialogTipUserRequestPermission();
             }
-            else if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                isFirstBoot = true;
-                showDialogTipUserRequestPermission();
-            }
-            else if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                isFirstBoot = true;
-                showDialogTipUserRequestPermission();
-            }
         }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        //button_user = findViewById(R.id.btn_main_quickStart);
-        //button_splicing = (Button)findViewById(R.id.btn_main_splicing);
-        //button_ffmpeg = (Button)findViewById(R.id.btn_main_ffmpeg);
-        //button_floatBtn = (Button)findViewById(R.id.btn_main_floatBtn);
-        //button_help = (Button)findViewById(R.id.btn_main_help);
-        //button_setting = (Button)findViewById(R.id.btn_main_setting);
 
         main_floatBtn_menu = (FloatingActionsMenu) findViewById(R.id.main_floatBtn_menu);
         main_floatBtn_quick = (FloatingActionButton) findViewById(R.id.main_floatBtn_quick);
@@ -251,16 +217,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         initRecycleView();
 
-        if (!sp_init.getBoolean("isCloseAd", false)) {
-            initBanner();
-            bv.loadAD();
-        } else {
-            mRecyclerView.setPadding(0,0,0,0);
-        }
-
 
         //main_floatBtn_menu.showMenuButton(true);
-
         /*main_floatBtn_menu.setOnMenuButtonClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -272,11 +230,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });   */
 
-
-        //text_bottom = (TextView)findViewById(R.id.text_main_bottom);
-        //text_bottom.getPaint().setFlags(Paint. UNDERLINE_TEXT_FLAG );
-
-        bannerContainer = (ViewGroup) findViewById(R.id.main_bannerContainer);
 
         dialog = new AlertDialog.Builder(this);
 
@@ -390,9 +343,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 intent = new Intent(MainActivity.this, SettingsActivity.class);
                 startActivity(intent);
                 break;
-            /*case R.id.nav_support:
-                showSupportDialog();
-                break;   */
             case R.id.nav_about:
                 showAboutDialog();
                 break;
@@ -433,9 +383,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void startRequestPermission() {
         ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                        Manifest.permission.READ_PHONE_STATE,
-                        Manifest.permission.ACCESS_COARSE_LOCATION}
+                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}
                 , 321);
     }
 
@@ -508,7 +456,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         public void run() {
             loadLib();
-            utils.finishActivity(MarkPictureActivity.instance);
+            utils.finishActivity(MarkPictureActivity2.instance);
             utils.finishActivity(ChooseActivity.instance);
             utils.finishActivity(BuildPictureActivity.instance);
             utils.finishActivity(PlayerActivity.instance);
@@ -528,6 +476,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         public  void run() {
             if (tool.copyFileToCahe(FileList, getExternalCacheDir().toString(), extension)) {
                 handler.sendEmptyMessage(HandlerStatusCopyFileDone);
+            }
+            else {
+                handler.sendEmptyMessage(HandlerStatusCopyFileFail);
             }
         }
     }
@@ -783,34 +734,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         void confirmResult(boolean confirm);
     }
 
-    private void showSupportDialog() {
-        LayoutInflater mLayoutInflater= LayoutInflater.from(MainActivity.this);
-        View view=mLayoutInflater.inflate(R.layout.dialog_main_support, null, false);
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        builder.setTitle(R.string.main_dialog_support_title)
-                .setView(view)
-                .setCancelable(true)
-                .create();
-        builder.show();
-        TextView bottomText = (TextView) view.findViewById(R.id.main_dialog_support_bottomText);
-        bottomText.setText(Html.fromHtml(getString(R.string.main_dialog_support_bottomText)));
-        bottomText.setTextIsSelectable(true);
-    }
-
-    private void showAlertDialog() {
-        Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
-                .setTitle(R.string.main_dialog_alert_title)
-                .setMessage(R.string.main_dialog_alert_content)
-                .setPositiveButton(res.getString(R.string.main_dialog_btn_ok),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                                showNavigationGuider();
-                            }
-                        }).create();
-        dialog.show();
-    }
 
     private void showSplicingDialog() {
         Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
@@ -931,7 +854,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void btn_feedback() {
-        String versionName;
+        Intent intent = new Intent(MainActivity.this, FeedbackActivity.class);
+        startActivity(intent);
+        /*String versionName;
         int currentapiVersion=0;
         try {
             PackageManager packageManager = getPackageManager();
@@ -943,11 +868,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             versionName = "NULL";
         }
         String mail_content = String.format(getResources().getString(R.string.main_mail_content),
-                versionName, currentapiVersion+"", android.os.Build.MODEL);
-
-        //Fixme
-        Intent intent = new Intent(MainActivity.this, FeedbackActivity.class);
-        startActivity(intent);
+                versionName, currentapiVersion+"", android.os.Build.MODEL);   */
             /*Intent data=new Intent(Intent.ACTION_SENDTO);
             data.setData(Uri.parse("mailto:admin@likehide.com"));
             data.putExtra(Intent.EXTRA_SUBJECT, this.getResources().getString(R.string.main_mail_title));
@@ -998,14 +919,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         activity.showSnackBar(R.string.main_snackbar_isPiracy, SnackBarOnClickDoSure, R.string.main_snackbar_sure);
                         break;
                     case HandlerStatusCopyFileDone:
+                        activity.dialog_copyFile.dismiss();
                         if (activity.settings.getBoolean("isSortPicture", true)) {
                             Intent intent = new Intent(activity, ChooseActivity.class);
                             activity.startActivity(intent);
                         }
                         else {
-                            Intent intent = new Intent(activity, MarkPictureActivity.class);
+                            Intent intent = new Intent(activity, MarkPictureActivity2.class);
                             activity.startActivity(intent);
                         }
+                        break;
+                    case HandlerStatusCopyFileFail:
+                        activity.dialog_copyFile.dismiss();
+                        Toast.makeText(activity, R.string.main_toast_copyFileFail, Toast.LENGTH_LONG).show();
                         break;
                 }
             }
@@ -1125,49 +1051,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         public void onCancel() {
 
         }
-    }
-
-    private void initBanner() {
-        bv = new BannerView(this, ADSize.BANNER, "1105671977", "1000732026922833");
-        bv.setRefresh(30);
-        bv.setShowClose(true);
-        bv.setADListener(new AbstractBannerADListener() {
-            @Override
-            public void onNoAD(AdError error) {
-                Log.i(
-                        "AD_DEMO",
-                        String.format("Banner onNoAD，eCode = %d, eMsg = %s", error.getErrorCode(),
-                                error.getErrorMsg()));
-            }
-            @Override
-            public void onADReceiv() {
-                Log.i("AD_DEMO", "ONBannerReceive");
-                if (bannerContainer.getParent()!=null) {   //FIXME 不确定是否会影响正常计算广告
-                    bannerContainer.removeAllViews();
-                }
-                bannerContainer.addView(bv);
-            }
-            @Override
-            public void onADClosed() {
-                showCloseAdDialog();
-                mRecyclerView.setPadding(0,0,0,0);
-            }
-        });
-        //bannerContainer.addView(bv);
-    }
-
-    private void showCloseAdDialog() {
-        Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
-                .setTitle(R.string.dialog_closeAD_title)
-                .setMessage(R.string.dialog_closeAD_content)
-                .setPositiveButton(res.getString(R.string.main_dialog_btn_ok),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        }).create();
-        dialog.show();
     }
 
     private long exitTime = 0;

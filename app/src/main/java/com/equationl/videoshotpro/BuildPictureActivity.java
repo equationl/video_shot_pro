@@ -1,6 +1,5 @@
 package com.equationl.videoshotpro;
 
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,9 +12,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.media.MediaScannerConnection;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
@@ -36,16 +33,7 @@ import android.widget.Toast;
 import com.equationl.videoshotpro.Image.Tools;
 import com.equationl.videoshotpro.utils.Share;
 import com.equationl.videoshotpro.utils.Utils;
-import com.qq.e.ads.interstitial.AbstractInterstitialADListener;
-import com.qq.e.ads.interstitial.InterstitialAD;
-import com.qq.e.comm.util.AdError;
 import com.tencent.bugly.crashreport.CrashReport;
-import com.tencent.connect.share.QQShare;
-import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
-import com.tencent.mm.opensdk.modelmsg.WXImageObject;
-import com.tencent.mm.opensdk.modelmsg.WXMediaMessage;
-import com.tencent.mm.opensdk.openapi.IWXAPI;
-import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 import com.tencent.tauth.IUiListener;
 import com.tencent.tauth.Tencent;
 import com.tencent.tauth.UiError;
@@ -77,10 +65,9 @@ public class BuildPictureActivity extends AppCompatActivity {
     Resources res;
     Thread t, t_2;
     Tencent mTencent;
-    InterstitialAD iad;
     Bitmap final_bitmap;
-    IWXAPI wxApi;
     Utils utils = new Utils();
+    boolean isAllFullPicture = false;
 
     private final MyHandler handler = new MyHandler(this);
 
@@ -99,8 +86,6 @@ public class BuildPictureActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_build_picture);
-
-        Log.i("cao", "In BuildPictureActivity onCreate");
 
         instance = this;
 
@@ -125,8 +110,6 @@ public class BuildPictureActivity extends AppCompatActivity {
 
         mTencent = Tencent.createInstance("1106257597", this);
 
-        //Log.i("filelist", fileList.toString());
-
         dialog = new ProgressDialog(this);
         dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);// 设置样式
         dialog.setIndeterminate(false);
@@ -135,27 +118,27 @@ public class BuildPictureActivity extends AppCompatActivity {
         dialog.setTitle("请稍等");
         dialog.setMax(fileList.length+1);
 
-        Toast.makeText(this,"请调整剪切字幕的位置", Toast.LENGTH_LONG).show();
-
         bm_test = getCutImg().copy(Bitmap.Config.ARGB_8888,true);
-
-        canvas = new Canvas(bm_test);
-        paint = new Paint();
-        paint.setColor(Color.RED);
-        paint.setStrokeWidth((float) 5);
         bHeight = bm_test.getHeight();
         bWidth = bm_test.getWidth();
-
-        Log.i(TAG, "TEST IMAGE WIDTH="+bWidth+" HEIGHT="+bHeight);
-
         startY = (float) (bHeight*0.8);
         stopY = startY;
-        canvas.drawLine(0,startY,bWidth,stopY,paint);
+
+        if (!isAllFullPicture){
+            Toast.makeText(this,"请调整剪切字幕的位置", Toast.LENGTH_LONG).show();
+            canvas = new Canvas(bm_test);
+            paint = new Paint();
+            paint.setColor(Color.RED);
+            paint.setStrokeWidth((float) 5);
+            canvas.drawLine(0,startY,bWidth,stopY,paint);
+        }
+        else {
+            t = new Thread(new MyThread());
+            t.start();
+            dialog.show();
+            dialog.setProgress(0);
+        }
         imageTest.setImageBitmap(bm_test);
-
-        int test[] = tool.getImageRealSize(imageTest);
-        Log.i(TAG, "imageview width="+imageTest.getHeight()+" height="+imageTest.getWidth());
-
 
         btn_up.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -202,16 +185,7 @@ public class BuildPictureActivity extends AppCompatActivity {
 
         btn_done.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                int test[] = tool.getImageRealSize(imageTest);
-                Log.i(TAG, "imageview width="+test[0]+" height="+test[1]);
                 if (isDone==1) {
-                    /*Uri imageUri = Uri.fromFile(savePath);
-                    Intent shareIntent = new Intent();
-                    shareIntent.setAction(Intent.ACTION_SEND);
-                    shareIntent.putExtra(Intent.EXTRA_STREAM, imageUri);
-                    shareIntent.setType("image/*");
-                    startActivity(Intent.createChooser(shareIntent, "分享到"));  */
-                    //showShareDialog(v);
                     Share.showSharePictureDialog(BuildPictureActivity.this, savePath, shareListener, BuildPictureActivity.this);
                 }
                 else {
@@ -291,6 +265,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                 return getBitmap(i+"");
             }
         }
+        isAllFullPicture = true;
         return getBitmap(0+"");
     }
 
@@ -405,7 +380,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                 msg.what = HandlerStatusBuildPictureNext;
                 handler.sendMessage(msg);
                 final_bitmap = tool.addRight(final_bitmap);
-                SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
+                SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
                 String date    =    sDateFormat.format(new    java.util.Date());
                 try {
                     if(saveMyBitmap(final_bitmap,date+"-by_EL", settings.getBoolean("isReduce_switch", false))) {
@@ -539,9 +514,6 @@ public class BuildPictureActivity extends AppCompatActivity {
                         activity.btn_done.setText("分享");
                         activity.btn_down.setVisibility(View.INVISIBLE);
                         activity.isDone=1;
-                        if (!activity.sp_init.getBoolean("isCloseAd", false)) {
-                            activity.showAD();
-                        }
                         String temp_path = activity.tool.getSaveRootPath()+"/"+msg.obj.toString();
                         temp_path += activity.settings.getBoolean("isReduce_switch", false) ? ".jpg":".png";
                         MediaScannerConnection.scanFile(activity, new String[]{temp_path}, null, null);
@@ -672,55 +644,6 @@ public class BuildPictureActivity extends AppCompatActivity {
         return mode;
     }
 
-    /*private void showShareDialog(View view){
-        final String[] items = res.getStringArray(R.array.buildPicture_dialog_share_items);
-        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-        alertBuilder.setTitle(R.string.buildPicture_dialog_share_title);
-        alertBuilder.setItems(items, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface arg0, int index) {
-                final Bundle params = new Bundle();
-                if (index == 0 || index == 1) {
-                    params.putString(QQShare.SHARE_TO_QQ_IMAGE_LOCAL_URL, savePath.toString());
-                    params.putString(QQShare.SHARE_TO_QQ_APP_NAME, res.getString(R.string.app_name));
-                    params.putInt(QQShare.SHARE_TO_QQ_KEY_TYPE, QQShare.SHARE_TO_QQ_TYPE_IMAGE);
-                }
-                switch (index) {
-                    case 0:
-                        //qq好友
-                        params.putInt(QQShare.SHARE_TO_QQ_EXT_INT, QQShare.SHARE_TO_QQ_FLAG_QZONE_ITEM_HIDE);
-                        mTencent.shareToQQ(BuildPictureActivity.this, params, shareListener);
-                        break;
-                    case 1:
-                        //qq空间
-                        params.putInt(QQShare.SHARE_TO_QQ_EXT_INT, QQShare.SHARE_TO_QQ_FLAG_QZONE_AUTO_OPEN);
-                        mTencent.shareToQQ(BuildPictureActivity.this, params, shareListener);
-                        break;
-                    case 2:
-                        //微信好友
-                        shareToWX(SendMessageToWX.Req.WXSceneSession);
-                        break;
-                    case 3:
-                        //微信朋友圈
-                        shareToWX(SendMessageToWX.Req.WXSceneTimeline);
-                        break;
-                    case 4:
-                        //更多
-                        Uri imageUri = //Uri.fromFile(savePath);
-                                tool.getUriFromFile(savePath, BuildPictureActivity.this);
-                        Intent shareIntent = new Intent();
-                        shareIntent.setAction(Intent.ACTION_SEND);
-                        shareIntent.putExtra(Intent.EXTRA_STREAM, imageUri);
-                        shareIntent.setType("image/*");
-                        startActivity(Intent.createChooser(shareIntent, "分享到"));
-                        break;
-                }
-            }
-        });
-        alertBuilder.create().show();
-    }  */
-
-
     IUiListener shareListener = new BaseUiListener() {
         @Override
         protected void doComplete(JSONObject values) {
@@ -752,82 +675,4 @@ public class BuildPictureActivity extends AppCompatActivity {
         Tencent.onActivityResultData(requestCode, resultCode, data, shareListener);
     }
 
-
-    private InterstitialAD getIAD() {
-        if (iad == null) {
-            iad = new InterstitialAD(this, "1105671977", "2090734016933086");
-        }
-        return iad;
-    }
-
-    private void showAD() {
-        getIAD().setADListener(new AbstractInterstitialADListener() {
-            @Override
-            public void onNoAD(AdError error) {
-                Log.i(
-                        "AD_DEMO",
-                        String.format("LoadInterstitialAd Fail, error code: %d, error msg: %s",
-                                error.getErrorCode(), error.getErrorMsg()));
-            }
-            @Override
-            public void onADReceive() {
-                Log.i("AD_DEMO", "onADReceive");
-                iad.show();
-            }
-            @Override
-            public void onADClosed() {
-                //showCloseAdDialog();
-            }
-        });
-        iad.loadAD();
-    }
-
-    private void showCloseAdDialog() {
-        Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
-                .setTitle(R.string.dialog_closeAD_title)
-                .setMessage(R.string.dialog_closeAD_content)
-                .setPositiveButton(res.getString(R.string.main_dialog_btn_ok),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        }).create();
-        dialog.show();
-    }
-
-    /*private void shareToWX(int shareTo) {
-        wxApi = WXAPIFactory.createWXAPI(this, "wx45ceac6c6d2f1aff", true);
-        wxApi.registerApp("wx45ceac6c6d2f1aff");
-
-        WXImageObject imgObj = new WXImageObject();
-        imgObj.setImagePath(savePath.toString());
-        WXMediaMessage msg = new WXMediaMessage();
-        msg.mediaObject = imgObj;
-
-        try
-        {
-            Bitmap thumbBmp = Bitmap.createScaledBitmap(tool.getBitmapFromFile(savePath.toString()), 128, 160, true);
-            msg.setThumbImage(thumbBmp);
-        }
-        catch (Exception e)
-        {
-            Toast.makeText(this, R.string.buildPicture_toast_createThumb_fail, Toast.LENGTH_SHORT).show();
-            CrashReport.postCatchedException(e);
-            return;
-        }
-
-        msg.title = res.getString(R.string.main_SHARE_TO_QQ_TITLE);
-        msg.description = res.getString(R.string.main_SHARE_TO_QQ_SUMMARY);
-
-        SendMessageToWX.Req req = new SendMessageToWX.Req();
-        req.transaction = "sharePicture";
-        req.message = msg;
-        req.scene = shareTo;
-
-        // 调用api接口发送数据到微信
-        if (!wxApi.sendReq(req)) {
-            Toast.makeText(this, R.string.buildPicture_toast_sharePicture_fail, Toast.LENGTH_LONG).show();
-        }
-    }  */
 }

@@ -9,13 +9,11 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
@@ -471,7 +469,7 @@ public class PlayerActivity extends AppCompatActivity {
             gif_RP = tool.getVideo2GifRP(video_path, gif_RP);
             String gif_frameRate = settings.getString("gifFrameRate_value", "14");
             Log.i(TAG, "RP="+gif_RP+" fraerate="+gif_frameRate);
-            SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
+            SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
             String date    =    sDateFormat.format(new    java.util.Date());
             date += "-by_EL.gif";
             final String save_path =  tool.getSaveRootPath() + "/" + date;
@@ -652,7 +650,7 @@ public class PlayerActivity extends AppCompatActivity {
                             activity.startActivity(intent);
                         }
                         else {
-                            Intent intent = new Intent(activity, MarkPictureActivity.class);
+                            Intent intent = new Intent(activity, MarkPictureActivity2.class);
                             activity.startActivity(intent);
                         }
                         break;
@@ -750,6 +748,13 @@ public class PlayerActivity extends AppCompatActivity {
             if (isORIENTATION_LANDSCAPE) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 player_controlBar_layout.setVisibility(View.INVISIBLE);
+                if (isHideBtn) {
+                    btn_done.setVisibility(View.VISIBLE);
+                    btn_shot.setVisibility(View.  VISIBLE);
+                    btn_status.setVisibility(View.  VISIBLE);
+                    text_count.setVisibility(View.VISIBLE);
+                    isHideBtn = false;
+                }
                 isORIENTATION_LANDSCAPE = false;
                 return true;
             }

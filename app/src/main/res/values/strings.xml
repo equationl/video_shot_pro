@@ -30,6 +30,18 @@
     </string>
 
     <string name="about_updateHistory_text">
+        1.4 Pureté:\n
+        \t*去除所有广告\n
+        \t*得益于广告的去除，我们同时去除了多余的权限\n
+        \t*继续为APK做减肥，体积再减少18%\n
+        \t*优化裁剪字幕体验\n
+        \t*优化跳转商店体验\n
+        \t*优化逐帧选优体验\n
+        \t*优化视频播放时的体验\n
+        \t*优化FFmpeg命令行体验\n
+        \t*修复生成文件名可能出现冲突的BUG\n
+        \t*修复部分机型SnackBar与虚拟按键冲突的BUG\n
+        \t*修复合成截图模式无限转圈的BUG\n
         1.3 Chimérique Fix04:\n
         \t*优化截取GIF时分辨率的选择\n
         \t*优化标记图片时的显示方式\n
@@ -164,15 +176,6 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="dialog_closeAD_title">永久关闭广告</string>
-    <string name="dialog_closeAD_content">您只需在首页点击 “更多”，选择 “推荐给好友” 即可永久关闭本APP的广告。\n
-    毕竟加广告是赚不了钱的，可能一个月都还赚不了我一天的伙食费。但是我为什么要加广告呢？\n
-    加广告并不是为了赚钱，纯粹的只是想通过这种半强制的方式把这款APP推广出去，让更多的人了解到这款APP。\n
-    因为我起初开发这款APP就是因为自己有这个需求，然后看到很多人都有这个需求，而市面上又没有一款类似的APP，所以我就把自用的APP提交到市场了。\n
-    但是一直到现在我还是经常能看到有人在四处寻找类似的APP，所以，我就时常在想，究竟怎样才能让需要的人都知道这款APP。恕我无能，只想到了当前这种可能引起大家不满的方式。\n
-    作为补偿，我会择期将这款APP的完整代码上传到 Github ，有能力的人可以自己剔除不喜欢的部分重新编译。同时也欢迎各位大佬为本APP贡献代码。\n
-    PS：本APP的早期版本已经上传至 Github ，详情请到 “支持作者” 界面查看。</string>
-
     <string name="main_mail_title">《视频截图》意见反馈</string>
     <string name="main_mail_content">
           \t应用版本：%1$s
@@ -196,27 +199,10 @@
     <string name="main_dialog_btn_ok">确定</string>
     <string name="main_dialog_disablePermission_content">请在-应用设置-权限-中，至少允许 %1$s 使用存储权限来保存您的作品</string>
     <string name="main_dialog_disablePermission_title">未授予足够的权限</string>
-    <string name="main_dialog_noPermission_title">未授予需要的权限</string>
-    <string name="main_dialog_noPermission_content">为了保证APP的正常运行，我们需要您授予一些权限</string>
+    <string name="main_dialog_noPermission_title">授予权限</string>
+    <string name="main_dialog_noPermission_content">您需要授予储存权限给我，我才能保存您的作品哦~</string>
     <string name="main_dialog_needFloatPermission_content">使用该功能需要开启悬浮窗权限，是否开启？\n
     </string>
-    <string name="main_dialog_support_topText">如果喜欢本app，欢迎捐赠 。</string>
-    <string name="main_dialog_support_byAlipay_text">使用支付宝捐赠：</string>
-    <string name="main_dialog_support_byWeixin_text">使用微信捐赠：</string>
-    <string name="main_dialog_support_bottomText">
-         <![CDATA[
-         <b>捐赠方法：</b>  <br />
-         选择一个您方便的捐赠方式后在本页面进行截图，并进入 支付宝/微信 -> 扫一扫 -> 相册 选择您的截图即可完成捐赠.  <br />
-        <b><font color="red">重要提示：</font></b><br/>
-        请先确保您的app是在正规渠道下载的再进行捐赠，以免因某些不发分子非法打包本app并替换二维码图片导致捐赠不能到达作者手中。<br />
-        同时请认准收款人： <b><font color="red">equationl</font></b>  <br />
-        本app普通版本已开源，您也可以通过 star 开源项目或为其提交代码，参与讨论，提出您的意见来支持作者<br />
-        项目地址：<a href="https://github.com/equationl/videoshot">https://github.com/equationl/videoshot</a>  <br /><br /><br /><br /><br /><br />
-         ]]>
-    </string>
-    <string name="main_dialog_support_title">支持作者</string>
-    <string name="main_dialog_alert_title">温馨提示</string>
-    <string name="main_dialog_alert_content">请一定确保您下载的app来自正规渠道，如果您从非正规渠道下载本应用，为了您的安全，建议立即卸载并前往正规渠道下载。</string>
     <string name="main_dialog_splicing_title">温馨提示</string>
     <string name="main_dialog_splicing_content">这个模式是用来拼接你手机里的截图的，选择的图片最好宽度是一样的哦，不然会出现“白边”影响作品的美观。\n\n
     使用方法：\n
@@ -226,27 +212,9 @@
     使用方法：\n
     \t选择该模式后，我们会显示一个悬浮按钮，此时您可以前往其他app开始在线观看视频，当需要截图时，只需要点击一下悬浮按钮。\n
     \t当所需图片已经全部截取完毕后，您可以下拉通知栏点击 “点击开始制作” 即可。</string>
-    <string name="main_dialog_about_title">关于</string>
-    <string name="main_dialog_about_content">
-        作者：equationl \n
-        联系方式： admin@likehide.com   \n
-        ---------------------\n
-        更新记录：\n\n
-        %1$S \n
-        ----------------------\n
-        本app涉及到的开源项目：\n\n
-        %2$s \n
-    </string>
     <string name="main_dialog_shotFrame_title">温馨提示</string>
     <string name="main_dialog_shotFrame_content">这个模式可以快速提取视频指定时间间隔的所有帧，方便用户从中选出满意的截图。\n
         使用方法：\n选择视频后点击按钮标记起始位置，再次点击按钮标记终止位置，这样app就会自动开始截取。 </string>
-
-    <!-- <string name="main_view_button_start">快速开始</string>
-    <string name="main_view_button_guide">说明</string>
-    <string name="main_view_button_splicing">已有截图合成</string>
-    <string name="main_view_button_floatBtn">外部程序截图（测试）</string>
-    <string name="main_view_button_setting">设置</string>
-    <string name="main_view_button_more">更多&#8230;</string>   -->
 
     <string name="main_floatBtn_menu_quick">快速开始</string>
     <string name="main_floatBtn_menu_splicing">合成截图</string>
@@ -264,28 +232,22 @@
     <string name="main_snackbar_shareDirectoryTip">不能分享文件夹哦</string>
     <string name="main_snackbar_sure">确定</string>
 
-    <string name="main_toast_chooseFile_fail">未选择文件！</string>
     <string name="main_toast_getPermission_success">权限获取成功！</string>
     <string name="main_toast_choosePictures_fail">选择图片出错！</string>
     <string name="main_toast_unSupportFloatBtn">当前系统版本过低，无法使用该功能！</string>
     <string name="main_toast_canNotStartFloatBtn">无法启动屏幕截图，请联系开发者解决！</string>
-    <string name="main_toast_getPermission_fail">获取权限失败！</string>
     <string name="main_toast_showNavigationGuider">向右滑动可以打开侧边栏哦~</string>
     <string name="main_toast_confirmExit">再按一次退出程序</string>
+    <string name="main_toast_copyFileFail">获取图片失败！</string>
 
     <string name="main_nav_text_ffmpeg">FFmpeg命令行</string>
     <string name="main_nav_text_setting">设置</string>
-    <string name="main_nav_text_more">更多&#8230;</string>
     <string name="main_nav_text_help">使用说明</string>
     <string name="main_nav_text_feedback">反馈意见</string>
-    <string name="main_nav_text_splicing">已有截图合成</string>
-    <string name="main_nav_text_floatBtn">外部程序截图</string>
     <string name="main_nav_title_info">反馈与帮助</string>
-    <string name="main_nav_text_support">支持作者</string>
     <string name="main_nav_text_about">关于</string>
     <string name="main_nav_title_more">更多功能</string>
     <string name="main_nav_title_share">推荐给好友</string>
-    <string name="main_nav_text_frameByFrame">逐帧选优</string>
 
     <string name="main_SHARE_TO_QQ_TITLE">原来电影台词字幕图片是这样做的！</string>
     <string name="main_SHARE_TO_QQ_SUMMARY">推荐你也使用隐云图解制作APP快速制作电影对白图！</string>
@@ -314,7 +276,6 @@
     <string name="WXEntry_toast_share_ERR_UNSUPPORT">分享失败：不支持分享该内容。</string>
     <string name="WXEntry_toast_share_ERR_COMM">分享失败！</string>
     <string name="WXEntry_toast_share_ERR_UNKNOW">分享失败：未知错误！</string>
-    <string name="WXEntry_toast_share_success">分享成功！</string>
 
 
     <string name="player_toast_needMoreShot">至少需要截取一张图片！</string>
@@ -345,21 +306,11 @@
     <string name="player_dialog_FBF_content">截取已开始</string>
 
     <string name="markPicture_toast_readFile_fail">读取图片列表出错！</string>
-    <string name="markPicture_toast_markFinish">所有图片已经标记完成，请点击 右上角 开始合成</string>
     <string name="markPicture_ProgressDialog_msg">请稍候</string>
     <string name="markPicture_ProgressDialog_title">请稍候&#8230;</string>
     <string name="markPicture_ProgressDialog_msgOnRunning">正在处理第%1$s张图片&#8230;</string>
-    <string name="markPicture_btn_start">开始合成</string>
-    <string name="markPicture_text_undo">撤销</string>
     <string name="markPicture_text_markStatus">%1$d/%2$d</string>
     <string name="markPicture_text_doneTip">所有图片都标记完了哦~\n点击右上角开始合成吧~</string>
-    <string name="markPicture_tip_dialog_tittle">使用指南</string>
-    <string name="markPicture_tip_dialog_content">选择添加文字后可以快捷的在图片任意位置添加任意大小任意颜色的文字。\n
-    在弹出的对话框中您可以输入想要添加的文字和文字大小，亦可以选择文字颜色和文字背景颜色（日后将支持透明背景），输入完毕,点击 确定 后可更改添加文字位置。\n
-    单击或拖动屏幕，文字将跟随您的手指位置在图片上显示，将文字拖动到图片底部，文字将自动更改为拼接到图片外部而非添加到内部。\n
-    确定好文字位置后点击右下角 确定 按钮即可将文字添加到文字中。</string>
-    <string name="markPicture_tip_dialog_btn_ok">我知道了</string>
-    <string name="markPicture_toast_getPicture_fail">获取图片失败！</string>
 
     <string name="markPicture_guide_undo">点击就能撤回上一步操作了~</string>
     <string name="markPicture_guide_delete">点击就能删除这张截图了~</string>
@@ -403,15 +354,8 @@
 
 
     <string name="title_activity_choose">确定图片顺序</string>
-    <string name="choosePicture_menu_title_done">完成</string>
     <string name="chooseActivity_ProgressDialog_loadImage_title">请稍候&#8230;</string>
     <string name="chooseActivity_ProgressDialog_loadImage_content">正在生成缩略图&#8230;</string>
-    <string name="choosePicture_tip_dialog_title">使用指南</string>
-    <string name="choosePicture_tip_dialog_content">您可以在当前页面对图片进行进一步的排序。\n
-    长按想要更改顺序的图片，然后移动至目标位置即可。\n
-    当想要更改的顺序在屏幕外时，您可以将图片滑动至屏幕上边缘或下边缘，此时当前界面将会自动滚屏直至您将图片移出屏幕边缘。\n
-    单击图片可以预览大图。</string>
-    <string name="choosePicture_tip_dialog_btn_ok">我知道了</string>
     <string name="choosePicture_toast_saveFail">保存失败</string>
     <string name="choosePicture_toast_saveSuccess">保存成功</string>
 
@@ -420,10 +364,8 @@
     <string name="choosePicture_guideView_editSummary">在编辑模式下可以点击删除多余的图片哦~\n再按一次编辑按钮即可退出编辑模式了~</string>
     <string name="choosePicture_guideView_clickImage">长按并拖动可以更换图片顺序哦~\n单击就能打开预览哦~\n在预览界面长按可以保存单张图片了呢~</string>
 
-    <string name="action_settings">设置</string>
     <string name="title_activity_settings">设置</string>
 
-    <string name="pref_header_general">通用</string>
     <string name="pref_category_title_watermark">水印设置</string>
     <string name="pref_category_title_quality">图片质量设置</string>
     <string name="pref_category_title_gif">动图相关设置</string>
@@ -599,25 +541,21 @@
 
     <string name="shortcut_float_ShortLabel">开始截图</string>
     <string name="shortcut_float_LongLabel">外部程序截图</string>
-    <string name="title_activity_main2">Main2Activity</string>
 
     <string name="title_activity_about">关于</string>
     <string name="about_toast_checkUpdate">正在检查更新&#8230;</string>
-    <string name="about_toast_goToMarkPlay_fail">额，你手机上没有应用市场哦</string>
     <string name="about_text_history">更新历史</string>
     <string name="about_text_thanks">鸣谢</string>
     <string name="about_text_right">© 2016&#8211;2018 Equationl.com \nAll rights reserved</string>
     <string name="about_text_support">请作者喝奶茶</string>
-    <string name="about_text_adStatus">首页广告已%1$s</string>
-    <string name="about_text_donation">捐赠</string>
-    <string name="about_text_splashAdStatus">开屏广告已%1$s</string>
     <string name="about_guide_text_logo">点击LOGO给作者五星好评哦~</string>
     <string name="about_guide_text_update">点击版本可以检查更新哦~</string>
     <string name="about_guide_text_history">点击查看更新记录哦~</string>
     <string name="about_guide_text_support">点击可以开启/关闭广告哦~\n打开广告可以让作者有奶茶喝哦~\nTIPS:修改会在下次启动app时生效哦~</string>
     <string name="about_guide_text_thanks">点击可以查看开源相关哦~</string>
     <string name="about_dialog_title_history">更新历史</string>
-    <string name="about_dialog_text_donation">捐赠通道已经关闭了哦~如果你喜欢本APP的话请打开广告，让作者赚点广告费哦~</string>
+    <string name="about_dialog_title_support">支持作者</string>
+    <string name="about_dialog_text_support">亲爱的使用者，本app能够得到您的青睐已经是我最大的荣幸了，如果想要支持我的工作，请将本app推荐给您的朋友吧~（在首页侧边栏点击 推荐给好友即可快速分享）\n
+        您的支持就是我最大的动力！如果您能给予我五星好评我会更高兴的哦~（在本页面点击logo就可以快速跳转到应用市场了）</string>
 
-    <string name="splash_btn_text_skip">跳过</string>
 </resources>
