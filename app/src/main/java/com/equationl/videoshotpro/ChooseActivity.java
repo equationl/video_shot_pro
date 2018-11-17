@@ -31,6 +31,7 @@ import com.github.ielse.imagewatcher.ImageWatcher;
 import com.github.ielse.imagewatcher.ImageWatcherHelper;
 import com.huxq17.handygridview.HandyGridView;
 import com.huxq17.handygridview.listener.OnItemCapturedListener;
+import com.tencent.bugly.crashreport.CrashReport;
 
 import java.io.File;
 import java.io.IOException;
@@ -185,7 +186,11 @@ public class ChooseActivity extends AppCompatActivity {
                         activity.gridView.setMode(HandyGridView.MODE.LONG_PRESS);
                         activity.gridView.setAutoOptimize(false);
                         activity.gridView.setScrollSpeed(750);
-                        activity.dialog.dismiss();
+                        try {    //避免因为非正常关闭Activity导致闪退
+                            activity.dialog.dismiss();
+                        } catch (IllegalArgumentException e) {
+                            CrashReport.postCatchedException(e);
+                        }
                         if (activity.sp_init.getBoolean("isFirstUseSortPicture", true)) {
                             activity.showGuideDialog();
                             SharedPreferences.Editor editor = activity.sp_init.edit();

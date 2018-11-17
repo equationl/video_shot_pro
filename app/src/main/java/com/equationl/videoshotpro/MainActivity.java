@@ -1156,7 +1156,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     return;
                 }
                 if (files.length > 0) {
-                    showPicture(holder2.img, filepath+"/"+files[vh.getAdapterPosition()]);
+                    if (vh.getAdapterPosition() < files.length && vh.getAdapterPosition() != RecyclerView.NO_POSITION) {
+                        showPicture(holder2.img, filepath+"/"+files[vh.getAdapterPosition()]);
+                    }
                 }
             }
 
@@ -1175,7 +1177,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     return;
                 }
                 if (files.length > 0) {
-                    if (vh.getAdapterPosition() < files.length) {    //避免因为首次使用添加了一个 提示cardView 导致的闪退
+                    if (vh.getAdapterPosition() < files.length && vh.getAdapterPosition() != RecyclerView.NO_POSITION) {    //避免因为首次使用添加了一个 提示cardView 导致的闪退
                         showPopupMenu(holder2.img, filepath+"/"+files[vh.getAdapterPosition()], vh.getAdapterPosition());
                     }
                 }
