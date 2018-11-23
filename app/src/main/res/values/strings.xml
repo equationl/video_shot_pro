@@ -30,6 +30,8 @@
     </string>
 
     <string name="about_updateHistory_text">
+        1.4 Pureté Fix01:\n
+        \t*修复若干BUG\n
         1.4 Pureté:\n
         \t*去除所有广告\n
         \t*得益于广告的去除，我们同时去除了多余的权限\n
@@ -349,6 +351,7 @@
     </string-array>
     <string name="buildPicture_ProgressDialog_msg_export">正在导出&#8230;</string>
     <string name="buildPicture_dialog_getBitmap_fail">获取图片出错！请重试！</string>
+    <string name="buildPicture_toast_copyPreview_fail">获取预览图片失败！</string>
     <string name="buildPicture_toast_createThumb_fail">生成缩略图失败！</string>
     <string name="buildPicture_toast_sharePicture_fail">分享失败，请尝试在 分享->更多 中选择 微信 进行分享</string>
 

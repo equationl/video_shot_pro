@@ -118,7 +118,13 @@ public class BuildPictureActivity extends AppCompatActivity {
         dialog.setTitle("请稍等");
         dialog.setMax(fileList.length+1);
 
-        bm_test = getCutImg().copy(Bitmap.Config.ARGB_8888,true);
+        try {
+            bm_test = getCutImg().copy(Bitmap.Config.ARGB_8888,true);
+        } catch (NullPointerException e) {
+            CrashReport.postCatchedException(e);
+            Toast.makeText(this, R.string.buildPicture_toast_copyPreview_fail, Toast.LENGTH_SHORT).show();
+            finish();
+        }
         bHeight = bm_test.getHeight();
         bWidth = bm_test.getWidth();
         startY = (float) (bHeight*0.8);
