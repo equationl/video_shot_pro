@@ -1,0 +1,526 @@
+<resources>
+    <string name="app_name">VideoShotPro</string>
+    <string name="main_information_title"> description </string>
+    <string name="main_information_content">Always see long screenshots of movie lines made by others on the Internet? Want to make one yourself? Is it cumbersome to cut and splicing one by one?\n\nWith the VideoshotPro, you can watch the video while watching the screenshot, and your screenshots have been processed after the video is played.\n\nCan be used to create movie graphics, movie dialogue images, etc., can also be used to capture any frame of the video in the video.\n\nNot only that, VideoshotPro also provides the ability to intercept GIF, add text functions anywhere in the screenshot.\n\nFor the screenshot er, we provide a frame-by-frame selection feature, and it is no longer soft because you want to capture a flashing picture!\n\nFor the image quality er, we provide the original video quality function!\n\nFor enthusiasts, we have a custom FFmpeg command!\n\n\n\nMore features waiting for you to explore!</string>
+
+    <string name="about_updateHistory_text">
+        1.4 Pureté Fix01:\n
+        \t*修复若干BUG\n
+        1.4 Pureté:\n
+        \t*去除所有广告\n
+        \t*得益于广告的去除，我们同时去除了多余的权限\n
+        \t*继续为APK做减肥，体积再减少18%\n
+        \t*优化裁剪字幕体验\n
+        \t*优化跳转商店体验\n
+        \t*优化逐帧选优体验\n
+        \t*优化视频播放时的体验\n
+        \t*优化FFmpeg命令行体验\n
+        \t*修复生成文件名可能出现冲突的BUG\n
+        \t*修复部分机型SnackBar与虚拟按键冲突的BUG\n
+        \t*修复合成截图模式无限转圈的BUG\n
+        1.3 Chimérique Fix04:\n
+        \t*优化截取GIF时分辨率的选择\n
+        \t*优化标记图片时的显示方式\n
+        1.3 Chimérique Fix01-03:\n
+        \t*修复点击首页加载提示导致闪退的BUG\n
+        \t*修复某些机型获取视频或图片路径出错的BUG\n
+        \t*修复更改顺序后闪退的BUG\n
+        \t*修复首页预览图片错误\n
+        \t*修复首页 snackbar 弹出错误\n
+        \t*修复 Flyme 权限申请失败的BUG\n
+        \t*修复某些机型使用 外部程序截图 闪退的BUG\n
+        \t*修复某些ROM不支持截取屏幕导致闪退的 BUG\n
+        1.3 Chimérique:\n
+        \t*重构大量代码与UI\n
+        \t*新增新手引导\n
+        \t*优化权限申请流程\n
+        \t*优化截取GIF时的体验\n
+        \t*减少安装包体积\n
+         1.2 Fix 06:\n
+        \t*优化反馈流程\n
+        \t*修复因获取视频路径失败闪退的BUG（感谢 shizhan856****@163.com 的反馈）\n
+        \t*修复因获取视频长度失败闪退的BUG\n
+        \t*修复加载视频时因视频格式不支持等其他错误导致闪退的BUG\n
+        1.2 Fix 05:\n
+        \t*修复外部程序截图时自动去除黑边失败的BUG\n
+        1.2 Update 04:\n
+        \t*增加退出自动清除缓存\n
+        \t*修改添加文字时默认背景为全透明\n
+        \t*优化添加文字时选择颜色的可视化过程\n
+        \t*优化添加文字的撤销操作\n
+        \t*优化某些界面的Toolbar\n
+        \t*修复添加文字时无法完全填充背景的错误\n
+        1.2 Update 03:\n
+        \t*优化播放体验：\n
+        \t使用横屏播放时增加时间轴\n
+        \t优化手势操作\n
+        1.2 Update 02:\n
+        \t*增加 shortcut\n
+        \t*外部程序截图模式适配安卓 8.0\n
+        \t*修复使用外部程序截图时按钮概率性无法隐藏的BUG\n
+        \t*适配圆形图标\n
+        1.2 Fix 01:\n
+        \t*增加微信分享组件\n
+        \t*修复加载视频失败闪退的BUG\n
+        \t*修复因无悬浮窗权限导致闪退的BUG\n
+        \t*修复因获取图片失败导致闪退的BUG\n
+        \t*修复因在安卓低版本上不兼容某些库导致闪退的BUG\n
+        \t*修复在安卓7.0以上无法分享图片的BUG\n
+        \t*修复因获取缓存目录失败导致闪退的BUG\n
+        \t*优化授权体验\n
+        1.2 Oublier:\n
+        \t*支持截图后对图片进行排序（感谢 @方霖、@q1075715*** 的反馈）\n
+        \t*新增更多新手指导\n
+        \t*增加QQ分享组件，分享作品更加方便快捷！（微信分享稍后增加）\n
+        \t*增加广告（可以永久关闭）\n
+        \t*优化设置\n
+        \t*大幅优化内存使用策略，降低因内存不足闪退的情况\n
+        \t*添加内存使用监听，当内存不足时不会闪退而是提示更改图片质量设置\n
+        \t*支持自定义图片质量，可在降低图片质量的情况下合成更多图片\n
+        \t*优化撤销操作（感谢 @xiajichen 的反馈）\n
+        \t*修复大量可能导致app崩溃的隐患\n
+        \t*优化部分UI交互体验\n
+        1.1 Update 02:\n
+        \t*修复某些机型无法获取悬浮窗权限的BUG\n
+        \t*优化反馈方式\n
+        \t*增加自动上传崩溃日志\n
+        \t*增加自动检查更新\n
+        1.1 Fix 01:\n
+        \t*修复关闭压缩图片后使用外部程序截图导致合成图片有大片透明的BUG （感谢 @蜜汁炖鱿鱼 的反馈）\n
+        \t*修复高级功能中选择文件未过滤类型的BUG\n
+        1.1 Update 01:\n
+        \t*主界面UI重构\n
+        \t*新增逐帧选优模式\n
+        \t*FFmpeg命令新增快速插入时间\n
+        1.1:\n
+        \t*更改app名为 隐云图解制作\n
+        \t*添加文字支持设置文字背景颜色\n
+        \t*添加文字支持自定义位置\n
+        \t*修复截取GIF动图时时间不准的BUG（感谢 @Qloulia 的反馈）\n
+        1.0 Fix 02:\n
+        \t*修复使用外部程序截图时出现未响应的BUG\n
+        \t*修复在选择图片时闪退的BUG\n
+        \t*修复因图片裁切时图片不一致导致闪退的BUG\n
+        （若高度不符合将使用默认高度裁切, 宽度不符合将使用最大宽度，我已发现当前版本剪裁存在较大问题，下个版本将更换剪裁算法）\n
+        1.0 Fix 01:\n
+        \t*降低使用外部程序截图时崩溃的概率\n
+        1.0:\n
+        \t*增加合成已有截图模式\n
+        \t*增加截取在线视频模式\n
+        \t*增加截取gif动图功能\n
+        \t*增加添加文字时使用取色板取色功能\n
+        \t*优化生成图片后系统图库的刷新\n
+        \t*优化部分手势的体验\n
+    </string>
+
+    <string name="about_right_text">
+        FloatWindowPermission：https://github.com/zhaozepeng/FloatWindowPermission  \n
+        -------------\n
+        ScreenCapture ： https://github.com/goodbranch/ScreenCapture  \n
+         -------------\n
+        ffmpeg-android-java：https://github.com/writingminds/ffmpeg-android-java \n
+         -------------\n
+        GalleryPick：https://github.com/YancyYe/GalleryPick \n
+         -------------\n
+        Ucrop：https://github.com/jdamcd/android-crop \n
+         -------------\n
+        glide：https://github.com/bumptech/glide  \n
+        --------------\n
+        ColorPicker：https://github.com/DingMouRen/ColorPicker   \n
+        --------------\n
+        HandyGridView：https://github.com/huxq17/HandyGridView   \n
+        --------------\n
+        okHttp：https://github.com/square/okhttp/   \n
+        --------------\n
+        floatingactionbutton: https://github.com/futuresimple/android-floating-action-button/  \n
+        --------------\n
+        FancyShowCaseView: https://github.com/faruktoptas/FancyShowCaseView \n
+        --------------\n
+        ImageWatcher: https://github.com/iielse/ImageWatcher \n
+        --------------\n
+        SwipeCardsView: https://github.com/huxq17/SwipeCardsView \n
+        --------------\n
+        AutoLoadmore: https://github.com/burgessjp/AutoLoadmore \n
+        --------------\n
+        特别感谢：\n
+        --------------\n
+        Bugly：https://bugly.qq.com   \n
+        Material Design Icons：https://materialdesignicons.com    \n
+        以及 tyanboot.pw 对本app的支持
+    </string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string><![CDATA[
+
+       ]]>
+    <string name="main_mail_content">"            \tApplication version: %1$s   \tSystem version: %2$s   \tMobile phone model: %3$s    "</string>
+
+    <string name="feedback_content_hint">Please enter your comments or problems encountered in use</string>
+        <string name="feedback_email_hint">"Please be sure to enter your contact information (such as email) "</string>
+        <string name="feedback_button_submit_text">submit </string>
+        <string name="feedback_button_posting_text">submitting&#8230;</string>
+        <string name="feedback_toast_content_null">Content cannot be empty! </string>
+        <string name="feedback_toast_email_null">"Email cannot be empty! "</string>
+        <string name="feedback_toast_postSuccessful">Submit successfully! We will contact you later. </string>
+        <string name="feedback_dialog_postFail_btn_retry">try again</string>
+        <string name="feedback_dialog_postFail_btn_sendBySelf">Send by yourself</string>
+        <string name="feedback_dialog_postFailNet_content">"Failed to send feedback! Please check your network connection or grant access to this app.  If you still can't send after retrying, please choose to send by yourself. "</string>
+        <string name="feedback_dialog_postFailServer_content">"I am very sorry, the server failed, you can choose to try again or send by yourself. "</string>
+
+    <string name="main_dialog_btn_cancel">Cancel </string>
+        <string name="main_dialog_btn_ok">OK</string>
+        <string name="main_dialog_disablePermission_content">In the -Application Settings - Permissions - at least %1$s is allowed to use storage permissions to save your picture</string>
+        <string name="main_dialog_disablePermission_title">permissions denied</string>
+        <string name="main_dialog_noPermission_title">allow permissions</string>
+        <string name="main_dialog_noPermission_content">Unless you allow storage permission to me, I can save your picture~</string>
+        <string name="main_dialog_needFloatPermission_content">To use this, you need allow display pop-up window,allow now?\n\n    </string>
+        <string name="main_dialog_splicing_title">Tips </string>
+        <string name="main_dialog_splicing_content">"This mode is used to stitch the screenshots in your mobile phone. The best width of the selected images is the same, otherwise there will be white edges affecting the beauty of the picture. \n\n\n    How to use: \n\n    According to the prompt, check the picture you want to splicing. After checking the box, select “Finish” in the upper right corner. "</string>
+        <string name="main_dialog_float_title"> Tips </string>
+        <string name="main_dialog_float_content">"This mode allows you to take screenshots anywhere, even if you use other apps to play videos, you can also make movie subtitles. \n\n\n    How to use: \n\n    \t After selecting this mode, we will display a float button. At this point, you can go to other apps to start watching videos online. When you need to take a screenshot, just click the float button. \n\n    \t When the image has been completely intercepted, you can click the “Click to start production” button in the notification bar to make it. "</string>
+        <string name="main_dialog_shotFrame_title"> Tips </string>
+        <string name="main_dialog_shotFrame_content"> This mode can quickly extract all the frames of the video at specified intervals, so that users can choose a satisfactory screenshot. \n
+        How to use: \nSelect the video and click the button to mark the starting position. Click the button again to mark the ending position, so the app will automatically start capturing. </string>
+
+    <string name="main_floatBtn_menu_quick">Quick start</string>
+  <string name="main_floatBtn_menu_splicing">"Splice screenshot "</string>
+  <string name="main_floatBtn_menu_shotScreen">Screenshot on other APP</string>
+  <string name="main_floatBtn_menu_frameByFrame">Frame-by-frame selection</string>
+
+
+    <string name="main_snackbar_loadSo_fail">Failed to load FFmpeg</string>
+         <string name="main_snackbar_btn_retry">try again</string>
+         <string name="main_snackbar_btn_contact">Contact Developer </string>
+         <string name="main_snackbar_so_notAble">Sorry, there is no so library compatible with your phone</string>
+         <string name="main_snackbar_isPiracy">"You downloaded an illegally packaged version,may you should go to the google play to re-download "</string>
+         <string name="main_snackbar_deleteTip">Are you sure you want to delete it? </string>
+         <string name="main_snackbar_deleteSure">Yes </string>
+         <string name="main_snackbar_shareDirectoryTip">Cannot share folders </string>
+         <string name="main_snackbar_sure">OK</string>
+
+    <string name="main_toast_getPermission_success">" permission is successfully! "</string>
+         <string name="main_toast_choosePictures_fail">Select picture error! </string>
+         <string name="main_toast_unSupportFloatBtn">The current system version is too low to use this feature! </string>
+         <string name="main_toast_canNotStartFloatBtn">Unable to start the screenshot, please contact the developer to solve! </string>
+         <string name="main_toast_showNavigationGuider">Swipe right to open the sidebar~</string>
+         <string name="main_toast_confirmExit"> press again to exit the program</string>
+         <string name="main_toast_copyFileFail">Failed to get the picture! </string>
+
+    <string name="main_nav_text_ffmpeg">FFmpeg command line </string>
+         <string name="main_nav_text_setting">Settings </string>
+         <string name="main_nav_text_help"> Instructions for use </string>
+         <string name="main_nav_text_feedback">Feedback</string>
+         <string name="main_nav_title_info">Feedback and help</string>
+         <string name="main_nav_text_about">About </string>
+         <string name="main_nav_title_more">More features</string>
+         <string name="main_nav_title_share">Recommended to friends</string>
+
+    <string name="main_SHARE_TO_QQ_TITLE">"The movie line caption picture is doing this! "</string>
+         <string name="main_SHARE_TO_QQ_SUMMARY">"I recommend you also use the VideoShotPro app to quickly create a movie dialogue! "</string>
+         <string name="main_SHARE_TO_QQ_IMAGE_URL">http://image.coolapk.com/apk_image/2016/1008/682885_1475815523_9911-for-104111-o_1auhhpq5m13m2fih1pii14mc1gvs1i-uid-408649.jpg</string>
+         <string name="main_SHARE_TO_QQ_APP_NAME">VideoShotPro</string>
+
+    <string name="main_toast_createThumb_fail">Failed to generate thumbnails! </string>
+
+         <string name="main_text_waterFall_firstUse">The first startup needs to be initialized, please slide the screen to refresh the data. </string>
+         <string name="main_text_waterFall_noData">"No picture, just click on the bottom right corner and start making! "</string>
+
+    <string name="main_popupMenu_share">Share</string>
+         <string name="main_popupMenu_delete">"Delete "</string>
+
+    <string name="main_guideView_startBtn">Click this button to start making ~</string>
+         <string name="main_guideView_summary">"The picture you made will be displayed here\n click to view the big picture\n  long press to share and delete "</string>
+
+    <string-array name="main_dialog_shareAPP_items">
+                 <item>QQ</item>
+                 <item> WeChat friends circle</item>
+                 <item> WeChat Friend</item>
+             </string-array>
+
+    <string name="WXEntry_toast_share_ERR_AUTH_DENIED">Share failed: authentication failed! Please contact the developer to resolve. </string>
+         <string name="WXEntry_toast_share_ERR_SENT_FAILED">Share failed: Send failed! </string>
+         <string name="WXEntry_toast_share_ERR_UNSUPPORT">Share failed: sharing of the content is not supported. </string>
+         <string name="WXEntry_toast_share_ERR_COMM"> Sharing failed! </string>
+         <string name="WXEntry_toast_share_ERR_UNKNOW">Share failed: Unknown error! </string>
+
+
+    <string name="player_toast_needMoreShot">At least one picture needs to be taken! </string>
+         <string name="player_toast_shotGif_fail">Failed to intercept the animation! </string>
+         <string name="player_toast_shotGif_success">The animation has been saved </string>
+         <string name="player_toast_shotGif_start">Start to intercept the animation </string>
+         <string name="player_toast_mark_timeError">End time must be greater than start time </string>
+         <string name="player_toast_FBF_done">The interception is complete, please go to %1$s to view! </string>
+         <string name="player_toast_loadUriFail_invalid">Sorry, the file failed to load: the file is invalid, please try again! </string>
+         <string name="player_toast_loadUriFail_lackPermission">Sorry, the file failed to load: no permission, please try again! </string>
+         <string name="player_toast_loadUriFail_other">Sorry, file loading failed: file format is not supported or other errors, please try again! </string>
+         <string name="player_toast_getMetaDuration_fail">Sorry, the time to get the video failed! Please try again! </string>
+
+    <string name="player_text_rotationScreen">Rotation</string>
+         <string name="player_text_shotStatus">Mark / Shoted: %1$d/%2$d</string>
+         <string name="player_text_replay"> replay </string>
+         <string name="player_text_savePicture_fail">Save screenshot failed</string>
+         <string name="player_text_start_play"> start playing </string>
+         <string name="player_text_done">Complete </string>
+         <string name="player_text_shot">Shot</string>
+         <string name="player_text_mark">Mark</string>
+         <string name="player_text_mark_end">End</string>
+         <string name="player_text_ok">OK</string>
+    <string name="player_text_getCachePath_fail">Get the cache directory error! </string>
+
+    <string name="player_dialog_FBF_title">shotting&#8230;</string>
+         <string name="player_dialog_FBF_content">Shot has started</string>
+
+         <string name="markPicture_toast_readFile_fail">Error reading the image list! </string>
+         <string name="markPicture_ProgressDialog_msg">Please wait </string>
+         <string name="markPicture_ProgressDialog_title">Please wait&#8230;</string>
+         <string name="markPicture_ProgressDialog_msgOnRunning">Processing image of %1$s&#8230;</string>
+         <string name="markPicture_text_markStatus">%1$d/%2$d</string>
+         <string name="markPicture_text_doneTip">All pictures are marked oh~\nClick on the top right corner to start compositing~</string>
+
+    <string name="markPicture_guide_undo">Click to retract the previous step~</string>
+         <string name="markPicture_guide_delete">Click to delete this screenshot~</string>
+         <string name="markPicture_guide_addText">Click to add text to the image~</string>
+         <string name="markPicture_guide_moreTool">Click to open more tools~</string>
+         <string name="markPicture_guide_summary">Click on the image to view the big picture~</string>
+         <string name="markPicture_guide_swipeRight">Slip \nTo \nRight \nSide\nTo\nMark\nSave\nFull\nPicture</string>
+         <string name="markPicture_guide_swipeLeft">Slip \nTo \nLeft\nSide\nTo\nMark\nSave\nSubtitle\nPicture</string>
+         <string name="markPicture_guide_guide">Click here to open this tip~</string>
+         <string name="markPicture_guide_done">Click here to go to the next step~</string>
+
+
+    <string name="floatWindowsService_notice_ticker_text">start notification </string>
+         <string name="floatWindowsService_notice_content">Click to start making</string>
+         <string name="floatWindowsService_notice_title">Program running </string>
+         <string name="floatWindowsService_toast_floatPermissionDenied">No floating window permissions! </string>
+
+
+    <string name="buildPicture_btn_up">Up</string>
+        <string name="buildPicture_btn_down">down</string>
+        <string name="buildPicture_btn_done">OK</string>
+        <string name="buildPicture_text_memory">%1$s/%2$s</string>
+        <string name="buildPicture_dialog_oom_tittle">Out of memory!</string>
+        <string name="buildPicture_dialog_oom_content">Sorry, your device is out of memory and we are unable to continue working.\n        \nSelect Exit will exit this production. At this time, you can choose to reduce the number of pictures to make it again or go to settings - picture quality and performance. Reduce the quality of the exported picture and make it again.\n        \nSelect Continue will automatically reduce the quality of the exported image and try again. If the memory is still out of memory or the quality of the exported image is too low, please select EXIT then manually set the quality of the exported image after</string>
+        <string name="buildPicture_btn_oom_exit">Exit</string>
+        <string name="buildPicture_btn_oom_continue">Continue </string>
+        <string name="buildPicture_dialog_share_title">Share to&#8230;</string>
+        <string-array name="buildPicture_dialog_share_items">
+            <item>QQ friends</item>
+            <item>QQ space</item>
+            <item> WeChat Friend</item>
+            <item> WeChat friends circle</item>
+            <item>More&#8230;</item>
+        </string-array>
+        <string name="buildPicture_ProgressDialog_msg_export">Exporting&#8230;</string>
+        <string name="buildPicture_dialog_getBitmap_fail">Get an image error! Please try again! </string>
+        <string name="buildPicture_toast_copyPreview_fail">Failed to get the thumbnails!</string>
+        <string name="buildPicture_toast_createThumb_fail">Failed to generate thumbnails! </string>
+        <string name="buildPicture_toast_sharePicture_fail"> Sharing failed, please try to share in the sharing -> more WeChat to share </string>
+
+
+    <string name="title_activity_choose">Make sure the picture order</string>
+        <string name="chooseActivity_ProgressDialog_loadImage_title">Please wait&#8230;</string>
+        <string name="chooseActivity_ProgressDialog_loadImage_content">Build thumbnails&#8230;</string>
+        <string name="choosePicture_toast_saveFail">Save failed</string>
+        <string name="choosePicture_toast_saveSuccess">Save successfully </string>
+
+        <string name="choosePicture_guideView_edit">Click to open the edit mode~</string>
+        <string name="choosePicture_guideView_done">Click to go to the next step~</string>
+        <string name="choosePicture_guideView_editSummary">In the edit mode, you can click to delete the picture which needless~  Press the edit button again to exit the edit mode~</string>
+        <string name="choosePicture_guideView_clickImage">Long press and drag to change the picture order~\nClick to open the preview~\nLong press on the preview interface to save a single picture~</string>
+
+        <string name="title_activity_settings">Settings</string>
+
+        <string name="pref_category_title_watermark">watermark settings </string>
+        <string name="pref_category_title_quality">image quality settings</string>
+        <string name="pref_category_title_gif">motion related settings </string>
+        <string name="pref_category_title_other">Other settings</string>
+        <string name="pref_screen_title_quality">Image quality and performance </string>
+        <string name="pref_screen_description_quality">Modify the quality of the final generated image. This setting will affect the performance of the app. If the app crashes frequently, please modify the setting </string>
+
+        <string name="pref_title_watermark">Add watermark </string>
+        <string name="pref_description_watermark">Is add a watermark after the image is synthesized\n    </string>
+
+        <string name="pref_title_shot_jpg">Shot as jpg</string>
+        <string name="pref_description_shot_jpg">Is save as jpg when capturing images (using jpg can greatly reduce the image size, but the quality will be slightly reduced)</string>
+
+        <string name="pref_title_hide_btn">Click to hidden interface</string>
+        <string name="pref_description_hide_btn">Is show/hide the interface when playing in full screen</string>
+
+        <string name="pref_title_monitored_show">Live preview </string>
+        <string name="pref_description_monitored_show">Is preview in real time when synthesizing pictures (may overflow after flashing, it is recommended to close)</string>
+
+        <string name="pref_title_sort_picture">Turn on sorting</string>
+        <string name="pref_description_sort_picture">Is sort the image after the interception is completed</string>
+
+        <string name="pref_screen_title_professional">Advanced Settings</string>
+        <string name="pref_screen_description_professional">If you don\'t know what the settings are, don\'t change this setting to avoid the app not working properly due to improper settings </string>
+
+        <string name="pref_category_title_checkBlankLines">Detect the black border settings in the screenshot </string>
+        <string name="pref_title_CheckBlankLines">Turn on black border</string>
+        <string name="pref_description_CheckBlankLines">Is automatically remove black borders when non-local video screenshots, if the screenshot is incomplete, please close this item</string>
+        <string name="pref_edit_AllowNotBlackNums_title">Single line allows the most non-black points </string>
+        <string name="pref_edit_AllowCheckBlackLines_title">The minimum number of consecutive black edges</string>
+        <string name="pref_edit_AllowNotBlackNums_default">20</string>
+        <string name="pref_edit_AllowCheckBlackLines_default">10</string>
+
+        <string name="pref_category_title_PlayVideo">Video play settings</string>
+        <string name="pref_edit_gestureSensibility_title">gesture sensitivity</string>
+        <string name="pref_edit_gestureSensibility_default">10</string>
+
+
+    <string name="pref_title_colorMode">Change the export image color mode </string>
+        <string name="pref_description_colorMode">Select whether to change the color mode. The quality of the picture is decremented from top to bottom. If the memory is insufficient to flash back, please change to the latter option. (This option is not available for all images) </string>
+        <string name="pref_colorMode_title">color mode </string>
+        <string-array name="pref_colorMode_list_titles">
+            <item>ARGB.8888</item>
+            <item>ARGB.4444</item>
+            <item>RGB_565</item>
+            <item>ALPHA_8</item>
+        </string-array>
+        <string-array name="pref_colorMode_list_values">
+            <item>1</item>
+            <item>2</item>
+            <item>3</item>
+            <item>4</item>
+        </string-array>
+
+        <string name="pref_title_resolution">Change the export image resolution </string>
+        <string name="pref_description_resolution">Select whether to change the resolution of the exported image. If the memory is insufficient to flash back, please lower the resolution </string>
+        <string name="pref_resolution_title">image resolution </string>
+        <string-array name="pref_resolution_list_titles">
+            <item> 1/2 of the original image</item>
+            <item> 1/4 of the original image</item>
+            <item> 1/6 of the original image</item>
+            <item> 1/8 of the original image</item>
+        </string-array>
+        <string-array name="pref_resolution_list_values">
+            <item>2</item>
+            <item>4</item>
+            <item>6</item>
+            <item>8</item>
+        </string-array>
+
+        <string name="pref_title_reduce">compress the picture </string>
+        <string name="pref_description_reduce">Select whether to compress the image when exporting (only reduce the quality, do not change the resolution)
+    </string>
+
+        <string name="pref_title_display_watermark">watermark text </string>
+        <string name="pref_default_display_watermark">"Use VideoShotPro production "</string>
+
+        <string name="pref_title_reduce_value">Image quality</string>
+        <string-array name="pref_reduce_list_titles">
+            <item> original image </item>
+            <item>9</item>
+            <item>8</item>
+            <item>7</item>
+            <item>6</item>
+            <item>5</item>
+            <item>4</item>
+            <item>3</item>
+            <item>2</item>
+            <item>1</item>
+            <item>min </item>
+        </string-array>
+        <string-array name="pref_reduce_list_values">
+            <item>100</item>
+            <item>90</item>
+            <item>80</item>
+            <item>70</item>
+            <item>60</item>
+            <item>50</item>
+            <item>40</item>
+            <item>30</item>
+            <item>20</item>
+            <item>10</item>
+            <item>0</item>
+        </string-array>
+
+        <string name="pref_title_watermark_position">Watermark location</string>
+        <string-array name="pref_watermark_position_titles">
+            <item>top left</item>
+            <item> middle </item>
+            <item> lower left </item>
+        </string-array>
+        <string-array name="pref_watermark_position_values">
+            <item>1</item>
+            <item>2</item>
+            <item>3</item>
+        </string-array>
+
+        <string name="pref_title_isShotGif">Long press to intercept the animation</string>
+        <string name="pref_description_isShotGif">Is hold the shot button to apture the GIF animation</string>
+        <string name="pref_title_gif_RP">Motion resolution</string>
+        <string-array name="pref_gif_RP_titles">
+            <item> scale to 1/2</item>
+            <item> scale to 1/4</item>
+            <item> scaled to 1/8 </item>
+            <item> original image </item>
+        </string-array>
+        <string-array name="pref_gif_RP_values">
+            <item>2</item>
+            <item>4</item>
+            <item>8</item>
+            <item>-1</item>
+        </string-array>
+        <string name="pref_title_gif_frameRate">Motion frame rate</string>
+        <string-array name="pref_gif_frameRate_titles">
+            <item>1</item>
+            <item>14</item>
+            <item>20</item>
+            <item>24</item>
+            <item> original frame rate </item>
+        </string-array>
+        <string-array name="pref_gif_frameRate_values">
+            <item>1</item>
+            <item>14</item>
+            <item>20</item>
+            <item>24</item>
+            <item>-1</item>
+        </string-array>
+
+        <string name="pref_title_gif_MinTime">Allows the interception of the animation for the shortest time (careful modification)</string>
+        <string-array name="pref_gif_MinTime_titles">
+            <item>1s</item>
+            <item>2s</item>
+            <item>3s</item>
+        </string-array>
+        <string-array name="pref_gif_MinTime_values">
+            <item>1</item>
+            <item>2</item>
+            <item>3</item>
+        </string-array>
+
+        <string name="title_activity_command">Custom FFmpeg command </string>
+        <string name="command_menu_addPath">Insert path</string>
+        <string name="command_menu_addTime">Insert time</string>
+        <string name="title_activity_feedback">Feedback</string>
+
+
+        <string name="float_done_channel_name">Do not close this channel, otherwise you will not be able to use Screenshot on other APP mode!</string>
+        <string name="float_done_channel_description">When using Screenshot on other APP, the notification is completed by the notification</string>
+
+        <string name="shortcut_quick_ShortLabel">Quick start </string>
+        <string name="shortcut_quick_LongLabel">Quick start </string>
+
+        <string name="shortcut_float_ShortLabel">Start screenshot</string>
+        <string name="shortcut_float_LongLabel">Screenshot on other APP</string>
+     
+
+
+    <string name="title_activity_about">About </string>
+        <string name="about_toast_checkUpdate">Checking for update&#8230;</string>
+        <string name="about_text_history">Update History</string>
+        <string name="about_text_thanks"> Acknowledgement </string>
+        <string name="about_text_right">© 2016–2018 Equationl.com \nAll rights reserved</string>
+        <string name="about_text_support">Support developer</string>
+        <string name="about_guide_text_logo">Click LOGO to give the author five-star~</string>
+        <string name="about_guide_text_update">Click the version to check for updates~</string>
+        <string name="about_guide_text_history">Click to view the update history~</string>
+        <string name="about_guide_text_support">Click support developer</string>
+        <string name="about_guide_text_thanks">Click to view open source</string>
+        <string name="about_dialog_title_history">Update history</string>
+        <string name="about_dialog_title_support">Support author </string>
+        <string name="about_dialog_text_support">Dear users, this app is the best honor for you to get your favor. If you want to support my work, please recommend this app to your friends~(On the homepage Click on the sidebar and recommend it to your friends for quick sharing)\n\nYour support is my biggest motivation! If you can give me a five-star rating, I will be more happy~ (click on the logo on this page to quickly jump to the application market)\n\nThis APP has been open source,welcome to pull and star~"</string>
+    <string name="main_mail_title">VideoShotPro Feedback</string>
+    <string name="player_text_back">Back</string>
+</resources>

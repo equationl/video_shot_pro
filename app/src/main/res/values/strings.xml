@@ -554,11 +554,10 @@
     <string name="about_guide_text_logo">点击LOGO给作者五星好评哦~</string>
     <string name="about_guide_text_update">点击版本可以检查更新哦~</string>
     <string name="about_guide_text_history">点击查看更新记录哦~</string>
-    <string name="about_guide_text_support">点击可以开启/关闭广告哦~\n打开广告可以让作者有奶茶喝哦~\nTIPS:修改会在下次启动app时生效哦~</string>
+    <string name="about_guide_text_support">点击支持作者~</string>
     <string name="about_guide_text_thanks">点击可以查看开源相关哦~</string>
     <string name="about_dialog_title_history">更新历史</string>
     <string name="about_dialog_title_support">支持作者</string>
-    <string name="about_dialog_text_support">亲爱的使用者，本app能够得到您的青睐已经是我最大的荣幸了，如果想要支持我的工作，请将本app推荐给您的朋友吧~（在首页侧边栏点击 推荐给好友即可快速分享）\n
-        您的支持就是我最大的动力！如果您能给予我五星好评我会更高兴的哦~（在本页面点击logo就可以快速跳转到应用市场了）</string>
+    <string name="about_dialog_text_support">亲爱的使用者，本app能够得到您的青睐已经是我最大的荣幸了，如果想要支持我的工作，请将本app推荐给您的朋友吧~（在首页侧边栏点击 推荐给好友即可快速分享）\n 您的支持就是我最大的动力！如果您能给予我五星好评我会更高兴的哦~（在本页面点击logo就可以快速跳转到应用市场了）\n 本APP已开源，欢迎贡献代码或star~</string>
 
 </resources>
