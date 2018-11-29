@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
@@ -47,6 +48,7 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.equationl.videoshotpro.Image.CheckPictureText;
 import com.equationl.videoshotpro.Image.Tools;
 import com.equationl.videoshotpro.rom.HuaweiUtils;
 import com.equationl.videoshotpro.rom.MeizuUtils;
@@ -106,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Boolean isFirstBoot = false;
     boolean isTranslucentStatus = false;
     Snackbar snackbar;
+    CheckPictureText cpt = new CheckPictureText();
     Utils utils = new Utils();
     FloatingActionsMenu main_floatBtn_menu;
     FloatingActionButton main_floatBtn_quick;
@@ -176,6 +179,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         tool = new Tools();
         res = getResources();
+
+        /*try {
+            Bitmap bm = cpt.getTextPicture(tool.getBitmapFromFile("0", getExternalCacheDir(),"jpg"));
+            tool.saveBitmap2png(bm, "test0", getExternalCacheDir());
+            Bitmap bm2 = cpt.getTextPicture(tool.getBitmapFromFile("1", getExternalCacheDir(),"jpg"));
+            tool.saveBitmap2png(bm2, "test1", getExternalCacheDir());
+            bm = cpt.getTextPicture(tool.getBitmapFromFile("3", getExternalCacheDir(),"jpg"));
+            tool.saveBitmap2png(bm, "test3", getExternalCacheDir());
+            bm2 = cpt.getTextPicture(tool.getBitmapFromFile("4", getExternalCacheDir(),"jpg"));
+            tool.saveBitmap2png(bm2, "test4", getExternalCacheDir());
+            bm2 = cpt.getTextPicture(tool.getBitmapFromFile("5", getExternalCacheDir(),"jpg"));
+            tool.saveBitmap2png(bm2, "test5", getExternalCacheDir());
+        } catch (Exception e) {
+            Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show();
+            Log.e(TAG, e.toString());
+        }*/
 
         if (sp_init.getBoolean("isFirstBoot", true)) {
             //FIXME 显示警告某些应用商城审核就不给过？？？？
