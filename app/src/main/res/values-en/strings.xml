@@ -1,7 +1,9 @@
 <resources>
     <string name="app_name">VideoShotPro</string>
     <string name="main_information_title"> description </string>
-    <string name="main_information_content">Always see long screenshots of movie lines made by others on the Internet? Want to make one yourself? Is it cumbersome to cut and splicing one by one?\n\nWith the VideoshotPro, you can watch the video while watching the screenshot, and your screenshots have been processed after the video is played.\n\nCan be used to create movie graphics, movie dialogue images, etc., can also be used to capture any frame of the video in the video.\n\nNot only that, VideoshotPro also provides the ability to intercept GIF, add text functions anywhere in the screenshot.\n\nFor the screenshot er, we provide a frame-by-frame selection feature, and it is no longer soft because you want to capture a flashing picture!\n\nFor the image quality er, we provide the original video quality function!\n\nFor enthusiasts, we have a custom FFmpeg command!\n\n\n\nMore features waiting for you to explore!</string>
+    <string name="main_information_content">Always see long screenshots of movie lines made by others on the Internet? Want to make one yourself? Is it cumbersome to cut and splicing one by one?\n\nWith the VideoshotPro, you can watch the video while watching the screenshot, and your screenshots have been processed after the video is played.\n\nCan be used to create movie graphics, movie dialogue images, etc., can also be used to capture any frame of the video in the video.\n\nNot only that, VideoshotPro also provides the ability to intercept GIF, add text functions anywhere in the screenshot.\n\nFor the screenshot er, we provide a frame-by-frame selection feature, and it is no longer soft because you want to capture a flashing picture!\n\nFor the image quality er, we provide the original video quality function!\n\nFor enthusiasts, we have a custom FFmpeg command!\n\n\n\nMore features waiting for you to explore!
+    \nYou could check your picture in %1$s
+    </string>
 
     <string name="about_updateHistory_text">
         1.4 Pureté Fix01:\n

@@ -103,7 +103,7 @@
         <activity
             android:name=".FeedbackActivity"
             android:label="@string/title_activity_feedback"
-            android:parentActivityName=".MainActivity" />
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ChooseActivity"
             android:label="@string/title_activity_choose" />
@@ -134,7 +134,7 @@
         <activity
             android:name=".AboutActivity"
             android:label="@string/title_activity_about"
-            android:parentActivityName=".MainActivity" />
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

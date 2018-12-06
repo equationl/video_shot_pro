@@ -11,12 +11,13 @@ import android.os.Environment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
 import com.equationl.videoshotpro.Image.Tools;
 import com.equationl.videoshotpro.utils.Utils;
@@ -38,6 +39,9 @@ public class AboutActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
+        android.support.v7.widget.Toolbar toolbar = (Toolbar) findViewById(R.id.about_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         text_update   = findViewById(R.id.about_text_version);
         text_history  = findViewById(R.id.about_text_history);
@@ -142,6 +146,16 @@ public class AboutActivity extends AppCompatActivity {
 
     private void clickSupport() {
         showTextDialog(R.string.about_dialog_title_support, R.string.about_dialog_text_support);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            finish();
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
 }

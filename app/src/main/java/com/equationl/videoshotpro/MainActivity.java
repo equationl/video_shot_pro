@@ -1065,7 +1065,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 } else {
                     tool.cleanExternalCache(this);
                     finish();
-                    System.exit(0);
                 }
                 return true;
             }
