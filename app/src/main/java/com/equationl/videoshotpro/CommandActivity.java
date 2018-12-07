@@ -1,6 +1,7 @@
 package com.equationl.videoshotpro;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -15,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ScrollView;
@@ -89,6 +91,7 @@ public class CommandActivity extends AppCompatActivity {
                             @Override
                             public void onStart() {
                                 btn.setClickable(false);
+                                hintKeyBoard();
                             }
                             @Override
                             public void onFailure(String message) {
@@ -225,6 +228,22 @@ public class CommandActivity extends AppCompatActivity {
                 scroll.scrollTo(0, offset);
             }
         });
+    }
+
+    /**
+     * from:https://www.jianshu.com/p/3f2b0ad3565b
+     * */
+    public void hintKeyBoard() {
+        //拿到InputMethodManager
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        //如果window上view获取焦点 && view不为空
+        if (imm.isActive() && getCurrentFocus() != null) {
+            //拿到view的token 不为空
+            if (getCurrentFocus().getWindowToken() != null) {
+                //表示软键盘窗口总是隐藏，除非开始时以SHOW_FORCED显示。
+                imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+            }
+        }
     }
 
 }

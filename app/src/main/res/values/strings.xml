@@ -30,6 +30,11 @@
     </string>
 
     <string name="about_updateHistory_text">
+        1.4 Pureté Fix02:\n
+        \t*新增英文语言支持\n
+        \t*优化部分动画效果\n
+        \t*优化FFmpeg命令行使用体验\n
+        \t*修复概率性出现漏截的BUG\n
         1.4 Pureté Fix01:\n
         \t*修复若干BUG\n
         1.4 Pureté:\n
@@ -199,7 +204,7 @@
 
     <string name="main_dialog_btn_cancel">取消</string>
     <string name="main_dialog_btn_ok">确定</string>
-    <string name="main_dialog_disablePermission_content">请在-应用设置-权限-中，至少允许 %1$s 使用存储权限来保存您的作品</string>
+    <string name="main_dialog_disablePermission_content">请在 应用设置-权限 中，至少允许 %1$s 使用存储权限来保存您的作品</string>
     <string name="main_dialog_disablePermission_title">未授予足够的权限</string>
     <string name="main_dialog_noPermission_title">授予权限</string>
     <string name="main_dialog_noPermission_content">您需要授予储存权限给我，我才能保存您的作品哦~</string>
