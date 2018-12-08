@@ -34,6 +34,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.Menu;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -264,6 +265,59 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .build();
 
         showGuide();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.activity_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menu.findItem(R.id.main_menu_isDirFirst).setChecked(sp_init.getBoolean("mainSortIsDirFirst", true));
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        invalidateOptionsMenu();//通知系统刷新Menu
+        int id = item.getItemId();
+        SharedPreferences.Editor editor = sp_init.edit();
+        switch (id) {
+            case R.id.main_menu_sort_date_asc:
+                editor.putString("mainSort", "dateAsc");
+                editor.apply();
+                refreshWaterfall();
+                break;
+            case R.id.main_menu_sort_date_desc:
+                editor.putString("mainSort", "dateDest");
+                editor.apply();
+                refreshWaterfall();
+                break;
+            case R.id.main_menu_sort_tyoe:
+                editor.putString("mainSort", "type");
+                editor.apply();
+                refreshWaterfall();
+                break;
+            case R.id.main_menu_isDirFirst:
+                if (item.isChecked()) {
+                    editor.putBoolean("mainSortIsDirFirst", false);
+                    item.setChecked(false);
+                }
+                else {
+                    editor.putBoolean("mainSortIsDirFirst", true);
+                    item.setChecked(true);
+                }
+                editor.apply();
+                refreshWaterfall();
+                break;
+            case R.id.main_menu_refresh:
+                refreshWaterfall();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -939,86 +993,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void shareAPP() {
-        /*final String[] items = res.getStringArray(R.array.main_dialog_shareAPP_items);
-        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-        alertBuilder.setTitle(R.string.buildPicture_dialog_share_title);
-        alertBuilder.setItems(items, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface arg0, int index) {
-                switch (index) {
-                    case 0:
-                        //qq
-                        shareAPPByQq();
-                        break;
-                    case 1:
-                        //微信朋友圈
-                        shareAPPByWx(SendMessageToWX.Req.WXSceneTimeline);
-                        break;
-                    case 2:
-                        //微信好友
-                        shareAPPByWx(SendMessageToWX.Req.WXSceneSession);
-                        break;
-                }
-            }
-        });
-        alertBuilder.create().show();  */
         Share.showShareAppDialog(this, shareListener, MainActivity.this);
     }
 
-    /*private void shareAPPByWx(int shareTo) {
-        wxApi = WXAPIFactory.createWXAPI(this, "wx45ceac6c6d2f1aff", true);
-        wxApi.registerApp("wx45ceac6c6d2f1aff");
-
-        WXWebpageObject webpage = new WXWebpageObject();
-        webpage.webpageUrl = "http://sj.qq.com/myapp/detail.htm?apkName=com.equationl.videoshotpro";//收到分享的好友点击会跳转到这个地址里面去
-        WXMediaMessage msg = new WXMediaMessage(webpage);
-        msg.title = res.getString(R.string.main_SHARE_TO_QQ_TITLE);
-        msg.description = res.getString(R.string.main_SHARE_TO_QQ_SUMMARY);
-        try
-        {
-            Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.preview);
-            Bitmap thumbBmp = Bitmap.createScaledBitmap(bmp, 147, 237, true);
-            bmp.recycle();
-            msg.setThumbImage(thumbBmp);
-        }
-        catch (Exception e)
-        {
-            Toast.makeText(this, R.string.main_toast_createThumb_fail, Toast.LENGTH_SHORT).show();
-            CrashReport.postCatchedException(e);
-            return;
-        }
-        SendMessageToWX.Req req = new SendMessageToWX.Req();
-        req.transaction = "shareAPP";
-        req.message = msg;
-        req.scene = shareTo;
-
-        // 调用api接口发送数据到微信
-        wxApi.sendReq(req);
-        Share.shareAppToWx(this, shareTo);
-    }   */
-
-    /*private void shareAPPByQq() {
-        Tencent mTencent = Tencent.createInstance("1106257597", this);
-        final Bundle params = new Bundle();
-        params.putInt(QQShare.SHARE_TO_QQ_KEY_TYPE, QQShare.SHARE_TO_QQ_TYPE_APP);
-        params.putString(QQShare.SHARE_TO_QQ_TITLE, res.getString(R.string.main_SHARE_TO_QQ_TITLE));
-        params.putString(QQShare.SHARE_TO_QQ_SUMMARY, res.getString(R.string.main_SHARE_TO_QQ_SUMMARY));
-        params.putString(QQShare.SHARE_TO_QQ_IMAGE_URL, res.getString(R.string.main_SHARE_TO_QQ_IMAGE_URL));
-        params.putString(QQShare.SHARE_TO_QQ_APP_NAME, res.getString(R.string.main_SHARE_TO_QQ_APP_NAME));
-        //params.putInt(QQShare.SHARE_TO_QQ_EXT_INT, QQShare.SHARE_TO_QQ_FLAG_QZONE_AUTO_OPEN);
-        mTencent.shareToQQ(MainActivity.this, params, shareListener);
-        Share.shareAppToQQ(this, shareListener, MainActivity.this);
-    }   */
-
     private void shareAPPSuccess() {
-        /*sp_init = getSharedPreferences("init", Context.MODE_PRIVATE);
-        Toast.makeText(MainActivity.this, "分享成功！", Toast.LENGTH_SHORT).show();
-        SharedPreferences.Editor editor = sp_init.edit();
-        editor.putBoolean("isCloseAd", true);
-        editor.apply();  */
         Share.shareAppSuccess(this);
-        /*bv.destroy();
-        mRecyclerView.setPadding(0,0,0,0); */
     }
 
     IUiListener shareListener = new BaseUiListener() {
@@ -1145,7 +1124,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onItemClick(RecyclerView.ViewHolder vh) {
                 //Toast.makeText(MainActivity.this,vh.getAdapterPosition()+"",Toast.LENGTH_SHORT).show();
                 String filepath =  tool.getSaveRootPath();
-                String[] files = tool.getFileOrderByName(filepath, -1);
+                String[] files = getFiles(filepath);//tool.getFileOrderByName(filepath, -1);
                 //ImageZoom.show(MainActivity.this, filepath+"/"+files[vh.getAdapterPosition()], ImageUrlType.LOCAL);
                 Log.i(TAG, "ViewHolder object name="+vh.getClass().toString());
                 MainWaterFallAdapter.MyViewHolder holder2;
@@ -1168,7 +1147,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 Toast.makeText(MainActivity.this,vh.getAdapterPosition()+"buke",Toast.LENGTH_SHORT).show();  */
                 String filepath =  tool.getSaveRootPath();
-                String[] files = tool.getFileOrderByName(filepath, -1);
+                String[] files = getFiles(filepath);//tool.getFileOrderByName(filepath, -1);
                 MainWaterFallAdapter.MyViewHolder holder2;
                 try {     //避免长按vh为autoLoadMore对象导致转换类型出错闪退
                     holder2 = (MainWaterFallAdapter.MyViewHolder) vh;
@@ -1199,7 +1178,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         imageGroupList.put(0, v);
         if (f.isDirectory()) {
             List<Uri> uriList = new LinkedList<>();
-            for (String s : tool.getFileOrderByName(file, -1)) {
+            for (String s : getFiles(file)) {
                 uriList.add(Uri.parse(file+"/"+s));
             }
             if (uriList.size() < 1) {
@@ -1224,7 +1203,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
 
                 String filepath =  tool.getSaveRootPath();
-                String[] files = tool.getFileOrderByName(filepath, -1);
+                String[] files = getFiles(filepath);//tool.getFileOrderByName(filepath, -1);
 
                 Log.i(TAG, "files length="+files.length);
 
@@ -1248,7 +1227,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     if (new File(data.img).isDirectory()) {
                         data.text = "（合集）" + data.text;
                         data.isDirectory = true;
-                        String[] imgs = tool.getFileOrderByName(data.img, -1);
+                        String[] imgs = getFiles(data.img);//tool.getFileOrderByName(data.img, -1);
                         if (imgs.length < 1) {
                             data.img = null;
                         }
@@ -1269,7 +1248,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private List<WaterFallData> initWaterFallList() {
         String filepath =  tool.getSaveRootPath();
-        String[] files = tool.getFileOrderByName(filepath, -1);
+        String[] files = getFiles(filepath);//tool.getFileOrderByName(filepath, -1);
 
         waterFallList.clear();
         if (files.length <= 0) {
@@ -1296,7 +1275,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 data.text = "（合集）" + data.text;
                 data.isDirectory = true;
                //Log.i(TAG, "directory files:"+tool.getFileOrderByName(data.img)[0]);
-                String[] imgs = tool.getFileOrderByName(data.img, -1);
+                String[] imgs = getFiles(data.img);//tool.getFileOrderByName(data.img, -1);
                 if (imgs.length < 1) {
                     data.img = null;
                 }
@@ -1520,5 +1499,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
         snackbar.show();
+    }
+
+
+    private String[] getFiles(String path) {
+        String order = sp_init.getString("mainSort", "dateDest");
+        Boolean isDirFirst = sp_init.getBoolean("mainSortIsDirFirst", true);
+        if (order.equals("dateDest")) {
+            return tool.getFileOrderByName(path, -1, isDirFirst);
+        }
+        else if (order.equals("dateAsc")) {
+            return tool.getFileOrderByName(path, 1, isDirFirst);
+        }
+        else if (order.equals("type")) {
+            return tool.getFileOrderByType(path, isDirFirst);
+        }
+
+        return tool.getFileOrderByName(path, -1);
+    }
+
+    private void refreshWaterfall() {
+        waterFallList.clear();
+        mRecyclerView.getAdapter().notifyDataSetChanged();
+        waterFallDataPager = 0;
+        initRecycleView();
     }
 }

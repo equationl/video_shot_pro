@@ -15,8 +15,8 @@ android {
         applicationId "com.equationl.videoshotpro"
         minSdkVersion 17
         targetSdkVersion 26
-        versionCode 24
-        versionName "1.4 Pureté FIX02"
+        versionCode 25
+        versionName "1.4 Pureté Update03"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         ndk {
             //设置支持的SO库架构

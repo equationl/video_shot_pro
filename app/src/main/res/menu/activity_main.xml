@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:title="@string/main_menu_referesh"
+        android:id="@+id/main_menu_refresh" />
+    <item android:title="@string/main_menu_sort_title"
+        android:id="@+id/main_menu_sort_title">
+        <menu>
+            <item
+                android:title="@string/main_menu_sort_type"
+                android:id="@+id/main_menu_sort_tyoe" />
+            <item
+                android:title="@string/main_menu_sort_date_asc"
+                android:id="@+id/main_menu_sort_date_asc" />
+            <item
+                android:title="@string/main_menu_sort_date_dese"
+                android:id="@+id/main_menu_sort_date_desc" />
+        </menu>
+    </item>
+    <group
+        android:checkableBehavior="all">
+        <item
+            android:title="@string/main_menu_isDirFirst"
+            android:id="@+id/main_menu_isDirFirst"
+            android:checkable="true"
+            android:checked="true"/>
+    </group>
+</menu>
