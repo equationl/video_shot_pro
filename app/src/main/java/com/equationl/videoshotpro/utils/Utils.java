@@ -67,6 +67,7 @@ public class Utils {
         //默认的应用市场列表，有些应用市场没有设置APP_MARKET通过隐式搜索不到
         ArrayList<String>  pkgList = new ArrayList<>();
         //将我们上传的应用市场都传上去
+        pkgList.add("com.android.vending");                        //Google Play
         pkgList.add("com.coolapk.market");                        //酷安
         pkgList.add("com.tencent.android.qqdownloader");        //腾讯应用宝
         pkgList.add("com.baidu.appsearch");                     //百度手机助手

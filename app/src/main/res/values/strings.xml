@@ -30,6 +30,14 @@
     </string>
 
     <string name="about_updateHistory_text">
+        1.4 Pureté Update03:\n
+        \t*首页瀑布流展示支持自定义排序方式\n
+        \t*修复若干可能引发闪退的BUG\n
+        1.4 Pureté Fix02:\n
+        \t*新增英文语言支持\n
+        \t*优化部分动画效果\n
+        \t*优化FFmpeg命令行使用体验\n
+        \t*修复概率性出现漏截的BUG\n
         1.4 Pureté Fix01:\n
         \t*修复若干BUG\n
         1.4 Pureté:\n
@@ -199,7 +207,7 @@
 
     <string name="main_dialog_btn_cancel">取消</string>
     <string name="main_dialog_btn_ok">确定</string>
-    <string name="main_dialog_disablePermission_content">请在-应用设置-权限-中，至少允许 %1$s 使用存储权限来保存您的作品</string>
+    <string name="main_dialog_disablePermission_content">请在 应用设置-权限 中，至少允许 %1$s 使用存储权限来保存您的作品</string>
     <string name="main_dialog_disablePermission_title">未授予足够的权限</string>
     <string name="main_dialog_noPermission_title">授予权限</string>
     <string name="main_dialog_noPermission_content">您需要授予储存权限给我，我才能保存您的作品哦~</string>
@@ -272,6 +280,14 @@
         <item>微信朋友圈</item>
         <item>微信好友</item>
     </string-array>
+
+    <string name="main_menu_referesh">刷新</string>
+    <string name="main_menu_sort_title">排序</string>
+    <string name="main_menu_sort_date_dese">时间（降序）</string>
+    <string name="main_menu_sort_date_asc">时间（升序）</string>
+    <string name="main_menu_sort_type">类型</string>
+    <string name="main_menu_isDirFirst">合集始终在前</string>
+
 
     <string name="WXEntry_toast_share_ERR_AUTH_DENIED">分享失败：认证失败！请联系开发者解决。</string>
     <string name="WXEntry_toast_share_ERR_SENT_FAILED">分享失败：发送失败！</string>
@@ -558,6 +574,9 @@
     <string name="about_guide_text_thanks">点击可以查看开源相关哦~</string>
     <string name="about_dialog_title_history">更新历史</string>
     <string name="about_dialog_title_support">支持作者</string>
-    <string name="about_dialog_text_support">亲爱的使用者，本app能够得到您的青睐已经是我最大的荣幸了，如果想要支持我的工作，请将本app推荐给您的朋友吧~（在首页侧边栏点击 推荐给好友即可快速分享）\n 您的支持就是我最大的动力！如果您能给予我五星好评我会更高兴的哦~（在本页面点击logo就可以快速跳转到应用市场了）\n 本APP已开源，欢迎贡献代码或star~</string>
+    <string name="about_dialog_text_support">亲爱的使用者，本app能够得到您的青睐已经是我最大的荣幸了，如果想要支持我的工作，请将本app推荐给您的朋友吧~（在首页侧边栏点击 推荐给好友即可快速分享）\n
+        您的支持就是我最大的动力！如果您能给予我五星好评我会更高兴的哦~（在本页面点击logo就可以快速跳转到应用市场了）\n
+        本APP已开源，欢迎贡献代码或star~\n
+    开源地址：https://gitee.com/equation/video_shot_pro/</string>
 
 </resources>

@@ -788,19 +788,28 @@ public class Tools{
      *
      * @param filePath 路径
      * @param sort 排序方式（正序：1， 倒序：-1）
+     * @param isDirFirst 是否文件夹优先
      * @return 返回文件名数组
     * */
-    public String[] getFileOrderByName(String filePath, final int sort) {
-        List <File> files = Arrays.asList(new File(filePath).listFiles());
+    public String[] getFileOrderByName(String filePath, final int sort, final boolean isDirFirst) {
+        List <File> files;
+        try {
+            files = Arrays.asList(new File(filePath).listFiles());
+        } catch(NullPointerException e) {
+            CrashReport.postCatchedException(e);
+            return new String[0];
+        }
         Collections.sort(files, new Comparator< File>() {
             @Override
             public int compare(File o1, File o2) {
                 long i1 = getFileNameToLong(o1);
                 long i2 = getFileNameToLong(o2);
-                if (o1.isDirectory() && o2.isFile())
-                    return -1;
-                if (o1.isFile() && o2.isDirectory())
-                    return 1;
+                if (isDirFirst) {
+                    if (o1.isDirectory() && o2.isFile())
+                        return -1;
+                    if (o1.isFile() && o2.isDirectory())
+                        return 1;
+                }
                 if (i1 > i2)
                     return sort==1 ? 1:-1;
                 if (i1 < i2)
@@ -815,6 +824,57 @@ public class Tools{
             array[i] = files.get(i).getName();
         }
         return array;
+    }
+
+    /**
+     * 获取按照文件名排序的指定路径下所有文件（夹）名
+     *
+     * @param filePath 路径
+     * @param sort 排序方式（正序：1， 倒序：-1）
+     * @return 返回文件名数组
+     * */
+    public String[] getFileOrderByName(String filePath, final int sort) {
+        return getFileOrderByName(filePath, sort, true);
+    }
+
+    public String[] getFileOrderByType(String filePath, final boolean isDirFirst) {
+        List <File> files;
+        try {
+            files = Arrays.asList(new File(filePath).listFiles());
+        } catch(NullPointerException e) {
+            CrashReport.postCatchedException(e);
+            return new String[0];
+        }
+        Collections.sort(files, new Comparator< File>() {
+            @Override
+            public int compare(File o1, File o2) {
+                String t1="",t2="";
+                if (!o1.isDirectory())
+                    t1 = getFileType(o1);
+                if (!o2.isDirectory())
+                    t2 = getFileType(o2);
+                if (isDirFirst) {
+                    if (o1.isDirectory() && o2.isFile())
+                        return -1;
+                    if (o1.isFile() && o2.isDirectory())
+                        return 1;
+                }
+                if (t1.equals(t2))
+                    return 0;
+
+                return t1.compareTo(t2);
+            }
+        });
+        String[] array = new String[files.size()];
+        for (int i=0; i<files.size(); i++) {
+            array[i] = files.get(i).getName();
+        }
+        return array;
+    }
+
+    private String getFileType(File file) {
+        String fileName=file.getName();
+        return fileName.substring(fileName.lastIndexOf("."),fileName.length());
     }
 
     private long getFileNameToLong(File f1) {

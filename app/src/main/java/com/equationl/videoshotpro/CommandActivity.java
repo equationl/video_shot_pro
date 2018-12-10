@@ -1,7 +1,9 @@
 package com.equationl.videoshotpro;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,6 +14,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ScrollView;
@@ -38,7 +43,7 @@ public class CommandActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_command);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.command_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -48,6 +53,30 @@ public class CommandActivity extends AppCompatActivity {
         sv = (ScrollView) findViewById(R.id.command_scroll);
 
         tool = new Tools();
+
+
+        /*
+         * from:https://blog.csdn.net/stimgo/article/details/80884146
+         * 监听键盘是否弹出，防止键盘遮挡输出信息
+        * */
+        edittext.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            //当键盘弹出隐藏的时候会 调用此方法。
+            @Override
+            public void onGlobalLayout() {
+                Rect r = new Rect();
+                //获取当前界面可视部分
+                getWindow().getDecorView().getWindowVisibleDisplayFrame(r);
+                //获取屏幕的高度
+                int screenHeight = getWindow().getDecorView().getRootView().getHeight();
+                //此处就是用来获取键盘的高度的， 在键盘没有弹出的时候 此高度为0 键盘弹出的时候为一个正数
+                int heightDifference = screenHeight - r.bottom;
+                if (heightDifference > 0) {
+                    scrollToBottom(sv, textview);
+                } else {
+                }
+            }
+        });
+
 
         btn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -62,6 +91,7 @@ public class CommandActivity extends AppCompatActivity {
                             @Override
                             public void onStart() {
                                 btn.setClickable(false);
+                                hintKeyBoard();
                             }
                             @Override
                             public void onFailure(String message) {
@@ -198,6 +228,22 @@ public class CommandActivity extends AppCompatActivity {
                 scroll.scrollTo(0, offset);
             }
         });
+    }
+
+    /**
+     * from:https://www.jianshu.com/p/3f2b0ad3565b
+     * */
+    public void hintKeyBoard() {
+        //拿到InputMethodManager
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        //如果window上view获取焦点 && view不为空
+        if (imm.isActive() && getCurrentFocus() != null) {
+            //拿到view的token 不为空
+            if (getCurrentFocus().getWindowToken() != null) {
+                //表示软键盘窗口总是隐藏，除非开始时以SHOW_FORCED显示。
+                imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+            }
+        }
     }
 
 }

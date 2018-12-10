@@ -10,13 +10,13 @@ android {
         }
     }
     compileSdkVersion 26
-    buildToolsVersion '28.0.2'
+    buildToolsVersion '28.0.3'
     defaultConfig {
         applicationId "com.equationl.videoshotpro"
         minSdkVersion 17
         targetSdkVersion 26
-        versionCode 23
-        versionName "1.4 Pureté FIX01"
+        versionCode 25
+        versionName "1.4 Pureté Update03"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         ndk {
             //设置支持的SO库架构

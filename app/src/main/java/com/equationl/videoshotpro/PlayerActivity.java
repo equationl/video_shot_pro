@@ -29,6 +29,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
+import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
@@ -42,6 +43,7 @@ import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunnin
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.Timer;
@@ -408,8 +410,10 @@ public class PlayerActivity extends AppCompatActivity {
                         outPathName = externalCacheDir.toString()+"/"+shot_num+".png";
                     }
 
-                    String cmd[] = {"-ss", ""+(time/1000.0), "-i", path, "-y", "-f", "image2", "-t", "0.001", outPathName};
+                    String cmd[] = {"-ss", ""+(time/1000.0), "-t", "0.001", "-i", path, "-update", "1", "-y", "-f", "image2", outPathName};
                     try {
+                        Log.i(TAG, "cmd="+Arrays.toString(cmd));
+
                         ffmpeg.execute(cmd, new ExecuteBinaryResponseHandler() {
                            @Override
                             public void onFailure(String message) {
@@ -423,7 +427,8 @@ public class PlayerActivity extends AppCompatActivity {
                             public void onSuccess(String message) {
                                 shot_num++;
                                 mark_time.poll();
-                                Log.i("el_test:", "onSuccess");
+                                Log.i("TAG", "onSuccess:");
+                                Log.i(TAG, message);
                                 Message msg = Message.obtain();
                                 msg.obj = String.format(res.getString(R.string.player_text_shotStatus),pic_num,shot_num);
                                 msg.what = 1;
@@ -449,7 +454,7 @@ public class PlayerActivity extends AppCompatActivity {
                     }
                 }
                 else {
-                    Log.i("el_test", "running");
+                    Log.i("TAG", "ffmpeg is running");
                 }
             }
             if (isDone) {
