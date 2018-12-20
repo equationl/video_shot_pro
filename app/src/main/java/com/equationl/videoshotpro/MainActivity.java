@@ -13,6 +13,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.media.MediaScannerConnection;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Build;
@@ -78,6 +79,7 @@ import com.yancy.gallerypick.inter.IHandlerCallBack;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -528,7 +530,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private class MyThreadCopyFile implements Runnable {
         @Override
         public  void run() {
-            if (tool.copyFileToCahe(FileList, getExternalCacheDir().toString(), extension)) {
+            if (tool.copyFileToCache(FileList, getExternalCacheDir().toString(), extension)) {
                 handler.sendEmptyMessage(HandlerStatusCopyFileDone);
             }
             else {
@@ -788,6 +790,67 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         void confirmResult(boolean confirm);
     }
 
+    private void showCommonDialog(int content, int btn, final int from) {
+        Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
+                .setTitle(R.string.main_dialog_title_hint)
+                .setMessage(content)
+                .setPositiveButton(res.getString(btn),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                switch (from) {
+                                    case SnackBarOnClickDoSure:
+                                        break;
+                                    case SnackBarOnClickDoReloadFFmpeg:
+                                        loadLib();
+                                        break;
+                                    case SnackBarOnClickDoFeedback:
+                                        startActivity(new Intent(MainActivity.this, FeedbackActivity.class));
+                                        break;
+                                }
+                            }
+                        }).create();
+        dialog.show();
+    }
+
+    private void showDeletePicDialog(final File f, final int pos, final boolean fromDir) {
+        boolean isDeleteLocalPic = sp_init.getBoolean("isDeleteLocalPic", true);
+        boolean initChoiceSets[] = {isDeleteLocalPic};
+        Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
+                .setTitle(R.string.main_dialog_deletePic_title)
+                .setMultiChoiceItems(R.array.main_dialog_deletePic_content, initChoiceSets,
+                        new DialogInterface.OnMultiChoiceClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which,
+                                                boolean isChecked) {
+                                if (isChecked) {
+                                    SharedPreferences.Editor editor = sp_init.edit();
+                                    editor.putBoolean("isDeleteLocalPic", true);
+                                    editor.apply();
+                                } else {
+                                    SharedPreferences.Editor editor = sp_init.edit();
+                                    editor.putBoolean("isDeleteLocalPic", false);
+                                    editor.apply();
+                                }
+                            }
+                        })
+                .setPositiveButton(R.string.main_dialog_btn_ok,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                clickDeletePic(f, pos, fromDir);
+                            }
+                        })
+                .setNegativeButton(R.string.main_dialog_btn_cancel,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        }
+                        )
+                .create();
+        dialog.show();
+    }
 
     private void showSplicingDialog() {
         Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
@@ -910,24 +973,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void btn_feedback() {
         Intent intent = new Intent(MainActivity.this, FeedbackActivity.class);
         startActivity(intent);
-        /*String versionName;
-        int currentapiVersion=0;
-        try {
-            PackageManager packageManager = getPackageManager();
-            PackageInfo packInfo = packageManager.getPackageInfo(getPackageName(),0);
-            versionName = packInfo.versionName;
-            currentapiVersion=android.os.Build.VERSION.SDK_INT;
-        }
-        catch (Exception ex) {
-            versionName = "NULL";
-        }
-        String mail_content = String.format(getResources().getString(R.string.main_mail_content),
-                versionName, currentapiVersion+"", android.os.Build.MODEL);   */
-            /*Intent data=new Intent(Intent.ACTION_SENDTO);
-            data.setData(Uri.parse("mailto:admin@likehide.com"));
-            data.putExtra(Intent.EXTRA_SUBJECT, this.getResources().getString(R.string.main_mail_title));
-            data.putExtra(Intent.EXTRA_TEXT, mail_content);
-            startActivity(data);   */
     }
 
     private void btn_shotFrame() {
@@ -946,11 +991,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    private void showNavigationGuider() {
-        drawer.openDrawer(Gravity.START);
-        Toast.makeText(this, R.string.main_toast_showNavigationGuider, Toast.LENGTH_LONG).show();
-    }
-
     private static class MyHandler extends Handler {
         private final WeakReference<MainActivity> mActivity;
 
@@ -964,13 +1004,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (activity != null) {
                 switch (msg.what) {
                     case HandlerStatusLoadLibsFailure:
-                        activity.showSnackBar( R.string.main_snackbar_loadSo_fail,  SnackBarOnClickDoReloadFFmpeg, R.string.main_snackbar_btn_retry);
+                        activity.showCommonDialog(R.string.main_snackbar_loadSo_fail, R.string.main_snackbar_btn_retry, SnackBarOnClickDoReloadFFmpeg);
                         break;
                     case HandlerStatusFFmpegNotSupported:
-                        activity.showSnackBar(R.string.main_snackbar_so_notAble, SnackBarOnClickDoFeedback, R.string.main_snackbar_btn_contact);
+                        activity.showCommonDialog(R.string.main_snackbar_so_notAble, R.string.main_snackbar_btn_contact, SnackBarOnClickDoFeedback);
                         break;
                     case HandlerStatusPackageNameNotRight:
-                        activity.showSnackBar(R.string.main_snackbar_isPiracy, SnackBarOnClickDoSure, R.string.main_snackbar_sure);
+                        activity.showCommonDialog(R.string.main_snackbar_isPiracy, R.string.main_snackbar_sure, SnackBarOnClickDoSure);
                         break;
                     case HandlerStatusCopyFileDone:
                         activity.dialog_copyFile.dismiss();
@@ -1325,12 +1365,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void showPopupMenu(View view, final String img, final int pos) {
-        PopupMenu popupMenu = new PopupMenu(MainActivity.this, view);
+        final PopupMenu popupMenu = new PopupMenu(MainActivity.this, view);
         popupMenu.getMenuInflater().inflate(R.menu.main_card_popup_menu, popupMenu.getMenu());
         popupMenu.show();
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
+                popupMenu.dismiss();
                 switch (item.getItemId()) {
                     case R.id.main_popupMenu_delete:
                         deletePicture(img, pos);
@@ -1355,8 +1396,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void deletePicture(String img, final int pos, final boolean fromDir) {
         final File f = new File(img);
-
-        showSnackBar(R.string.main_snackbar_deleteTip, SnackBarOnClickDoDeletePicture, R.string.main_snackbar_deleteSure, f, pos, fromDir);
+        showDeletePicDialog(f, pos, fromDir);   //TODO
+        //showSnackBar(R.string.main_snackbar_deleteTip, SnackBarOnClickDoDeletePicture, R.string.main_snackbar_deleteSure, f, pos, fromDir);
     }
 
     private void deletePicture(String img, final int pos) {
@@ -1366,7 +1407,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void sharePicture(String img) {
         File f = new File(img);
         if (f.isDirectory()) {
-            showSnackBar(R.string.main_snackbar_shareDirectoryTip, SnackBarOnClickDoSure, R.string.main_snackbar_sure);
+            showCommonDialog(R.string.main_snackbar_shareDirectoryTip, R.string.main_snackbar_sure, SnackBarOnClickDoSure);
         }
         else {
             Share.showSharePictureDialog(this, new File(img), shareListener, MainActivity.this);
@@ -1406,42 +1447,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .add(fancyShowCaseView2);
 
         mQueue.show();
-    }
-
-    /*
-    * From: https://www.jianshu.com/p/4e7b26c8afca
-    * */
-    public void showSnackBar(int message, final int onClick, int  tipText) {
-        //去掉虚拟按键
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION //隐藏虚拟按键栏
-                | View.SYSTEM_UI_FLAG_IMMERSIVE //防止点击屏幕时,隐藏虚拟按键栏又弹了出来
-        );
-        snackbar = Snackbar.make(getWindow().getDecorView(), message, Snackbar.LENGTH_INDEFINITE);
-        snackbar.setAction(tipText, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dismissSnackBar();
-                switch (onClick) {
-                    case SnackBarOnClickDoSure:
-                        break;
-                    case SnackBarOnClickDoReloadFFmpeg:
-                        loadLib();
-                        break;
-                    case SnackBarOnClickDoFeedback:
-                        startActivity(new Intent(MainActivity.this, FeedbackActivity.class));
-                        break;
-                }
-            }
-        });
-        snackbar.setCallback(new Snackbar.Callback() {
-            @Override
-            public void onDismissed(Snackbar snackbar, int event) {
-                super.onDismissed(snackbar, event);
-                dismissSnackBar();
-            }
-        });
-        snackbar.show();
     }
 
     /**
@@ -1484,7 +1489,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             }
                         }
                         else{
-                            waterFallList.remove(pos);
+                            if (waterFallList.size() >= pos) {
+                                waterFallList.remove(pos);
+                            }
                             mRecyclerView.getAdapter().notifyDataSetChanged();
                         }
                         break;
@@ -1523,5 +1530,44 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mRecyclerView.getAdapter().notifyDataSetChanged();
         waterFallDataPager = 0;
         initRecycleView();
+    }
+
+    private void clickDeletePic(File f, int pos, boolean fromDir) {
+        if (!sp_init.getBoolean("isDeleteLocalPic", true)) {
+            if (f.isDirectory()) {
+                try {
+                    tool.copyDir(f.toString(),
+                            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()+"/"+f.getName());
+                } catch (IOException E) {}
+            }
+            else {
+                String saveTo = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()+"/"+f.getName();
+                try {
+                    tool.copyFile(f,
+                            new File(saveTo));
+                } catch (IOException e) {}
+                MediaScannerConnection.scanFile(MainActivity.this, new String[]{saveTo}, null, null);
+            }
+        }
+
+        if (f.isDirectory())
+            tool.deleteDirectory(f);
+        else
+            tool.deleteFile(f);
+
+        if (fromDir) {
+            //FIXME 应当改为直接退出imagewatcher界面而不是靠模拟返回键来退出
+            try {
+                Runtime.getRuntime().exec("input keyevent "+KeyEvent.KEYCODE_BACK);
+            } catch (Exception e) {
+                Log.e(TAG, "模拟返回键出错");
+            }
+        }
+        else{
+            if (waterFallList.size() >= pos) {
+                waterFallList.remove(pos);
+            }
+            mRecyclerView.getAdapter().notifyDataSetChanged();
+        }
     }
 }
