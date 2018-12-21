@@ -233,7 +233,7 @@ public class Tools{
     /**
      * 裁切图片
      * */
-    public Bitmap cutBimap(Bitmap bm, int startY, int width) {
+    public Bitmap cutBitmap(Bitmap bm, int startY, int width) {
         int height = bm.getHeight()-startY;
         if (height <= 0) {
             height = (int)(bm.getHeight()-bm.getHeight()*0.8);
@@ -271,7 +271,11 @@ public class Tools{
                     return path;
                 }
 
-                Uri contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+                Uri contentUri = imageUri;
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                    contentUri = ContentUris.withAppendedId(
+                            Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+                }
                 return getDataColumn(context, contentUri, null, null);
             } else if (isMediaDocument(imageUri)) {
                 String docId = DocumentsContract.getDocumentId(imageUri);
@@ -353,7 +357,7 @@ public class Tools{
     }
 
 
-    public Boolean copyFileToCahe(List <String> files, String save_path, String extension) {
+    public Boolean copyFileToCache(List <String> files, String save_path, String extension) {
         int i = 0;
         for (String path : files) {
             try {
@@ -364,6 +368,22 @@ public class Tools{
             i++;
         }
         return true;
+    }
+
+    public void copyDir(String sourcePath, String newPath) throws IOException {
+        File file = new File(sourcePath);
+        String[] filePath = file.list();
+
+        if (!(new File(newPath)).exists()) {
+            (new File(newPath)).mkdir();
+        }
+
+        for (int i = 0; i < filePath.length; i++) {
+            if (new File(sourcePath  + file.separator + filePath[i]).isFile()) {
+                copyFile(new File(sourcePath + file.separator + filePath[i]),
+                        new File(newPath + file.separator + filePath[i]));
+            }
+        }
     }
 
     public void copyFile(File fromFile,File toFile) throws IOException {

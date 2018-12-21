@@ -419,4 +419,9 @@
     <string name="main_menu_sort_date_asc">Date(asc)</string>
     <string name="main_menu_sort_type">Type</string>
     <string name="main_menu_isDirFirst">Folder first</string>
+    <string name="main_dialog_title_hint">Hint</string>
+    <string name="main_dialog_deletePic_title">Are you sure?</string>
+    <string-array name="main_dialog_deletePic_content">
+        <item>Delete local file too</item>
+    </string-array>
 </resources>

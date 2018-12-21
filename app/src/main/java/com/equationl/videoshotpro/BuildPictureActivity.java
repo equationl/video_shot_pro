@@ -80,6 +80,7 @@ public class BuildPictureActivity extends AppCompatActivity {
     private static final int HandlerStatusBuildPictureDone = 10088;
     private static final int HandlerStatusBuildPictureUpdateBitmap = 10089;
     private static final int HandlerStatusBuildPictureFail = 10090;
+    private static final int HandlerGetBitmapFail = 10091;
 
 
     @Override
@@ -259,7 +260,7 @@ public class BuildPictureActivity extends AppCompatActivity {
         }
 
         if (bm == null) {
-            Toast.makeText(this, R.string.buildPicture_dialog_getBitmap_fail, Toast.LENGTH_LONG).show();
+            handler.sendEmptyMessage(HandlerGetBitmapFail);
             finish();
         }
         return bm;
@@ -411,7 +412,7 @@ public class BuildPictureActivity extends AppCompatActivity {
 
     private Bitmap cutBitmap(Bitmap bm) {
         //return Bitmap.createBitmap(bm, 0, (int)startY, bWidth, (int)(bm.getHeight()-startY));
-        return tool.cutBimap(bm, (int)startY, bWidth);
+        return tool.cutBitmap(bm, (int)startY, bWidth);
     }
 
     private Bitmap addBitmap(Bitmap first, Bitmap second) {
@@ -436,43 +437,6 @@ public class BuildPictureActivity extends AppCompatActivity {
         return flag;
     }
 
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        Log.i("cao", "In BuildPictureActivity onDestroy");
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        Log.i("cao", "In BuildPictureActivity onStop");
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        Log.i("cao", "In BuildPictureActivity onPause");
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        Log.i("cao", "In BuildPictureActivity onResume");
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        Log.i("cao", "In BuildPictureActivity onStart");
-    }
-
-    @Override
-    public void onRestart() {
-        super.onRestart();
-        Log.i("cao", "In BuildPictureActivity onRestart");
-    }
 
     private void updateMemoryText() {
         int maxMemory = ((int) Runtime.getRuntime().maxMemory())/1024/1024;
@@ -549,11 +513,19 @@ public class BuildPictureActivity extends AppCompatActivity {
 
                     case HandlerStatusBuildPictureFail:
                         Toast.makeText(activity,msg.obj.toString(), Toast.LENGTH_LONG).show();
-                        activity.dialog.dismiss();
+                        try {   //避免非正常退出导致的闪退
+                            activity.dialog.dismiss();
+                        } catch (IllegalArgumentException e) {
+                            Log.i(TAG, "At HandlerStatusBuildPictureFail, dismiss dialog fail!");
+                        }
                         activity.isDone = 1;
                         activity.btn_up.setText("退出");
                         activity.btn_down.setVisibility(View.GONE);
                         activity.btn_done.setVisibility(View.GONE);
+                        break;
+
+                    case HandlerGetBitmapFail:
+                        Toast.makeText(activity, R.string.buildPicture_dialog_getBitmap_fail, Toast.LENGTH_LONG).show();
                         break;
 
                     case HandlerStatusOutOfMemory:
