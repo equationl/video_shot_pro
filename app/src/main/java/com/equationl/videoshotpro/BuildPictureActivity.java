@@ -513,7 +513,11 @@ public class BuildPictureActivity extends AppCompatActivity {
 
                     case HandlerStatusBuildPictureFail:
                         Toast.makeText(activity,msg.obj.toString(), Toast.LENGTH_LONG).show();
-                        activity.dialog.dismiss();
+                        try {   //避免非正常退出导致的闪退
+                            activity.dialog.dismiss();
+                        } catch (IllegalArgumentException e) {
+                            Log.i(TAG, "At HandlerStatusBuildPictureFail, dismiss dialog fail!");
+                        }
                         activity.isDone = 1;
                         activity.btn_up.setText("退出");
                         activity.btn_down.setVisibility(View.GONE);

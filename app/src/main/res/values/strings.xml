@@ -30,6 +30,10 @@
     </string>
 
     <string name="about_updateHistory_text">
+        1.4 Pureté Fix04:\n
+        \t*新增删除作品时是否删除本地文件\n
+        \t*修复无法点击删除文件时确定按钮的BUG\n
+        \t*修复某些可能引起闪退的BUG\n
         1.4 Pureté Update03:\n
         \t*首页瀑布流展示支持自定义排序方式\n
         \t*修复若干可能引发闪退的BUG\n

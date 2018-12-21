@@ -33,7 +33,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
@@ -108,7 +107,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     int activityResultMode = 0;
     Boolean isFirstBoot = false;
     boolean isTranslucentStatus = false;
-    Snackbar snackbar;
     Utils utils = new Utils();
     FloatingActionsMenu main_floatBtn_menu;
     FloatingActionButton main_floatBtn_quick;
@@ -165,6 +163,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         instance = this;
 
+        initLayout();
+        initRecycleView();
+        showGuide();
+    }
+
+    private void initLayout() {
         dialog_copyFile = new ProgressDialog(this);
         dialog_copyFile.setProgressStyle(ProgressDialog.STYLE_SPINNER);// 设置样式
         dialog_copyFile.setIndeterminate(false);
@@ -201,7 +205,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
         main_floatBtn_menu = (FloatingActionsMenu) findViewById(R.id.main_floatBtn_menu);
         main_floatBtn_quick = (FloatingActionButton) findViewById(R.id.main_floatBtn_quick);
         main_floatBtn_splicing = (FloatingActionButton) findViewById(R.id.main_floatBtn_splicing);
@@ -210,29 +213,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         mRecyclerView = (RecyclerView) findViewById(R.id.main_recyclerView);
 
-        //main_floatBtn_menu.setClosedOnTouchOutside(true);
-        //main_floatBtn_menu.hideMenuButton(false);
-
         main_floatBtn_quick.setOnClickListener(clickListener);
         main_floatBtn_splicing.setOnClickListener(clickListener);
         main_floatBtn_shotScreen.setOnClickListener(clickListener);
         main_floatBtn_frameByFrame.setOnClickListener(clickListener);
-
-        initRecycleView();
-
-
-        //main_floatBtn_menu.showMenuButton(true);
-        /*main_floatBtn_menu.setOnMenuButtonClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (main_floatBtn_menu.isOpened()) {
-                    //Toast.makeText(MainActivity.this, main_floatBtn_menu.getMenuButtonLabelText(), Toast.LENGTH_SHORT).show();
-                }
-
-                main_floatBtn_menu.toggle(true);
-            }
-        });   */
-
 
         dialog = new AlertDialog.Builder(this);
 
@@ -246,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
 
 
-        Thread t = new Thread(new MainActivity.MyThread());
+        Thread t = new Thread(new MainActivity.InitThread());
         t.start();
 
         int userFlagID = sp_init.getInt("userFlagID", 0);
@@ -265,8 +249,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .provider("com.equationl.videoshotpro.fileprovider")
                 .multiSelect(true, 100)
                 .build();
-
-        showGuide();
     }
 
     @Override
@@ -508,7 +490,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    private class MyThread implements Runnable {
+    private class InitThread implements Runnable {
         @Override
         public void run() {
             loadLib();
@@ -902,21 +884,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void showAboutDialog() {
-        /*String content = String.format(
-                res.getString(R.string.main_dialog_about_content),
-                res.getString(R.string.main_updateHistory_text),
-                res.getString(R.string.main_right_text));
-        Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
-                .setTitle(R.string.main_dialog_about_title)
-                .setMessage(content)
-                .setPositiveButton(res.getString(R.string.main_dialog_btn_ok),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        }).create();
-        dialog.show();   */
         Intent intent = new Intent(MainActivity.this, AboutActivity.class);
         startActivity(intent);
     }
@@ -1333,9 +1300,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mOnPictureLongPressListener = new ImageWatcher.OnPictureLongPressListener() {
             @Override
             public void onPictureLongPress(ImageView v, final Uri url, final int pos) {
-                //Toast.makeText(MainActivity.this, "call long press:"+url, Toast.LENGTH_SHORT).show();
                 String[] items;
-                //Log.i(TAG, "in longPress path= "+new File(url.toString()).getParent()+" RootPath= "+tool.getSaveRootPath());
                 if (!new File(url.toString()).getParent().equals(tool.getSaveRootPath())) {
                     items = new String[] {"分享", "删除"};
                 }
@@ -1349,11 +1314,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         switch (i) {
                             case 0:
                                 sharePicture(url.toString());
-                                //Toast.makeText(MainActivity.this, "分享 "+url, Toast.LENGTH_SHORT).show();
                                 break;
                             case 1:
                                 deletePicture(url.toString(), pos, true);
-                                //Toast.makeText(MainActivity.this, "删除 "+url, Toast.LENGTH_SHORT).show();
                                 break;
                         }
                     }
@@ -1375,11 +1338,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 switch (item.getItemId()) {
                     case R.id.main_popupMenu_delete:
                         deletePicture(img, pos);
-                        //Toast.makeText(MainActivity.this, "删除 "+img, Toast.LENGTH_SHORT).show();
                         break;
                     case R.id.main_popupMenu_share:
                         sharePicture(img);
-                        //Toast.makeText(MainActivity.this, "分享 "+img, Toast.LENGTH_SHORT).show();
                         break;
                 }
                 return false;
@@ -1396,8 +1357,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void deletePicture(String img, final int pos, final boolean fromDir) {
         final File f = new File(img);
-        showDeletePicDialog(f, pos, fromDir);   //TODO
-        //showSnackBar(R.string.main_snackbar_deleteTip, SnackBarOnClickDoDeletePicture, R.string.main_snackbar_deleteSure, f, pos, fromDir);
+        showDeletePicDialog(f, pos, fromDir);
     }
 
     private void deletePicture(String img, final int pos) {
@@ -1413,24 +1373,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Share.showSharePictureDialog(this, new File(img), shareListener, MainActivity.this);
         }
     }
-
-    /*@Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-        switch (ev.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                if (main_floatBtn_menu.isExpanded()) {
-                    main_floatBtn_menu.setEnabled(false);
-                }
-                main_floatBtn_menu.collapse();
-                break;
-            case MotionEvent.ACTION_UP:
-                main_floatBtn_menu.setEnabled(true);
-                break;
-        }
-        return super.dispatchTouchEvent(ev);
-
-    }   */
-
 
     private void showGuide() {
         final FancyShowCaseView fancyShowCaseView1 = new FancyShowCaseView.Builder(this)
@@ -1448,66 +1390,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         mQueue.show();
     }
-
-    /**
-     * 隐藏一个SnackBar
-     */
-    public void dismissSnackBar() {
-        if (snackbar != null && snackbar.isShownOrQueued()) {//不为空，是否正在显示或者排队等待即将要显示
-            snackbar.dismiss();
-            snackbar = null;
-        }
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-    }
-
-    public void showSnackBar(int message, final int onClick, int  tipText, final File f, final int pos, final boolean fromDir) {
-        //去掉虚拟按键
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION //隐藏虚拟按键栏
-                | View.SYSTEM_UI_FLAG_IMMERSIVE //防止点击屏幕时,隐藏虚拟按键栏又弹了出来
-        );
-        snackbar = Snackbar.make(getWindow().getDecorView(), message, Snackbar.LENGTH_LONG);
-        snackbar.setActionTextColor(Color.RED);
-        snackbar.setAction(tipText, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dismissSnackBar();
-                switch (onClick) {
-                    case SnackBarOnClickDoDeletePicture:
-                        if (f.isDirectory()) {
-                            tool.deleteDirectory(f);
-                        }
-                        else {
-                            tool.deleteFile(f);
-                        }
-                        if (fromDir) {
-                            //FIXME 应当改为直接退出imagewatcher界面而不是靠模拟返回键来退出
-                            try {
-                                Runtime.getRuntime().exec("input keyevent "+KeyEvent.KEYCODE_BACK);
-                            } catch (Exception e) {
-                                Log.e(TAG, "模拟返回键出错");
-                            }
-                        }
-                        else{
-                            if (waterFallList.size() >= pos) {
-                                waterFallList.remove(pos);
-                            }
-                            mRecyclerView.getAdapter().notifyDataSetChanged();
-                        }
-                        break;
-                }
-            }
-        });
-        snackbar.setCallback(new Snackbar.Callback() {
-            @Override
-            public void onDismissed(Snackbar snackbar, int event) {
-                super.onDismissed(snackbar, event);
-                dismissSnackBar();
-            }
-        });
-        snackbar.show();
-    }
-
 
     private String[] getFiles(String path) {
         String order = sp_init.getString("mainSort", "dateDest");
