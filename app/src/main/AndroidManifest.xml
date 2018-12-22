@@ -78,17 +78,6 @@
                 android:resource="@xml/provider_paths"
                 tools:replace="name,resource" />
         </provider>
-        <provider
-            android:name=".utils.GdtFileProvider"
-            android:authorities="${applicationId}.fileProvider"
-            android:exported="false"
-            android:grantUriPermissions="true"
-            tools:replace="name,authorities,exported,grantUriPermissions">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/gdt_file_path"
-                tools:replace="name,resource" />
-        </provider>
 
         <service
             android:name=".FloatWindowsService"

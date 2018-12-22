@@ -188,21 +188,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tool = new Tools();
         res = getResources();
 
-        /*try {
-            Bitmap bm = cpt.getTextPicture(tool.getBitmapFromFile("0", getExternalCacheDir(),"jpg"));
-            tool.saveBitmap2png(bm, "test0", getExternalCacheDir());
-            Bitmap bm2 = cpt.getTextPicture(tool.getBitmapFromFile("1", getExternalCacheDir(),"jpg"));
-            tool.saveBitmap2png(bm2, "test1", getExternalCacheDir());
-            bm = cpt.getTextPicture(tool.getBitmapFromFile("3", getExternalCacheDir(),"jpg"));
-            tool.saveBitmap2png(bm, "test3", getExternalCacheDir());
-            bm2 = cpt.getTextPicture(tool.getBitmapFromFile("4", getExternalCacheDir(),"jpg"));
-            tool.saveBitmap2png(bm2, "test4", getExternalCacheDir());
-            bm2 = cpt.getTextPicture(tool.getBitmapFromFile("5", getExternalCacheDir(),"jpg"));
-            tool.saveBitmap2png(bm2, "test5", getExternalCacheDir());
+       /* try {
+            //Bitmap bm = cpt.getTextPicture(tool.getBitmapFromFile("0", getExternalCacheDir(),"jpg"));
+            //tool.saveBitmap2png(bm, "test0", getExternalCacheDir());
+            for (int i=0;i<30;i++) {
+                //Bitmap bm = cpt.isSingleSubtitlePicture(tool.getBitmapFromFile(i+"", getExternalCacheDir(),"jpg"));
+                //tool.saveBitmap2png(bm, "test"+i, getExternalCacheDir());
+                if (cpt.isSingleSubtitlePicture(tool.getBitmapFromFile(i+"", getExternalCacheDir(),"jpg"))) {
+                    Log.i(TAG, i+" is!!!!");
+                }
+                else {
+                    Log.i(TAG, i+" not!!!!!");
+                }
+            }
         } catch (Exception e) {
             Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show();
-            Log.e(TAG, e.toString());
-        }*/
+            Log.e(TAG, Log.getStackTraceString(e));
+        }   */
 
         if (sp_init.getBoolean("isFirstBoot", true)) {
             //FIXME 显示警告某些应用商城审核就不给过？？？？

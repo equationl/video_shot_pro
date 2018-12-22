@@ -2,6 +2,7 @@ package com.equationl.videoshotpro.Image;
 
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.util.Log;
 
 public class CheckPictureText {
@@ -13,55 +14,169 @@ public class CheckPictureText {
     /**
     * 对比两张截图是否在同一台词时的容差
     * */
-    private final static int isSameSubtitleTolerance = 20;
+    private final static float isSameSubtitleTolerance = 0.03f;
+
+    /**
+    * 根据图片中包含的白色像素点确定是否是文字的概率
+    * */
+    private final static float colorLikeTextProbability= 0.05f;
 
     /**
     * 字幕高度
     * */
     private int subtitleHeight = 0;
 
+    private Bitmap lastBitmap = null;
+
+    private int fullHeight = 0;
+
+
+    /**
+    * 获取最终的字幕高度
+    * */
+    public int getSubtitleHeight() {
+        return subtitleHeight;
+    }
+
+    /**
+     * 是否是非重复的有字幕图片
+     * @param bitmap 欲检测的图片(原图)
+     * */
+    public boolean isSingleSubtitlePicture(Bitmap bitmap) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        fullHeight = height;
+        if (subtitleHeight == 0) {
+            subtitleHeight = (int)(bitmap.getHeight() * 0.7);
+        }
+
+        Log.i("el", "字幕高度为"+subtitleHeight);
+
+        //预裁剪，减少遍历数
+        bitmap = Bitmap.createBitmap(bitmap, (int)(width*0.35), subtitleHeight, width-(int)(width*0.35)*2, height-subtitleHeight);
+        bitmap = getBinaryzationPicture(bitmap);
+
+        if (!isSubtitlePicture(bitmap)) {
+            Log.i("el", "不是字幕因为没有文字");
+            lastBitmap = bitmap;
+            return false;
+        }
+        else if (lastBitmap != null) {
+            if (contrastPicture(lastBitmap, bitmap)) {
+                Log.i("el", "不是字幕因为两张图片一样！");
+                lastBitmap = bitmap;
+                return false;
+            }
+        }
+        lastBitmap = bitmap;
+        return true;
+    }
+
+
+    /**
+     * 检测该图片是否是有字幕图片
+     * @param bitmap 欲检测的图片（二值化处理后）
+    * */
+    private boolean isSubtitlePicture(Bitmap bitmap) {
+        if (Math.random() < 1) {    //FIXME 一半的概率检测字幕高度
+            //Log.i("EL", "检测高度");
+            subtitleHeight = getTextHeight(bitmap);
+        }
+
+        //Log.i("el", "图片有文字的概率====="+getColorRatio(bitmap, Color.WHITE));
+
+        if (getColorRatio(bitmap, Color.WHITE) > colorLikeTextProbability) {
+            return true;
+        }
+        return false;
+    }
 
 
     /**
     * 对比两张截图是否拥有同一对白
     * */
-    public boolean contrastPicture(Bitmap Bitmap, Bitmap nextBitmap) {
-        //TODO
-        return true;
+    private boolean contrastPicture(Bitmap bitmap, Bitmap nextBitmap) {
+        float bitmapRatio1 = getColorRatio(bitmap, Color.WHITE);
+        float bitmapRatio2 = getColorRatio(nextBitmap, Color.WHITE);
+
+        //Log.i("el", "图片相似度===="+Math.abs(bitmapRatio1-bitmapRatio2));
+        if (Math.abs(bitmapRatio1-bitmapRatio2) > isSameSubtitleTolerance) {
+            return true;
+        }
+        return false;
     }
 
 
     /**
     * 获取bitmap中指定颜色的比率
     * */
-    public float getColorRatio(Bitmap bitmap, int color) {
-        //TODO
-        return 0;
+    private float getColorRatio(Bitmap bitmap, int color) {
+        int x = bitmap.getWidth();
+        int y = bitmap.getHeight();
+        int colorNums = 0;
+
+        for (int i=0;i<x;i++) {
+            for (int j=0;j<y;j++) {
+                if (bitmap.getPixel(i , j) == color) {
+                    colorNums++;
+                }
+            }
+        }
+        return (float)colorNums/(x*y);
     }
 
+
     /**
-     * 裁切bitmap中有字幕部分
+    * 获取字幕高度
+     * @param bitmap 处理后的bitmap（预剪切，二值化）
     * */
-    public Bitmap getTextPicture(Bitmap bitmap) {
-        int width = bitmap.getWidth();
+    private int getTextHeight(Bitmap bitmap) {
         int height = bitmap.getHeight();
-        //if (subtitleHeight == 0) {  //字幕高度尚未初始化   //FIXME DEBUG用，记得把注释删掉
-            subtitleHeight = (int)(height * 0.75);
-        //}
-        Log.i("el", "height="+height+" subtitleheight="+subtitleHeight);
-        Bitmap textPicture = Bitmap.createBitmap(bitmap, 0, subtitleHeight, width, height-subtitleHeight);
-        textPicture = getBinaryzationPicture(textPicture);
+        int width = bitmap.getWidth();
+        int linneNotText = 0;
+        int temp = 0;
 
-        //TODO 检测图片颜色值，随时调整字幕高度
+        for (int i=height-1;i>0;i--) {
+            if (!checkLineIsText(bitmap, i)) {
+                linneNotText++;
+            }
+            else {
+                linneNotText = 0;
+                temp = i;
+            }
+            //Log.i("el", "temp========== "+temp+" fullHeight=== "+fullHeight);
+            if (linneNotText > 20) {
+                int tempHeight = subtitleHeight + temp;
+                if (tempHeight >= fullHeight*0.6) {
+                    //Log.i("el", "改变字幕高度, temp="+temp);
+                    subtitleHeight = tempHeight;
+                }
+                break;
+            }
+        }
 
-        return textPicture;
+        return subtitleHeight;
+    }
+
+    private boolean checkLineIsText(Bitmap bitmap, int height) {
+        int colorNums = 0;
+        for (int i=0;i<bitmap.getWidth();i++) {
+            if (bitmap.getPixel(i, height) == Color.WHITE) {
+                colorNums++;
+            }
+        }
+        if ((float)colorNums/bitmap.getWidth() > 0.1) {   //FIXME 还可以优化
+            //Log.i("el", "检测行是文字！");
+            return true;
+        }
+        return false;
     }
 
     /**
     * 二值化bitmap（固定阀值法）
      * source: https://blog.csdn.net/huangxin388/article/details/80229103
     * */
-    public Bitmap getBinaryzationPicture(Bitmap bitmap) {
+    private Bitmap getBinaryzationPicture(Bitmap bitmap) {
         //得到图形的宽度和长度
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
