@@ -603,52 +603,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private boolean checkPermission(Context context) {
         if (Build.VERSION.SDK_INT < 23) {
             if (RomUtils.checkIsMiuiRom()) {
-                return miuiPermissionCheck(context);
+                return MiuiUtils.checkFloatWindowPermission(context);
             } else if (RomUtils.checkIsMeizuRom()) {
-                return meizuPermissionCheck(context);
+                return MeizuUtils.checkFloatWindowPermission(context);
             } else if (RomUtils.checkIsHuaweiRom()) {
-                return huaweiPermissionCheck(context);
+                return HuaweiUtils.checkFloatWindowPermission(context);
             } else if (RomUtils.checkIs360Rom()) {
-                return qikuPermissionCheck(context);
+                return QikuUtils.checkFloatWindowPermission(context);
             }
         }
         return commonROMPermissionCheck(context);
     }
 
-    private boolean huaweiPermissionCheck(Context context) {
-        return HuaweiUtils.checkFloatWindowPermission(context);
-    }
-
-    private boolean miuiPermissionCheck(Context context) {
-        return MiuiUtils.checkFloatWindowPermission(context);
-    }
-
-    private boolean meizuPermissionCheck(Context context) {
-        return MeizuUtils.checkFloatWindowPermission(context);
-    }
-
-    private boolean qikuPermissionCheck(Context context) {
-        return QikuUtils.checkFloatWindowPermission(context);
-    }
-
     private boolean commonROMPermissionCheck(Context context) {
         if (RomUtils.checkIsMeizuRom()) {
-            return meizuPermissionCheck(context);
+            return MeizuUtils.checkFloatWindowPermission(context);
         }
         if (RomUtils.checkIsMiuiRom()) {
-            return miuiPermissionCheck(context);
+            return MiuiUtils.checkFloatWindowPermission(context);
         }
 
         else {
             Boolean result = true;
             if (Build.VERSION.SDK_INT >= 23) {
-                /*try {
-                    Class clazz = Settings.class;
-                    Method canDrawOverlays = clazz.getDeclaredMethod("canDrawOverlays", Context.class);
-                    result = (Boolean) canDrawOverlays.invoke(null, context);
-                } catch (Exception e) {
-                    Log.e(TAG, Log.getStackTraceString(e));
-                }   */
                 result =  Settings.canDrawOverlays(this);
             }
             return result;
