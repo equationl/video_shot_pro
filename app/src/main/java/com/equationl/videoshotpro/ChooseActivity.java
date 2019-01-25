@@ -14,6 +14,7 @@ import android.os.Message;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -44,11 +45,12 @@ import java.util.List;
 import me.toptas.fancyshowcase.FancyShowCaseQueue;
 import me.toptas.fancyshowcase.FancyShowCaseView;
 
-public class ChooseActivity extends AppCompatActivity {
+public class ChooseActivity extends AppCompatActivity implements ChoosePictureAdapter.OnPictureDeleteListener{
 
     HandyGridView gridView;
     List<Bitmap> images = new ArrayList<>();
     List<String> imagePaths = new ArrayList<>();
+    List<Uri> fullFiles = new ArrayList<>();
     String[] files;
     ProgressDialog dialog;
     Resources res;
@@ -115,10 +117,9 @@ public class ChooseActivity extends AppCompatActivity {
                 //ChoosePictureAdapter.ViewHolder viewHolder = (ChoosePictureAdapter.ViewHolder) pictureAdapter.getView(position, view, parent).getTag();
                 ImageView imageview = (ImageView) pictureAdapter.getView(position, view, parent);
                 SparseArray<ImageView> imageGroupList = new SparseArray<>();
-                imageGroupList.put(0, imageview);
+                imageGroupList.put(position, imageview);
                 imagePaths = pictureAdapter.getImagePaths();
-                String path = getExternalCacheDir().toString();
-                String file = path+"/"+imagePaths.get(position);
+
                 new FancyShowCaseView.Builder(ChooseActivity.this)
                         .focusOn(imageview)
                         .title(res.getString(R.string.choosePicture_guideView_clickImage))
@@ -126,7 +127,7 @@ public class ChooseActivity extends AppCompatActivity {
                         .titleStyle(R.style.GuideViewTextBlank, Gravity.CENTER)
                         .build()
                         .show();
-                vImageWatcher.show(imageview, imageGroupList, Collections.singletonList(Uri.parse(file)));
+                vImageWatcher.show(imageview, imageGroupList, fullFiles);
             }
         });
 
@@ -149,16 +150,26 @@ public class ChooseActivity extends AppCompatActivity {
     }
 
 
+    //删除图片回调
+    @Override
+    public void onDelete(int position) {
+        Log.i(TAG, "删除图片；"+position);
+        fullFiles.remove(position);
+    }
+
+
     private class LoadImageThread implements Runnable {
         @Override
         public void run() {
             String path = getExternalCacheDir().toString();
             for (int i = 0; i < files.length; i++) {
-                Bitmap bitmap = tool.getBitmapThumbnailFromFile(path+"/"+files[i], 128, 160);
+                String file = path+"/"+files[i];
+                Bitmap bitmap = tool.getBitmapThumbnailFromFile(file, 128, 160);
                 if (bitmap == null) {
                     bitmap = tool.drawableToBitmap(R.mipmap.error_picture, ChooseActivity.this);
                 }
                 images.add(bitmap);
+                fullFiles.add(Uri.parse(file));
                 handler.sendEmptyMessage(HandlerStatusLoadImageNext);
             }
             handler.sendEmptyMessage(HandlerStatusLoadImageDone);
@@ -182,6 +193,7 @@ public class ChooseActivity extends AppCompatActivity {
                         break;
                     case HandlerStatusLoadImageDone:
                         activity.pictureAdapter = new ChoosePictureAdapter(activity.images, activity.files, activity);
+                        activity.pictureAdapter.setOnPictureDeleteListener(activity);
                         activity.gridView.setAdapter(activity.pictureAdapter);
                         activity.gridView.setMode(HandyGridView.MODE.LONG_PRESS);
                         activity.gridView.setAutoOptimize(false);

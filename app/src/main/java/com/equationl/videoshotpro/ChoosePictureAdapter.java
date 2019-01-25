@@ -18,6 +18,7 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.equationl.videoshotpro.Image.Tools;
 import com.equationl.videoshotpro.utils.ChooseTagView;
@@ -166,6 +167,11 @@ public class ChoosePictureAdapter extends BaseAdapter  implements OnItemMovedLis
 
     @Override
     public void onDelete(View deleteView) {
+        if (mPictureDeleteListener == null) {
+            Log.e(TAG, "Delete picture fail: not set mPictureDeleteListener");
+            Toast.makeText(context, R.string.choosePicture_toast_deletePictureFail, Toast.LENGTH_SHORT).show();
+            return;
+        }
         int index = mGridView.indexOfChild(deleteView);
         //if (index <= 0) return;
         int position = index + mGridView.getFirstVisiblePosition();
@@ -174,6 +180,7 @@ public class ChoosePictureAdapter extends BaseAdapter  implements OnItemMovedLis
         imagePaths.remove(position);
         pictures.remove(position);
         notifyDataSetChanged();
+        mPictureDeleteListener.onDelete(position);
     }
 
    /* class Picture {
@@ -189,4 +196,20 @@ public class ChoosePictureAdapter extends BaseAdapter  implements OnItemMovedLis
         }
 
     }*/
+
+    private OnPictureDeleteListener mPictureDeleteListener;
+
+    public void setOnPictureDeleteListener(OnPictureDeleteListener listener) {
+        mPictureDeleteListener = listener;
+    }
+
+    public interface OnPictureDeleteListener {
+        /**
+         * 删除图片
+         *
+         * @param position 删除了第 position 张图片
+         */
+        void onDelete(int position);
+    }
+
 }

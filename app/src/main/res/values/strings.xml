@@ -386,6 +386,8 @@
     <string name="chooseActivity_ProgressDialog_loadImage_content">正在生成缩略图&#8230;</string>
     <string name="choosePicture_toast_saveFail">保存失败</string>
     <string name="choosePicture_toast_saveSuccess">保存成功</string>
+    <string name="choosePicture_toast_deletePictureFail">删除图片失败，请重试！</string>
+
 
     <string name="choosePicture_guideView_edit">点击就能打开编辑模式哦~</string>
     <string name="choosePicture_guideView_done">点击进入下一步哦~</string>

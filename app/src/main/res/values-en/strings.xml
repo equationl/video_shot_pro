@@ -424,4 +424,5 @@
     <string-array name="main_dialog_deletePic_content">
         <item>Delete local file too</item>
     </string-array>
+    <string name="choosePicture_toast_deletePictureFail">Delete picture fail, please try again!</string>
 </resources>
