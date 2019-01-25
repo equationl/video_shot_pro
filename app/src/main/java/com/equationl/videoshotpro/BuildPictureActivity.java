@@ -125,6 +125,10 @@ public class BuildPictureActivity extends AppCompatActivity {
             CrashReport.postCatchedException(e);
             Toast.makeText(this, R.string.buildPicture_toast_copyPreview_fail, Toast.LENGTH_SHORT).show();
             finish();
+        } catch (RuntimeException e) {
+            CrashReport.postCatchedException(e);
+            Toast.makeText(this, R.string.buildPicture_toast_copyPreview_fail, Toast.LENGTH_SHORT).show();
+            finish();
         }
         bHeight = bm_test.getHeight();
         bWidth = bm_test.getWidth();
@@ -416,7 +420,15 @@ public class BuildPictureActivity extends AppCompatActivity {
     }
 
     private Bitmap addBitmap(Bitmap first, Bitmap second) {
-        return tool.jointBitmap(first, second);
+        Bitmap bitmap = tool.jointBitmap(first, second);
+        if (bitmap != null) {
+            return bitmap;
+        }
+         else {
+            //避免因为拼接失败直接返回错误，如果拼接失败就只返回第一个bitmap
+            Log.e(TAG, "joint bitmap fail, just return first bitmap");
+            return first;
+        }
     }
 
     private boolean saveMyBitmap(Bitmap bmp, String bitName, boolean isReduce) throws IOException {

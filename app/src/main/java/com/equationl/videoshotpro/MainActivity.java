@@ -1446,7 +1446,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
         else{
-            if (waterFallList.size() >= pos) {
+            if (waterFallList.size() > pos) {
                 waterFallList.remove(pos);
             }
             mRecyclerView.getAdapter().notifyDataSetChanged();

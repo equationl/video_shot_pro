@@ -95,8 +95,13 @@ public class Tools{
 
     /**
      * 拼接两个 bitmap
+     *
+     * @return Bitmap 返回拼接后的Bitmap, 如果拼接失败返回 null
      * */
     public Bitmap jointBitmap(Bitmap first, Bitmap second) {
+        if (first == null || second == null){
+            return null;
+        }
         int width = Math.max(first.getWidth(),second.getWidth());
         int height = first.getHeight() + second.getHeight();
 

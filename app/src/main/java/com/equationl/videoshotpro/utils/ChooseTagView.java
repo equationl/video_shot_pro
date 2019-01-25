@@ -53,6 +53,9 @@ public class ChooseTagView extends android.support.v7.widget.AppCompatImageView 
         int action = event.getAction();
         int x = (int) event.getX();
         int y = (int) event.getY();
+        if (mAssumeDelteRect == null) {
+            setDeleteBounds();
+        }
         boolean contains = mAssumeDelteRect.contains(x, y);
         switch (action) {
             case MotionEvent.ACTION_DOWN:
