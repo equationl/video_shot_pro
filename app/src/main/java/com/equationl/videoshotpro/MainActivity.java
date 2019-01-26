@@ -46,6 +46,7 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.equationl.videoshotpro.Image.Tools;
@@ -107,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     int activityResultMode = 0;
     Boolean isFirstBoot = false;
     boolean isTranslucentStatus = false;
+    boolean isMultiSelect = false;
     Utils utils = new Utils();
     FloatingActionsMenu main_floatBtn_menu;
     FloatingActionButton main_floatBtn_quick;
@@ -254,13 +256,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.activity_main, menu);
+        if (isMultiSelect) {
+            getMenuInflater().inflate(R.menu.activity_main_multi_select, menu);
+        }
+        else {
+            getMenuInflater().inflate(R.menu.activity_main, menu);
+        }
         return true;
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        menu.findItem(R.id.main_menu_isDirFirst).setChecked(sp_init.getBoolean("mainSortIsDirFirst", true));
+        if (!isMultiSelect) {
+            menu.findItem(R.id.main_menu_isDirFirst).setChecked(sp_init.getBoolean("mainSortIsDirFirst", true));
+        }
         return true;
     }
 
@@ -280,7 +289,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 editor.apply();
                 refreshWaterfall();
                 break;
-            case R.id.main_menu_sort_tyoe:
+            case R.id.main_menu_sort_type:
                 editor.putString("mainSort", "type");
                 editor.apply();
                 refreshWaterfall();
@@ -300,8 +309,50 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.main_menu_refresh:
                 refreshWaterfall();
                 break;
+            case R.id.main_menu_multiSelect:
+                isMultiSelect = true;
+                invalidateOptionsMenu();
+                break;
+            case R.id.main_menu_exitSelect:
+                exitMultiSelect();
+                break;
+            case R.id.main_menu_allDelete:
+                allDelete();
+                break;
+            case R.id.main_menu_allSelect:
+                clickAllSelect();
+                break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void exitMultiSelect() {
+        isMultiSelect = false;
+        invalidateOptionsMenu();
+        for (WaterFallData data : waterFallList) {
+            data.isSelected = false;
+        }
+        mRecyclerView.getAdapter().notifyDataSetChanged();
+    }
+
+    private void clickAllSelect() {
+        int selectedCount = 0;
+        for (WaterFallData data : waterFallList) {
+            if (data.isSelected) {
+                selectedCount++;
+            }
+            data.isSelected = true;
+        }
+        if (selectedCount == waterFallList.size()) {
+            for (WaterFallData data : waterFallList) {
+                data.isSelected = false;
+            }
+        }
+        mRecyclerView.getAdapter().notifyDataSetChanged();
+    }
+
+    private void allDelete() {
+        showDeletePicDialog(null, 0, false);
     }
 
     @Override
@@ -798,8 +849,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void showDeletePicDialog(final File f, final int pos, final boolean fromDir) {
         boolean isDeleteLocalPic = sp_init.getBoolean("isDeleteLocalPic", true);
         boolean initChoiceSets[] = {isDeleteLocalPic};
+        int title = isMultiSelect ? R.string.main_dialog_deleteAllPic_title : R.string.main_dialog_deletePic_title;
         Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
-                .setTitle(R.string.main_dialog_deletePic_title)
+                .setTitle(title)
                 .setMultiChoiceItems(R.array.main_dialog_deletePic_content, initChoiceSets,
                         new DialogInterface.OnMultiChoiceClickListener() {
                             @Override
@@ -820,7 +872,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                clickDeletePic(f, pos, fromDir);
+                                if (isMultiSelect) {
+                                    clickDeleteAllPic();
+                                }
+                                else {
+                                    clickDeletePic(f, pos, fromDir);
+                                }
                             }
                         })
                 .setNegativeButton(R.string.main_dialog_btn_cancel,
@@ -1099,6 +1156,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             data.text = res.getString(R.string.main_text_waterFall_firstUse);
             data.imgHeight = 0;
             data.isDirectory = false;
+            data.isSelected = false;
             waterFallList.add(data);
         }
         mLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
@@ -1129,11 +1187,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mRecyclerView.addOnItemTouchListener(new OnRecylerViewItemClickListener(mRecyclerView) {
             @Override
             public void onItemClick(RecyclerView.ViewHolder vh) {
-                //Toast.makeText(MainActivity.this,vh.getAdapterPosition()+"",Toast.LENGTH_SHORT).show();
                 String filepath =  tool.getSaveRootPath();
-                String[] files = getFiles(filepath);//tool.getFileOrderByName(filepath, -1);
-                //ImageZoom.show(MainActivity.this, filepath+"/"+files[vh.getAdapterPosition()], ImageUrlType.LOCAL);
-                Log.i(TAG, "ViewHolder object name="+vh.getClass().toString());
+                String[] files = getFiles(filepath);
                 MainWaterFallAdapter.MyViewHolder holder2;
                 try {   //避免点击vh为autoLoadMore对象导致转换类型出错闪退
                     holder2 = (MainWaterFallAdapter.MyViewHolder) vh;
@@ -1142,7 +1197,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 if (files.length > 0) {
                     if (vh.getAdapterPosition() < files.length && vh.getAdapterPosition() != RecyclerView.NO_POSITION) {
-                        showPicture(holder2.img, filepath+"/"+files[vh.getAdapterPosition()]);
+                        int position = vh.getAdapterPosition();
+                        if (isMultiSelect) {
+                            boolean isSelected = waterFallList.get(position).isSelected;
+                            waterFallList.get(position).isSelected = !isSelected;
+                            mRecyclerView.getAdapter().notifyDataSetChanged();
+                        }
+                        else {
+                            showPicture(holder2.img, filepath+"/"+files[position]);
+                        }
                     }
                 }
             }
@@ -1242,6 +1305,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             data.img = data.img+"/"+imgs[0];
                         }
                     }
+                    data.isSelected = false;
                     waterFallList.add(data);
                 }
                 waterFallDataPager++;
@@ -1264,6 +1328,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             data.text = res.getString(R.string.main_text_waterFall_noData);
             data.imgHeight = 0;
             data.isDirectory = false;
+            data.isSelected = false;
             waterFallList.add(data);
         }
 
@@ -1290,6 +1355,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     data.img = data.img+"/"+imgs[0];
                 }
             }
+            data.isSelected = false;
             waterFallList.add(data);
         }
         waterFallDataPager++;
@@ -1414,7 +1480,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         initRecycleView();
     }
 
-    private void clickDeletePic(File f, int pos, boolean fromDir) {
+    private void clickDeleteAllPic() {
+        List<WaterFallData> selected = new ArrayList<>();
+        for (WaterFallData data : waterFallList) {
+            if (data.isSelected) {
+                selected.add(data);
+            }
+        }
+        deleteSelectedPic(selected);
+    }
+
+    private void deleteSelectedPic(List<WaterFallData> selected) {
+        for (WaterFallData data : selected) {
+            deletePic(new File(data.img));
+        }
+        waterFallList.removeAll(selected);
+        mRecyclerView.getAdapter().notifyDataSetChanged();
+    }
+
+
+    private void deletePic(File f) {
         if (!sp_init.getBoolean("isDeleteLocalPic", true)) {
             if (f.isDirectory()) {
                 try {
@@ -1436,6 +1521,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             tool.deleteDirectory(f);
         else
             tool.deleteFile(f);
+    }
+
+    private void clickDeletePic(File f, int pos, boolean fromDir) {
+       deletePic(f);
 
         if (fromDir) {
             //FIXME 应当改为直接退出imagewatcher界面而不是靠模拟返回键来退出

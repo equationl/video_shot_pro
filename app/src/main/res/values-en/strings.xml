@@ -413,7 +413,7 @@
         <string name="about_dialog_text_support">Dear users, this app is the best honor for you to get your favor. If you want to support my work, please recommend this app to your friends~(On the homepage Click on the sidebar and recommend it to your friends for quick sharing)\n\nYour support is my biggest motivation! If you can give me a five-star rating, I will be more happy~ (click on the logo on this page to quickly jump to the application market)\n\nThis APP has been open source,welcome to pull and star~"</string>
     <string name="main_mail_title">VideoShotPro Feedback</string>
     <string name="player_text_back">Back</string>
-    <string name="main_menu_referesh">Refresh</string>
+    <string name="main_menu_refresh">Refresh</string>
     <string name="main_menu_sort_title">Sort by</string>
     <string name="main_menu_sort_date_dese">Date(desc)</string>
     <string name="main_menu_sort_date_asc">Date(asc)</string>
@@ -425,4 +425,9 @@
         <item>Delete local file too</item>
     </string-array>
     <string name="choosePicture_toast_deletePictureFail">Delete picture fail, please try again!</string>
+    <string name="main_menu_MultiSelect">MultiSelect</string>
+    <string name="main_menu_allDelete">Delete</string>
+    <string name="main_menu_allSelect">Select all</string>
+    <string name="main_menu_exitSelect">Exit</string>
+    <string name="main_dialog_deleteAllPic_title">Would you like delete all pictures which you selected?</string>
 </resources>

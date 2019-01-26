@@ -216,6 +216,7 @@
     <string-array name="main_dialog_deletePic_content">
         <item>同时删除本地文件</item>
     </string-array>
+    <string name="main_dialog_deleteAllPic_title">您确定要删除选中的图片吗？</string>
     <string name="main_dialog_disablePermission_content">请在 应用设置-权限 中，至少允许 %1$s 使用存储权限来保存您的作品</string>
     <string name="main_dialog_disablePermission_title">未授予足够的权限</string>
     <string name="main_dialog_noPermission_title">授予权限</string>
@@ -290,12 +291,17 @@
         <item>微信好友</item>
     </string-array>
 
-    <string name="main_menu_referesh">刷新</string>
+    <string name="main_menu_refresh">刷新</string>
+    <string name="main_menu_MultiSelect">多选</string>
     <string name="main_menu_sort_title">排序</string>
     <string name="main_menu_sort_date_dese">时间（降序）</string>
     <string name="main_menu_sort_date_asc">时间（升序）</string>
     <string name="main_menu_sort_type">类型</string>
     <string name="main_menu_isDirFirst">合集始终在前</string>
+    <string name="main_menu_allDelete">删除</string>
+    <string name="main_menu_allSelect">全选</string>
+    <string name="main_menu_exitSelect">返回</string>
+
 
 
     <string name="WXEntry_toast_share_ERR_AUTH_DENIED">分享失败：认证失败！请联系开发者解决。</string>

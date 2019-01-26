@@ -2,12 +2,13 @@ package com.equationl.videoshotpro;
 
 
 import android.content.Context;
-import android.net.Uri;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -15,7 +16,6 @@ import com.bumptech.glide.request.RequestOptions;
 import com.equationl.videoshotpro.Image.Tools;
 import com.equationl.videoshotpro.utils.WaterFallData;
 
-import java.io.File;
 import java.util.List;
 
 public class MainWaterFallAdapter extends RecyclerView.Adapter {
@@ -61,6 +61,12 @@ public class MainWaterFallAdapter extends RecyclerView.Adapter {
         }
         holder2.img.getLayoutParams().height = waterFallData.imgHeight; //从数据源中获取图片高度，动态设置到控件上
         holder2.text.setText(waterFallData.text);
+        if (waterFallData.isSelected) {
+            holder2.cardViewLinearLayout.setBackgroundColor(Color.parseColor("#c5cae9"));
+        }
+        else {
+            holder2.cardViewLinearLayout.setBackgroundColor(Color.WHITE);
+        }
     }
 
     @Override
@@ -75,11 +81,13 @@ public class MainWaterFallAdapter extends RecyclerView.Adapter {
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public ImageView img;
         public TextView text;
+        public LinearLayout cardViewLinearLayout;
 
         public MyViewHolder(View itemView) {
             super(itemView);
             img = (ImageView) itemView.findViewById(R.id.main_recyclerView_img);
             text = (TextView) itemView.findViewById(R.id.main_recyclerView_text);
+            cardViewLinearLayout = itemView.findViewById(R.id.main_cardView_linearLayout);
         }
     }
 }

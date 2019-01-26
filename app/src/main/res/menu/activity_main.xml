@@ -2,14 +2,17 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:title="@string/main_menu_referesh"
+        android:title="@string/main_menu_refresh"
         android:id="@+id/main_menu_refresh" />
+    <item
+        android:id="@+id/main_menu_multiSelect"
+        android:title="@string/main_menu_MultiSelect"/>
     <item android:title="@string/main_menu_sort_title"
         android:id="@+id/main_menu_sort_title">
         <menu>
             <item
                 android:title="@string/main_menu_sort_type"
-                android:id="@+id/main_menu_sort_tyoe" />
+                android:id="@+id/main_menu_sort_type" />
             <item
                 android:title="@string/main_menu_sort_date_asc"
                 android:id="@+id/main_menu_sort_date_asc" />

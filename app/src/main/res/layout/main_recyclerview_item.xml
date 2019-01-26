@@ -12,16 +12,17 @@
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#FFFFFF"
         app:cardCornerRadius="5dp"
         >
         <LinearLayout
+            android:id="@+id/main_cardView_linearLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="5dp"
             android:paddingLeft="6dp"
             android:paddingRight="6dp"
             android:paddingTop="10dp"
+            android:background="#fff"
             android:orientation="vertical"
             >
             <ImageView
