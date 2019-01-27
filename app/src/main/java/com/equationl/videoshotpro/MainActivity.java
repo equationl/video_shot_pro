@@ -106,6 +106,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     ProgressDialog dialog_copyFile;
     DrawerLayout drawer;
     int activityResultMode = 0;
+    int selectedCount = 0;
     Boolean isFirstBoot = false;
     boolean isTranslucentStatus = false;
     boolean isMultiSelect = false;
@@ -311,6 +312,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case R.id.main_menu_multiSelect:
                 isMultiSelect = true;
+                setTitle(R.string.main_title_multiSelect);
                 invalidateOptionsMenu();
                 break;
             case R.id.main_menu_exitSelect:
@@ -328,6 +330,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void exitMultiSelect() {
         isMultiSelect = false;
+        setTitle(R.string.app_name);
+        selectedCount = 0;
         invalidateOptionsMenu();
         for (WaterFallData data : waterFallList) {
             data.isSelected = false;
@@ -336,23 +340,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void clickAllSelect() {
-        int selectedCount = 0;
+        int hasSelectedCount = 0;
         for (WaterFallData data : waterFallList) {
             if (data.isSelected) {
-                selectedCount++;
+                hasSelectedCount++;
             }
             data.isSelected = true;
+            selectedCount++;
         }
-        if (selectedCount == waterFallList.size()) {
+        if (hasSelectedCount == waterFallList.size()) {
             for (WaterFallData data : waterFallList) {
                 data.isSelected = false;
             }
+            selectedCount = 0;
         }
         mRecyclerView.getAdapter().notifyDataSetChanged();
     }
 
     private void allDelete() {
-        showDeletePicDialog(null, 0, false);
+        if (selectedCount < 1) {
+            Toast.makeText(this, R.string.main_toast_unSelectedPic, Toast.LENGTH_SHORT).show();
+        }
+        else {
+            showDeletePicDialog(null, 0, false);
+        }
     }
 
     @Override
@@ -1101,7 +1112,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK
                 && event.getAction() == KeyEvent.ACTION_DOWN) {
-            if (!vImageWatcher.handleBackPressed() && !drawer.isDrawerOpen(GravityCompat.START)) {    //没有打开预览图片或者侧边栏
+            if (drawer.isDrawerOpen(GravityCompat.START)) {
+                drawer.closeDrawer(GravityCompat.START);
+                return true;
+            }
+            if (isMultiSelect) {
+                exitMultiSelect();
+                return true;
+            }
+            if (!vImageWatcher.handleBackPressed()) {    //没有打开预览图片
                 if ((System.currentTimeMillis() - exitTime) > 2000) {
                     Toast.makeText(MainActivity.this,R.string.main_toast_confirmExit,Toast.LENGTH_SHORT).show();
                     exitTime = System.currentTimeMillis();
@@ -1110,10 +1129,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     finish();
                 }
                 return true;
-            }
-
-            if (drawer.isDrawerOpen(GravityCompat.START)) {
-                drawer.closeDrawer(GravityCompat.START);
             }
 
             return false;
@@ -1200,6 +1215,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         int position = vh.getAdapterPosition();
                         if (isMultiSelect) {
                             boolean isSelected = waterFallList.get(position).isSelected;
+                            selectedCount += isSelected ? -1 : 1;
                             waterFallList.get(position).isSelected = !isSelected;
                             mRecyclerView.getAdapter().notifyDataSetChanged();
                         }

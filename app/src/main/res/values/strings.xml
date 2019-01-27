@@ -259,6 +259,7 @@
     <string name="main_toast_showNavigationGuider">向右滑动可以打开侧边栏哦~</string>
     <string name="main_toast_confirmExit">再按一次退出程序</string>
     <string name="main_toast_copyFileFail">获取图片失败！</string>
+    <string name="main_toast_unSelectedPic">你还没有选择任何图片哦</string>
 
     <string name="main_nav_text_ffmpeg">FFmpeg命令行</string>
     <string name="main_nav_text_setting">设置</string>
@@ -302,6 +303,7 @@
     <string name="main_menu_allSelect">全选</string>
     <string name="main_menu_exitSelect">返回</string>
 
+    <string name="main_title_multiSelect">批量操作</string>
 
 
     <string name="WXEntry_toast_share_ERR_AUTH_DENIED">分享失败：认证失败！请联系开发者解决。</string>
