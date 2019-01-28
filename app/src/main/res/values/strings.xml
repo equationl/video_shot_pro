@@ -598,4 +598,6 @@
         本APP已开源，欢迎贡献代码或star~\n
     开源地址：https://gitee.com/equation/video_shot_pro/</string>
 
+    <string name="title_activity_chooseBest">选择需要保存的图片</string>
+    <string name="chooseBest_menu_save">保存</string>
 </resources>

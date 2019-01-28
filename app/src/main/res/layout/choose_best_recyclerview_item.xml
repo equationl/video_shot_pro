@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/chooseBest_item_relativeLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <ImageView
+        android:id="@+id/chooseBest_item_imageView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="5dp"
+        android:scaleType="centerCrop"
+        android:src="@mipmap/error_picture"/>
+    <CheckBox
+        android:id="@+id/chooseBest_item_checkBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/chooseBest_item_imageView"
+        android:layout_alignRight="@id/chooseBest_item_imageView"
+        android:clickable="false" />
+
+</RelativeLayout>

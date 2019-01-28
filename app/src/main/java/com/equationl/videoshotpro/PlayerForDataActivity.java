@@ -783,6 +783,9 @@ public class PlayerForDataActivity extends AppCompatActivity {
                         activity.markTime[0] = 0;
                         activity.markTime[1] = 0;
                         activity.videoview.start();
+                        Intent intent2 = new Intent(activity, ChooseBestPictureActivity.class);
+                        intent2.putExtra("filePath", msg.obj.toString());
+                        activity.startActivity(intent2);
                         break;
                     case HandlerFBFonProgress:
                         activity.dialog.setMessage(msg.obj.toString());

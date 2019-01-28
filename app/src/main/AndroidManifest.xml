@@ -35,6 +35,7 @@
             <meta-data
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -124,7 +125,6 @@
             android:name="com.tencent.connect.common.AssistActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-
         <activity
             android:name=".wxapi.WXEntryActivity"
             android:exported="true"
@@ -135,6 +135,9 @@
             android:name=".AboutActivity"
             android:label="@string/title_activity_about"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".ChooseBestPictureActivity"
+            android:label="@string/title_activity_chooseBest"
+            android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 
 </manifest>

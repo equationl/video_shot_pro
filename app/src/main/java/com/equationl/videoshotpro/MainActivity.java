@@ -24,7 +24,6 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -46,9 +45,9 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.equationl.videoshotpro.Adapter.MainWaterFallAdapter;
 import com.equationl.videoshotpro.Image.Tools;
 import com.equationl.videoshotpro.rom.HuaweiUtils;
 import com.equationl.videoshotpro.rom.MeizuUtils;
@@ -956,13 +955,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         startActivity(intent);
     }
 
-    /*@Override
+    @Override
     public void onResume() {
         super.onResume();
-        if (dialog_copyFile.isShowing()) {
-            dialog_copyFile.dismiss();
-        }
-    }  */
+        refreshWaterfall();
+    }
 
 
     @Override

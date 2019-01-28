@@ -26,6 +26,7 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.equationl.videoshotpro.Adapter.ChoosePictureAdapter;
 import com.equationl.videoshotpro.Image.Tools;
 import com.equationl.videoshotpro.utils.GlideSimpleLoader;
 import com.github.ielse.imagewatcher.ImageWatcher;
@@ -39,7 +40,6 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import me.toptas.fancyshowcase.FancyShowCaseQueue;

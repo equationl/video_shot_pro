@@ -1,4 +1,4 @@
-package com.equationl.videoshotpro;
+package com.equationl.videoshotpro.Adapter;
 
 import java.io.File;
 import java.lang.reflect.Array;
@@ -20,7 +20,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.equationl.videoshotpro.ChooseActivity;
 import com.equationl.videoshotpro.Image.Tools;
+import com.equationl.videoshotpro.R;
 import com.equationl.videoshotpro.utils.ChooseTagView;
 import com.huxq17.handygridview.scrollrunner.OnItemMovedListener;
 

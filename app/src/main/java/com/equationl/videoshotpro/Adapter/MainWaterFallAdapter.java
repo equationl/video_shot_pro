@@ -1,4 +1,4 @@
-package com.equationl.videoshotpro;
+package com.equationl.videoshotpro.Adapter;
 
 
 import android.content.Context;
@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.equationl.videoshotpro.Image.Tools;
+import com.equationl.videoshotpro.R;
 import com.equationl.videoshotpro.utils.WaterFallData;
 
 import java.util.List;
@@ -35,7 +36,7 @@ public class MainWaterFallAdapter extends RecyclerView.Adapter {
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(mContext).inflate(R.layout.main_recyclerview_item, null);
         return new MyViewHolder(view);
-    }
+}
 
     @Override  //将数据源的数据绑定到相应控件上
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
