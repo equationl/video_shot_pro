@@ -600,4 +600,7 @@
 
     <string name="title_activity_chooseBest">选择需要保存的图片</string>
     <string name="chooseBest_menu_save">保存</string>
+    <string name="chooseBest_dialog_deleteAll_content">您确定一张都不保存吗？</string>
+    <string name="chooseBest_dialog_deleteAll_btn_ok">是的</string>
+    <string name="chooseBest_dialog_deleteAll_btn_cancel">不是</string>
 </resources>

@@ -432,4 +432,9 @@
     <string name="main_dialog_deleteAllPic_title">Would you like delete all pictures which you selected?</string>
     <string name="main_title_multiSelect">Multi Select</string>
     <string name="main_toast_unSelectedPic">You have no select any picture</string>
+    <string name="title_activity_chooseBest">Choose Picture To Save</string>
+    <string name="chooseBest_menu_save">Save</string>
+    <string name="chooseBest_dialog_deleteAll_content">Are you sure not save any picture?</string>
+    <string name="chooseBest_dialog_deleteAll_btn_ok">Yes</string>
+    <string name="chooseBest_dialog_deleteAll_btn_cancel">No</string>
 </resources>

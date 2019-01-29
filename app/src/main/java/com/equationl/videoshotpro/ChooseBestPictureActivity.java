@@ -1,8 +1,11 @@
 package com.equationl.videoshotpro;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
@@ -103,14 +106,32 @@ public class ChooseBestPictureActivity extends AppCompatActivity {
         SparseBooleanArray checkStates = mAdapter.getCheckStates();
         int itemCount = mAdapter.getItemCount();
         boolean isAllDelete = checkStates.indexOfValue(true) == -1;   //如果没有已经选中的数据则为全部删除
-        for (int i=0; i<itemCount; i++) {
-            if (!checkStates.get(i, false)) {
-                tool.deleteFile(new File(imgData.get(i)));
-            }
-        }
         if (isAllDelete) {
-            tool.deleteDirectory(new File(filePath));
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.chooseBest_dialog_deleteAll_content)
+                    .setPositiveButton(R.string.chooseBest_dialog_deleteAll_btn_ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            tool.deleteDirectory(new File(filePath));
+                            exitActivity();
+                        }
+                    })
+                    .setNegativeButton(R.string.chooseBest_dialog_deleteAll_btn_cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) { }
+                    }).setCancelable(false).show();
         }
+        else {
+            for (int i=0; i<itemCount; i++) {
+                if (!checkStates.get(i, false)) {
+                    tool.deleteFile(new File(imgData.get(i)));
+                }
+            }
+            exitActivity();
+        }
+    }
+
+    private void exitActivity() {
         PlayerForDataActivity.instance.finish();
         finish();
     }

@@ -14,7 +14,6 @@ import android.os.Message;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -108,7 +107,7 @@ public class ChooseActivity extends AppCompatActivity implements ChoosePictureAd
         dialog.setProgress(0);
         new Thread(new LoadImageThread()).start();
 
-        initPictureWathcher();
+        initPictureWatcher();
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -127,6 +126,7 @@ public class ChooseActivity extends AppCompatActivity implements ChoosePictureAd
                         .titleStyle(R.style.GuideViewTextBlank, Gravity.CENTER)
                         .build()
                         .show();
+                fullFiles = pictureAdapter.getImagesUri();
                 vImageWatcher.show(imageview, imageGroupList, fullFiles);
             }
         });
@@ -152,10 +152,7 @@ public class ChooseActivity extends AppCompatActivity implements ChoosePictureAd
 
     //删除图片回调
     @Override
-    public void onDelete(int position) {
-        Log.i(TAG, "删除图片；"+position);
-        fullFiles.remove(position);
-    }
+    public void onDelete(int position) {}
 
 
     private class LoadImageThread implements Runnable {
@@ -192,7 +189,7 @@ public class ChooseActivity extends AppCompatActivity implements ChoosePictureAd
                         activity.dialog.setProgress(activity.dialog.getProgress()+1);
                         break;
                     case HandlerStatusLoadImageDone:
-                        activity.pictureAdapter = new ChoosePictureAdapter(activity.images, activity.files, activity);
+                        activity.pictureAdapter = new ChoosePictureAdapter(activity.images, activity.files, activity.fullFiles, activity);
                         activity.pictureAdapter.setOnPictureDeleteListener(activity);
                         activity.gridView.setAdapter(activity.pictureAdapter);
                         activity.gridView.setMode(HandyGridView.MODE.LONG_PRESS);
@@ -204,7 +201,6 @@ public class ChooseActivity extends AppCompatActivity implements ChoosePictureAd
                             CrashReport.postCatchedException(e);
                         }
                         if (activity.sp_init.getBoolean("isFirstUseSortPicture", true)) {
-                            activity.showGuideDialog();
                             SharedPreferences.Editor editor = activity.sp_init.edit();
                             editor.putBoolean("isFirstUseSortPicture", false);
                             editor.apply();
@@ -287,66 +283,7 @@ public class ChooseActivity extends AppCompatActivity implements ChoosePictureAd
         return super.onOptionsItemSelected(item);
     }
 
-   /* private void showPictureDialog(int position) {
-        imagePaths = pictureAdapter.getImagePaths();
-        //Log.i(TAG, imagePaths.toString());
-        String path = getExternalCacheDir().toString();
-        Bitmap bitmap = tool.getBitmapFromFile(path+"/"+imagePaths.get(position));
-        if (bitmap == null) {
-            bitmap = tool.drawableToBitmap(R.drawable.load_image_fail, ChooseActivity.this);
-        }
-        DialogInterface.OnClickListener dialogOnclicListener=new DialogInterface.OnClickListener(){
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch(which){
-                    case Dialog.BUTTON_POSITIVE:
-                        break;
-                }
-            }
-        };
-        mLayoutInflater= LayoutInflater.from(ChooseActivity.this);
-        view=mLayoutInflater.inflate(R.layout.dialog_show_picture, null, false);
-        ImageView imageView = (ImageView) view.findViewById(R.id.showPicture_image);
-        imageView.setImageBitmap(bitmap);
-        builder = new AlertDialog.Builder(ChooseActivity.this);
-        builder.setView(view)
-                .setPositiveButton("确定",dialogOnclicListener)
-                .setCancelable(true)
-                .create();
-        builder.show();
-    }   */
-
-    private void showGuideDialog() {
-        /*Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
-                .setTitle(R.string.choosePicture_tip_dialog_title)
-                .setMessage(R.string.choosePicture_tip_dialog_content)
-                .setPositiveButton(res.getString(R.string.choosePicture_tip_dialog_btn_ok),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        }).create();
-        dialog.show();   */
-        /*final FancyShowCaseView fancyShowCaseView1 = new FancyShowCaseView.Builder(this)
-                .focusOn(findViewById(R.id.main_guide_pos))
-                .title("Focus on View")
-                //.showOnce("fancy1")
-                .build();
-        final FancyShowCaseView fancyShowCaseView2 = new FancyShowCaseView.Builder(this)
-                .focusOn(findViewById(R.id.main_recyclerView))
-                .title("Focus on View")
-                .roundRectRadius(100)
-                //.showOnce("fancy1")
-                .build();
-        FancyShowCaseQueue mQueue = new FancyShowCaseQueue()
-                .add(fancyShowCaseView1)
-                .add(fancyShowCaseView2);
-
-        mQueue.show();   */
-    }
-
-    private void initPictureWathcher() {
+    private void initPictureWatcher() {
         mOnPictureLongPressListener = new ImageWatcher.OnPictureLongPressListener() {
             @Override
             public void onPictureLongPress(ImageView v, final Uri url, final int pos) {

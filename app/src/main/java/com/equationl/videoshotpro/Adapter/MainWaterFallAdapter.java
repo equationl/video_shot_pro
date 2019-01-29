@@ -39,7 +39,7 @@ public class MainWaterFallAdapter extends RecyclerView.Adapter {
 }
 
     @Override  //将数据源的数据绑定到相应控件上
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         MyViewHolder holder2 = (MyViewHolder) holder;
         WaterFallData waterFallData= mData.get(position);
         //holder2.img.setImageBitmap(waterFallData.img);
@@ -68,6 +68,22 @@ public class MainWaterFallAdapter extends RecyclerView.Adapter {
         else {
             holder2.cardViewLinearLayout.setBackgroundColor(Color.WHITE);
         }
+
+        if (mOnItemClickListener != null) {
+            holder2.cardViewLinearLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mOnItemClickListener.onItemClick(holder);
+                }
+            });
+            holder2.cardViewLinearLayout.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    mOnItemClickListener.onItemLongClick(holder);
+                    return false;
+                }
+            });
+        }
     }
 
     @Override
@@ -90,5 +106,17 @@ public class MainWaterFallAdapter extends RecyclerView.Adapter {
             text = (TextView) itemView.findViewById(R.id.main_recyclerView_text);
             cardViewLinearLayout = itemView.findViewById(R.id.main_cardView_linearLayout);
         }
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(RecyclerView.ViewHolder holder);
+
+        void onItemLongClick(RecyclerView.ViewHolder holder);
+    }
+
+    private OnItemClickListener mOnItemClickListener;
+
+    public void setOnItemClickListener(OnItemClickListener mOnItemClickListener) {
+        this.mOnItemClickListener = mOnItemClickListener;
     }
 }

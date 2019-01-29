@@ -55,7 +55,6 @@ import com.equationl.videoshotpro.rom.MiuiUtils;
 import com.equationl.videoshotpro.rom.QikuUtils;
 import com.equationl.videoshotpro.rom.RomUtils;
 import com.equationl.videoshotpro.utils.GlideSimpleLoader;
-import com.equationl.videoshotpro.utils.OnRecylerViewItemClickListener;
 import com.equationl.videoshotpro.utils.Share;
 import com.equationl.videoshotpro.utils.Utils;
 import com.equationl.videoshotpro.utils.WaterFallData;
@@ -1177,26 +1176,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mRecyclerView.setLayoutManager(mLayoutManager);
         //mRecyclerView.setAdapter(mAdapter);
 
-
-        mAutoLoadMoreAdapter = new AutoLoadMoreAdapter(this, mAdapter);
-        mAutoLoadMoreAdapter.setOnLoadListener(new AutoLoadMoreAdapter.OnLoadListener() {
-            @Override
-            public void onRetry() {
-                //do retry
-                Log.i(TAG, "call  onRetry");
-                addWaterFallList();
-            }
-
-            @Override
-            public void onLoadMore() {
-                //do load more
-                Log.i(TAG, "call onLoadMore");
-                addWaterFallList();
-            }
-        });
-        mRecyclerView.setAdapter(mAutoLoadMoreAdapter);
-
-        mRecyclerView.addOnItemTouchListener(new OnRecylerViewItemClickListener(mRecyclerView) {
+        mAdapter.setOnItemClickListener(new MainWaterFallAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(RecyclerView.ViewHolder vh) {
                 String filepath =  tool.getSaveRootPath();
@@ -1225,12 +1205,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             @Override
             public void onItemLongClick(RecyclerView.ViewHolder vh) {
-                /*if (vh.getLayoutPosition()!=waterFallList.size()-1) {
-                    //helper.startDrag(vh);
-                }
-                Toast.makeText(MainActivity.this,vh.getAdapterPosition()+"buke",Toast.LENGTH_SHORT).show();  */
+                Log.i(TAG, "call onItemLongClick");
                 String filepath =  tool.getSaveRootPath();
-                String[] files = getFiles(filepath);//tool.getFileOrderByName(filepath, -1);
+                String[] files = getFiles(filepath);
                 MainWaterFallAdapter.MyViewHolder holder2;
                 try {     //避免长按vh为autoLoadMore对象导致转换类型出错闪退
                     holder2 = (MainWaterFallAdapter.MyViewHolder) vh;
@@ -1238,13 +1215,33 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     return;
                 }
                 if (files.length > 0) {
-                    if (vh.getAdapterPosition() < files.length && vh.getAdapterPosition() != RecyclerView.NO_POSITION) {    //避免因为首次使用添加了一个 提示cardView 导致的闪退
+                    //避免因为首次使用添加了一个 提示cardView 导致的闪退
+                    if (vh.getAdapterPosition() < files.length &&
+                            vh.getAdapterPosition() != RecyclerView.NO_POSITION &&
+                            !isMultiSelect) {
                         showPopupMenu(holder2.img, filepath+"/"+files[vh.getAdapterPosition()], vh.getAdapterPosition());
                     }
                 }
             }
         });
 
+        mAutoLoadMoreAdapter = new AutoLoadMoreAdapter(this, mAdapter);
+        mAutoLoadMoreAdapter.setOnLoadListener(new AutoLoadMoreAdapter.OnLoadListener() {
+            @Override
+            public void onRetry() {
+                //do retry
+                Log.i(TAG, "call  onRetry");
+                addWaterFallList();
+            }
+
+            @Override
+            public void onLoadMore() {
+                //do load more
+                Log.i(TAG, "call onLoadMore");
+                addWaterFallList();
+            }
+        });
+        mRecyclerView.setAdapter(mAutoLoadMoreAdapter);
 
         initOnPictureLongPressListener();
         vImageWatcher = ImageWatcherHelper.with(this, new GlideSimpleLoader()) // 一般来讲， ImageWatcher 需要占据全屏的位置
@@ -1407,9 +1404,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void showPopupMenu(View view, final String img, final int pos) {
-        final PopupMenu popupMenu = new PopupMenu(MainActivity.this, view);
+        final PopupMenu popupMenu;
+        popupMenu = new PopupMenu(MainActivity.this, view);
         popupMenu.getMenuInflater().inflate(R.menu.main_card_popup_menu, popupMenu.getMenu());
-        popupMenu.show();
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -1423,12 +1420,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         break;
                 }
                 return false;
-            }
-        });
-        popupMenu.setOnDismissListener(new PopupMenu.OnDismissListener() {
-            @Override
-            public void onDismiss(PopupMenu menu) {
-                // 控件消失时的事件
             }
         });
         popupMenu.show();
@@ -1505,7 +1496,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void deleteSelectedPic(List<WaterFallData> selected) {
         for (WaterFallData data : selected) {
-            deletePic(new File(data.img));
+            File f = new File(data.img);
+            if (data.isDirectory) {
+                f = f.getParentFile();
+            }
+            deletePic(f);
         }
         waterFallList.removeAll(selected);
         mRecyclerView.getAdapter().notifyDataSetChanged();
@@ -1513,6 +1508,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
     private void deletePic(File f) {
+        Log.i(TAG, "in deletePic, f= "+f.toString());
         if (!sp_init.getBoolean("isDeleteLocalPic", true)) {
             if (f.isDirectory()) {
                 try {

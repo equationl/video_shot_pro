@@ -778,8 +778,8 @@ public class PlayerForDataActivity extends AppCompatActivity {
                     case HandlerFBFonSuccess:
                         activity.dialog.setMessage("截取成功！");
                         activity.dialog.dismiss();
-                        Toast.makeText(activity, String.format(activity.res.getString(R.string.player_toast_FBF_done),msg.obj.toString()),
-                                Toast.LENGTH_LONG).show();
+                        /*Toast.makeText(activity, String.format(activity.res.getString(R.string.player_toast_FBF_done),msg.obj.toString()),
+                                Toast.LENGTH_LONG).show();  */
                         activity.markTime[0] = 0;
                         activity.markTime[1] = 0;
                         activity.videoview.start();
