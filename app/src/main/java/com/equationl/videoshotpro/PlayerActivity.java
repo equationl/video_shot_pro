@@ -45,6 +45,7 @@ import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -478,14 +479,27 @@ public class PlayerActivity extends AppCompatActivity {
             String date    =    sDateFormat.format(new    java.util.Date());
             date += "-by_EL.gif";
             final String save_path =  tool.getSaveRootPath() + "/" + date;
-            String cmd = "-ss "+(gif_start_time/1000.0)+" -t "+((gif_end_time-gif_start_time)/1000.0)+" -i "+video_path;
+            boolean isVideoPathHaveSpace = false;
+            if (video_path.contains(" ")) {  //避免因为视频路径中包含空格而导致按照空格分割命令时出错
+                video_path = video_path.replaceAll(" ", "_");
+                isVideoPathHaveSpace = true;
+            }
+            String cmd = String.format(Locale.CHINA,
+                    "-ss %f -t %f -i %s",
+                    (gif_start_time/1000.0),
+                    ((gif_end_time-gif_start_time)/1000.0),
+                    video_path);
+            //String cmd = "-ss "+(gif_start_time/1000.0)+" -t "+((gif_end_time-gif_start_time)/1000.0)+" -i "+video_path;
             Log.i(TAG, "gif start time(s)="+(gif_start_time/1000.0)+" time(ms)="+gif_start_time+" all="+((gif_end_time-gif_start_time)/1000.0));
             cmd += gif_RP.equals("-1")?"":" -s "+gif_RP;
             cmd += " -f gif";
             cmd += gif_frameRate.equals("-1")?"":" -r "+gif_frameRate;
             cmd += " "+save_path;
-            Log.i(TAG, "cmd = "+cmd);
             String gif_cmd[] = cmd.split(" ");
+            if (isVideoPathHaveSpace) {   //FIXME 现在的索引确定是5，小心以后变化啊
+                gif_cmd[5] = gif_cmd[5].replaceAll("_", " ");
+            }
+            Log.i(TAG, "cmd = "+Arrays.toString(gif_cmd));
 
             while (ffmpeg.isFFmpegCommandRunning()) {
                 //阻塞等待执行结束
@@ -522,6 +536,7 @@ public class PlayerActivity extends AppCompatActivity {
                     public void onFinish() {}
                 });
             } catch (FFmpegCommandAlreadyRunningException e) {
+                Log.e(TAG, Log.getStackTraceString(e));
                 handler.sendEmptyMessage(HandlerShotGifFail);
             }
         }

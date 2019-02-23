@@ -1496,7 +1496,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void deleteSelectedPic(List<WaterFallData> selected) {
         for (WaterFallData data : selected) {
-            File f = new File(data.img);
+            File f;
+            try {
+                f = new File(data.img);
+            } catch (NullPointerException e) {
+                Log.e(TAG, Log.getStackTraceString(e));
+                continue;
+            }
             if (data.isDirectory) {
                 f = f.getParentFile();
             }

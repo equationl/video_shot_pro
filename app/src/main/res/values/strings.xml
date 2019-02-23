@@ -30,6 +30,12 @@
     </string>
 
     <string name="about_updateHistory_text">
+        1.4 Pureté Update05:\n
+        \t*支持多选删除图片\n
+        \t*支持同时预览所有图片\n
+        \t*优化逐帧选优功能：现在可以在截取后对图片进行选择保存\n
+        \t*优化首页长按菜单体验\n
+        \t*修复若干可能引发闪退的BUG\n
         1.4 Pureté Fix04:\n
         \t*新增删除作品时是否删除本地文件\n
         \t*修复无法点击删除文件时确定按钮的BUG\n

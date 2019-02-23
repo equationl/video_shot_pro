@@ -665,4 +665,12 @@ public class BuildPictureActivity extends AppCompatActivity {
         Tencent.onActivityResultData(requestCode, resultCode, data, shareListener);
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(dialog.isShowing()){
+            dialog.dismiss();
+        }
+    }
+
 }

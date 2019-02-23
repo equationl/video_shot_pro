@@ -103,6 +103,10 @@ public class MarkPictureActivity2 extends AppCompatActivity {
         fab_delete.setOnClickListener(clickListener);
         fab_addText.setOnClickListener(clickListener);
 
+        res = getResources();
+        settings = PreferenceManager.getDefaultSharedPreferences(this);
+        sp_init = getSharedPreferences("init", Context.MODE_PRIVATE);
+
         String filepath = getExternalCacheDir().toString();
         fileList = tool.getFileOrderByName(filepath, 1);
         for (String s: fileList) {
@@ -112,19 +116,11 @@ public class MarkPictureActivity2 extends AppCompatActivity {
         }
         pic_num = fileList.length;
 
-        res = getResources();
-        settings = PreferenceManager.getDefaultSharedPreferences(this);
-        sp_init = getSharedPreferences("init", Context.MODE_PRIVATE);
-
-        checkOrigin();
-
         for (int i=0;i<pic_num;i++) {
             fileList[i] = "del";
         }
 
-        initCardView();
-        showCardView();
-        initPictureWathcher();
+        checkOrigin();
 
         text_markStatus.setText(String.format(res.getString(R.string.markPicture_text_markStatus), pic_no, pic_num));
         text_markDoneTip.setVisibility(View.GONE);
@@ -198,6 +194,7 @@ public class MarkPictureActivity2 extends AppCompatActivity {
 
 
     private void showCardView() {
+        Log.i(TAG, "call showCardView()");
         if (adapter == null) {
             adapter = new markPictureAdapter(pictureList, this);
             swipeCardsView.setAdapter(adapter);
@@ -235,6 +232,7 @@ public class MarkPictureActivity2 extends AppCompatActivity {
     }
 
     private void initCardView() {
+        Log.i(TAG, "call initCardView()");
         swipeCardsView = (SwipeCardsView) findViewById(R.id.markPictureSwipCardsView);
         //保留最后一张卡片，具体请看[#9](https://github.com/huxq17/SwipeCardsView/issues/9)
         swipeCardsView.retainLastCard(false);
@@ -336,10 +334,12 @@ public class MarkPictureActivity2 extends AppCompatActivity {
             dialog.setProgress(0);
             new Thread(new CheckPictureThread()).start();
         }
-
         if (pic_num < 1) {
             Toast.makeText(this, R.string.markPicture_toast_readFile_fail, Toast.LENGTH_SHORT).show();
             finish();
+        }
+        else {
+            init();
         }
     }
 
@@ -479,6 +479,7 @@ public class MarkPictureActivity2 extends AppCompatActivity {
                     case HandlerStatusProgressDone:
                         activity.tool.MakeCacheToStandard(activity);
                         activity.dialog.dismiss();
+                        activity.init();
                         break;
                     case HandlerStatusGetImgFail:
                         Toast.makeText(activity, "获取图片失败："+msg.obj, Toast.LENGTH_SHORT).show();
@@ -557,6 +558,7 @@ public class MarkPictureActivity2 extends AppCompatActivity {
     }
 
     private void initPictureWathcher() {
+        Log.i(TAG, "call initPictureWathcher()");
         mOnPictureLongPressListener = new ImageWatcher.OnPictureLongPressListener() {
             @Override
             public void onPictureLongPress(ImageView v, final Uri url, final int pos) {
@@ -567,5 +569,11 @@ public class MarkPictureActivity2 extends AppCompatActivity {
                 .setTranslucentStatus(0)
                 .setErrorImageRes(R.mipmap.error_picture)
                 .setOnPictureLongPressListener(mOnPictureLongPressListener);
+    }
+
+    private void init() {
+        initCardView();
+        showCardView();
+        initPictureWathcher();
     }
 }
