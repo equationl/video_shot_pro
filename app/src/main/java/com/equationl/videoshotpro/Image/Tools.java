@@ -49,11 +49,16 @@ public class Tools{
     private static final String TAG = "EL,In Tools";
 
     /**
-     * 将 bitmap 保存为png
+     * 将 bitmap 保存为图片文件（开启压缩保存为jpg，否则为png）
+     * @param bmp bitmap
+     * @param bitName 保存文件名（不含扩展名）
+     * @param savePath 保存路径
+     * @param isReduce 是否压缩
+     * @param quality 图片质量（仅在开启压缩时有效）
      *
      * @return File 返回保存的文件
      * */
-    public File saveBitmap2png(Bitmap bmp, String bitName,File savePath,boolean isReduce, int quality) throws Exception {
+    public File saveBitmap2File(Bitmap bmp, String bitName, File savePath, boolean isReduce, int quality) throws Exception {
         File f;
         Bitmap.CompressFormat imgFormat;
 
@@ -66,16 +71,15 @@ public class Tools{
             imgFormat = Bitmap.CompressFormat.PNG;
         }
 
-
         if (!f.createNewFile()) {
-            Log.w("el", "file "+f+"has already exist");
+            Log.w(TAG, "file "+f+"has already exist");
         }
         FileOutputStream fOut = null;
         try {
             fOut = new FileOutputStream(f);
             bmp.compress(imgFormat, quality, fOut);
         }  catch (Exception e) {
-            Log.e("el", "save file fail:"+e);
+            Log.e(TAG, "save file fail:"+e);
             throw e;
         }
         finally {
@@ -83,14 +87,23 @@ public class Tools{
                 fOut.flush();
                 fOut.close();
             } catch (Exception e) {
-                Log.e("el", "close file fail"+e);
+                Log.e(TAG, "close file fail"+e);
             }
         }
 
         return f;
     }
-    public File saveBitmap2png(Bitmap bmp, String bitName, File savePath) throws Exception {
-        return this.saveBitmap2png(bmp, bitName, savePath, false, 100);
+
+    /**
+     * 将 bitmap 保存为图片文件（开启压缩保存为jpg，否则为png）
+     * @param bmp bitmap
+     * @param bitName 保存文件名（不含扩展名）
+     * @param savePath 保存路径
+     *
+     * @return File 返回保存的文件
+     * */
+    public File saveBitmap2File(Bitmap bmp, String bitName, File savePath) throws Exception {
+        return this.saveBitmap2File(bmp, bitName, savePath, false, 100);
     }
 
     /**

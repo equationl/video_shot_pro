@@ -401,11 +401,11 @@ public class MarkPictureActivity2 extends AppCompatActivity {
         boolean flag;
         try {
             if (settings.getBoolean("isShotToJpg", true)) {
-                tool.saveBitmap2png(bmp,bitName, getExternalCacheDir(), true, 100);
+                tool.saveBitmap2File(bmp,bitName, getExternalCacheDir(), true, 100);
                 flag = true;
             }
             else {
-                tool.saveBitmap2png(bmp,bitName, getExternalCacheDir());
+                tool.saveBitmap2File(bmp,bitName, getExternalCacheDir());
                 flag = true;
             }
         } catch (Exception e) {

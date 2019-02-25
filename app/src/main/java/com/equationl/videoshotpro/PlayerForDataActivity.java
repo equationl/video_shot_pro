@@ -362,7 +362,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
 
         boolean flag;
         try {
-            tool.saveBitmap2png(bmp,bitName, getExternalCacheDir());
+            tool.saveBitmap2File(bmp,bitName, getExternalCacheDir());
             flag = true;
         } catch (Exception e) {
             flag = false;

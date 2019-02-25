@@ -436,10 +436,10 @@ public class BuildPictureActivity extends AppCompatActivity {
         try {
             if (isReduce) {
                 int quality = Integer.parseInt(settings.getString("reduce_value","100"));
-                savePath = tool.saveBitmap2png(bmp,bitName, new File(tool.getSaveRootPath()), true, quality);
+                savePath = tool.saveBitmap2File(bmp,bitName, new File(tool.getSaveRootPath()), true, quality);
             }
             else {
-                savePath = tool.saveBitmap2png(bmp,bitName, new File(tool.getSaveRootPath()));
+                savePath = tool.saveBitmap2File(bmp,bitName, new File(tool.getSaveRootPath()));
             }
             flag = true;
         } catch (Exception e) {
