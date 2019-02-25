@@ -31,7 +31,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
-import android.support.v4.os.AsyncTaskCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -328,7 +327,8 @@ public class FloatWindowsService extends Service {
             image = mImageReader.acquireLatestImage();
         }
         SaveTask mSaveTask = new SaveTask();
-        AsyncTaskCompat.executeParallel(mSaveTask, image);
+        //AsyncTaskCompat.executeParallel(mSaveTask, image);
+        //FIXME
     }
 
 

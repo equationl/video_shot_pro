@@ -146,7 +146,7 @@
          <string name="player_toast_getMetaDuration_fail">Sorry, the time to get the video failed! Please try again! </string>
 
     <string name="player_text_rotationScreen">Rotation</string>
-         <string name="player_text_shotStatus">Mark / Shoted: %1$d/%2$d</string>
+         <string name="player_text_shotStatus">%1$d/%2$d</string>
          <string name="player_text_replay"> Replay </string>
          <string name="player_text_savePicture_fail">Save screenshot failed</string>
          <string name="player_text_start_play"> Start playing </string>

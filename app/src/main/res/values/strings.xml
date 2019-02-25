@@ -331,7 +331,7 @@
     <string name="player_toast_getMetaDuration_fail">很抱歉，获取视频时间失败！请重试！</string>
 
     <string name="player_text_rotationScreen">翻转</string>
-    <string name="player_text_shotStatus">标记/已截取：%1$d/%2$d</string>
+    <string name="player_text_shotStatus">%1$d/%2$d</string>
     <string name="player_text_replay">重新播放</string>
     <string name="player_text_savePicture_fail">保存截图失败</string>
     <string name="player_text_start_play">开始播放</string>

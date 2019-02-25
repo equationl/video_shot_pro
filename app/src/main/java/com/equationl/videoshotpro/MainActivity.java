@@ -396,7 +396,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Uri uri = data.getData();
                 //String path = uri.getPath();
                 String path = tool.getImageAbsolutePath(this, uri);
-                Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
+                //Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
+                Intent intent = new Intent(MainActivity.this, Player2Activity.class);  //FIXME
                 Bundle bundle = new Bundle();
                 bundle.putString("path", path);
                 intent.putExtras(bundle);
