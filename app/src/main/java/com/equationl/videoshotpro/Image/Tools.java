@@ -1016,31 +1016,38 @@ public class Tools{
         String height = retr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT);
         String width = retr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH);
 
-        float height_f = Float.parseFloat(height);
-        float width_f  = Float.parseFloat(width);
+        return getRP(Integer.valueOf(width), Integer.valueOf(height), ratio);
+    }
 
+    /**
+    * 获取根据比例缩放后的视频分辨率
+     *
+     * @param width 宽
+     * @param height 高
+     * @param ratio 比例
+    * */
+    public String getRP(int width, int height, String ratio) {
         String RP = "-1";
 
         switch (ratio) {
             case "-1":
                 break;
             case "2":
-                height_f = height_f/2;
-                width_f = width_f/2;
-                RP = (int)width_f+"x"+(int)height_f;
+                height = height/2;
+                width = width/2;
+                RP = width+"x"+height;
                 break;
             case "4":
-                height_f = height_f/4;
-                width_f = width_f/4;
-                RP = (int)width_f+"x"+(int)height_f;
+                height = height/4;
+                width = width/4;
+                RP = width+"x"+height;
                 break;
             case "8":
-                height_f = height_f/8;
-                width_f = width_f/8;
-                RP = (int)width_f+"x"+(int)height_f;
+                height = height/8;
+                width = width/8;
+                RP = width+"x"+height;
                 break;
         }
         return RP;
     }
-
 }

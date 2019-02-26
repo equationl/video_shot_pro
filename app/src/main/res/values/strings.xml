@@ -370,6 +370,11 @@
     <string name="floatWindowsService_toast_floatPermissionDenied">没有悬浮窗权限！</string>
     <string name="floatWindowsService_toast_getBitmap_fail">转换 Bitmap 出错！</string>
     <string name="floatWindowsService_toast_saveBitmap_fail">保存图片出错！</string>
+    <string name="floatWindowsService_toast_setMediaProjection_fail">尝试录制GIF失败：setMediaProjection_fail</string>
+    <string name="floatWindowsService_toast_saveVideo2Gif_start">录制成功，正在转换为GIF&#8230;</string>
+    <string name="floatWindowsService_toast_saveVideo2Gif_fail">生成GIF失败！</string>
+    <string name="floatWindowsService_toast_saveVideo2Gif_success">GIF已保存！</string>
+    <string name="floatWindowsService_toast_deleteCacheFile_fail">清除缓存失败！</string>
 
     <string name="buildPicture_btn_up">上调</string>
     <string name="buildPicture_btn_down">下调</string>
