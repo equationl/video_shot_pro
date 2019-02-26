@@ -179,7 +179,6 @@ public class CommandActivity extends AppCompatActivity {
         else if (resultCode == Activity.RESULT_OK) {
             if (ResultDo == ActivityResultCodeAddPath) {
                 Uri uri = data.getData();
-                //String path = uri.getPath();
                 String path = tool.getImageAbsolutePath(this, uri);
                 int index = edittext.getSelectionStart();
                 Editable editable = edittext.getText();
@@ -187,8 +186,6 @@ public class CommandActivity extends AppCompatActivity {
             }
             if (ResultDo == ActivityResultCodeAddTime) {
                 Uri uri = data.getData();
-                String path = tool.getImageAbsolutePath(this, uri);
-
                 ResultDo = 0;
                 Intent intent = new Intent(this, PlayerForDataActivity.class);
                 intent.putExtra("do", "getTime");

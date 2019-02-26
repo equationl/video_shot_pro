@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Handler;
@@ -120,7 +121,12 @@ public class Player2Activity extends AppCompatActivity {
         res = getResources();
 
         Uri uri = getIntent().getData();
+        checkUri(uri);
         video_path = tool.getImageAbsolutePath(this, uri);
+        if (video_path == null) {
+            Toast.makeText(this, R.string.player_toast_getVideoPath_fail, Toast.LENGTH_SHORT).show();
+            finish();
+        }
 
         isShotGif = settings.getBoolean("isShotGif", false);
 
@@ -182,6 +188,24 @@ public class Player2Activity extends AppCompatActivity {
             return false;
         }
     };
+
+    // FIXME 文档中没找到检查URi的方法，这样曲线检查吧
+    private void checkUri(Uri uri) {
+        MediaMetadataRetriever rev = new MediaMetadataRetriever();
+        try {
+            rev.setDataSource(this, uri);
+        } catch (IllegalArgumentException e) {
+            Toast.makeText(this, R.string.player_toast_loadUriFail_invalid, Toast.LENGTH_LONG).show();
+            finish();
+        } catch (SecurityException e) {
+            Toast.makeText(this, R.string.player_toast_loadUriFail_lackPermission, Toast.LENGTH_LONG).show();
+            finish();
+        }   catch (Exception e) {
+            Toast.makeText(this, R.string.player_toast_loadUriFail_other, Toast.LENGTH_LONG).show();
+            finish();
+        }
+        rev.release();
+    }
 
     private void click_btn_shot() {
         if (isShotingGif) {

@@ -381,11 +381,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 //逐帧截取
                 activityResultMode = 0;
                 Uri uri = data.getData();
-                //String path = uri.getPath();
-                String path = tool.getImageAbsolutePath(this, uri);
                 Intent intent = new Intent(MainActivity.this, PlayerForDataActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putString("path", path);
                 bundle.putString("do", "FrameByFrame");
                 intent.putExtras(bundle);
                 intent.setData(uri);
@@ -394,13 +391,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             else if (requestCode == RequestCodeQuickStart){
                 //快速开始
                 Uri uri = data.getData();
-                //String path = uri.getPath();
-                String path = tool.getImageAbsolutePath(this, uri);
                 //Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
                 Intent intent = new Intent(MainActivity.this, Player2Activity.class);  //FIXME
-                Bundle bundle = new Bundle();
-                bundle.putString("path", path);
-                intent.putExtras(bundle);
                 intent.setData(uri);
                 startActivity(intent);
             }

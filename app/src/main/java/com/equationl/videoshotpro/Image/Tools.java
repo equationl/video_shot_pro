@@ -5,7 +5,9 @@ import android.app.Activity;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ProviderInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -36,6 +38,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -274,13 +278,16 @@ public class Tools{
             return null;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT && DocumentsContract.isDocumentUri(context, imageUri)) {
             if (isExternalStorageDocument(imageUri)) {
+                Log.i(TAG, "isDocumentUri isExternalStorageDocument");
                 String docId = DocumentsContract.getDocumentId(imageUri);
                 String[] split = docId.split(":");
                 String type = split[0];
                 if ("primary".equalsIgnoreCase(type)) {
                     return Environment.getExternalStorageDirectory() + "/" + split[1];
                 }
-            } else if (isDownloadsDocument(imageUri)) {
+            }
+            else if (isDownloadsDocument(imageUri)) {
+                Log.i(TAG, "isDocumentUri isDownloadsDocument");
                 String id = DocumentsContract.getDocumentId(imageUri);
 
                 //解决华为手机URI不规范的问题
@@ -295,7 +302,9 @@ public class Tools{
                             Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
                 }
                 return getDataColumn(context, contentUri, null, null);
-            } else if (isMediaDocument(imageUri)) {
+            }
+            else if (isMediaDocument(imageUri)) {
+                Log.i(TAG, "isDocumentUri isMediaDocument");
                 String docId = DocumentsContract.getDocumentId(imageUri);
                 String[] split = docId.split(":");
                 String type = split[0];
@@ -313,14 +322,74 @@ public class Tools{
             }
         } // MediaStore (and general)
         else if ("content".equalsIgnoreCase(imageUri.getScheme())) {
+            Log.i(TAG, "is content");
             // Return the remote address
             if (isGooglePhotosUri(imageUri))
                 return imageUri.getLastPathSegment();
-            return getDataColumn(context, imageUri, null, null);
+            try {   //7.0 之前
+                return getDataColumn(context, imageUri, null, null);
+            } catch (Exception e) {
+                Log.e(TAG, Log.getStackTraceString(e));
+            }
+
+            return getFPUriToPath(context, imageUri);   //7.0 之后
         }
         // File
         else if ("file".equalsIgnoreCase(imageUri.getScheme())) {
+            Log.i(TAG, "is file");
             return imageUri.getPath();
+        }
+        return null;
+    }
+
+    private static String getFPUriToPath(Context context, Uri uri) {
+        // FIXME 随时可能失效
+        Log.i(TAG, "call getFPUriToPath");
+        try {
+            List<PackageInfo> packs = context.getPackageManager().getInstalledPackages(PackageManager.GET_PROVIDERS);
+            if (packs != null) {
+                String fileProviderClassName = FileProvider.class.getName();
+                for (PackageInfo pack : packs) {
+                    ProviderInfo[] providers = pack.providers;
+                    if (providers != null) {
+                        for (ProviderInfo provider : providers) {
+                            if (uri.getAuthority().equals(provider.authority)) {
+                                if (provider.name.equalsIgnoreCase(fileProviderClassName)) {
+                                    Class<FileProvider> fileProviderClass = FileProvider.class;
+                                    try {
+                                        Method getPathStrategy = fileProviderClass.getDeclaredMethod("getPathStrategy", Context.class, String.class);
+                                        getPathStrategy.setAccessible(true);
+                                        Object invoke = getPathStrategy.invoke(null, context, uri.getAuthority());
+                                        if (invoke != null) {
+                                            String PathStrategyStringClass = FileProvider.class.getName() + "$PathStrategy";
+                                            Class<?> PathStrategy = Class.forName(PathStrategyStringClass);
+                                            Method getFileForUri = PathStrategy.getDeclaredMethod("getFileForUri", Uri.class);
+                                            getFileForUri.setAccessible(true);
+                                            Object invoke1 = getFileForUri.invoke(invoke, uri);
+                                            if (invoke1 instanceof File) {
+                                                String filePath = ((File) invoke1).getAbsolutePath();
+                                                return filePath;
+                                            }
+                                        }
+                                    } catch (NoSuchMethodException e) {
+                                        Log.i(TAG, Log.getStackTraceString(e));
+                                    } catch (InvocationTargetException e) {
+                                        Log.i(TAG, Log.getStackTraceString(e));
+                                    } catch (IllegalAccessException e) {
+                                        Log.i(TAG, Log.getStackTraceString(e));
+                                    } catch (ClassNotFoundException e) {
+                                        Log.i(TAG, Log.getStackTraceString(e));
+                                    }
+                                    break;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.i(TAG, Log.getStackTraceString(e));
         }
         return null;
     }

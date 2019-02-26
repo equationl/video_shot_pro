@@ -266,6 +266,7 @@
     <string name="main_toast_confirmExit">再按一次退出程序</string>
     <string name="main_toast_copyFileFail">获取图片失败！</string>
     <string name="main_toast_unSelectedPic">你还没有选择任何图片哦</string>
+    <string name="main_toast_getVideoPath_fail">获取视频失败！请勿使用第三方程序选择视频！请尝试从系统文件选择视频！</string>
 
     <string name="main_nav_text_ffmpeg">FFmpeg命令行</string>
     <string name="main_nav_text_setting">设置</string>
@@ -325,6 +326,7 @@
     <string name="player_toast_shotGif_start">开始截取动图</string>
     <string name="player_toast_mark_timeError">结束时间必须大于开始时间</string>
     <string name="player_toast_FBF_done">截取完成，请进入 %1$s 查看！</string>
+    <string name="player_toast_getVideoPath_fail">获取视频失败！请勿使用第三方程序选择视频！请尝试从系统文件选择视频！</string>
     <string name="player_toast_loadUriFail_invalid">抱歉，加载文件失败：文件失效，请重试！</string>
     <string name="player_toast_loadUriFail_lackPermission">抱歉，加载文件失败：无权限，请重试！</string>
     <string name="player_toast_loadUriFail_other">抱歉，加载文件失败：文件格式不支持或其他错误，请重试！</string>

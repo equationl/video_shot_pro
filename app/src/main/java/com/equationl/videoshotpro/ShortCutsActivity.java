@@ -1,14 +1,11 @@
 package com.equationl.videoshotpro;
 
-import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Build;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,7 +13,6 @@ import android.widget.Toast;
 
 import com.equationl.videoshotpro.Image.Tools;
 import com.equationl.videoshotpro.utils.Utils;
-import com.tencent.tauth.Tencent;
 
 public class ShortCutsActivity extends AppCompatActivity {
     Tools tool;
@@ -66,12 +62,7 @@ public class ShortCutsActivity extends AppCompatActivity {
             else if (requestCode == RequestCodeQuickStart){
                 //快速开始
                 Uri uri = data.getData();
-                //String path = uri.getPath();
-                String path = tool.getImageAbsolutePath(this, uri);
                 Intent intent = new Intent(ShortCutsActivity.this, PlayerActivity.class);
-                Bundle bundle = new Bundle();
-                bundle.putString("path", path);
-                intent.putExtras(bundle);
                 intent.setData(uri);
                 startActivity(intent);
             }
