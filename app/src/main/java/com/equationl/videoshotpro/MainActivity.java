@@ -381,7 +381,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 //逐帧截取
                 activityResultMode = 0;
                 Uri uri = data.getData();
-                Intent intent = new Intent(MainActivity.this, PlayerForData2Activity.class);
+                Intent intent = new Intent(MainActivity.this, PlayerForDataActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putString("do", "FrameByFrame");
                 intent.putExtras(bundle);
@@ -392,7 +392,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 //快速开始
                 Uri uri = data.getData();
                 //Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
-                Intent intent = new Intent(MainActivity.this, Player2Activity.class);  //FIXME
+                Intent intent = new Intent(MainActivity.this, PlayerActivity.class);  //FIXME
                 intent.setData(uri);
                 startActivity(intent);
             }
@@ -547,7 +547,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         public void run() {
             loadLib();
-            utils.finishActivity(MarkPictureActivity2.instance);
+            utils.finishActivity(MarkPictureActivity.instance);
             utils.finishActivity(ChooseActivity.instance);
             utils.finishActivity(BuildPictureActivity.instance);
             utils.finishActivity(PlayerActivity.instance);
@@ -1051,7 +1051,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             activity.startActivity(intent);
                         }
                         else {
-                            Intent intent = new Intent(activity, MarkPictureActivity2.class);
+                            Intent intent = new Intent(activity, MarkPictureActivity.class);
                             activity.startActivity(intent);
                         }
                         break;

@@ -7,8 +7,7 @@
     <item
         android:id="@+id/main_menu_multiSelect"
         android:title="@string/main_menu_MultiSelect"/>
-    <item android:title="@string/main_menu_sort_title"
-        android:id="@+id/main_menu_sort_title">
+    <item android:title="@string/main_menu_sort_title">
         <menu>
             <item
                 android:title="@string/main_menu_sort_type"

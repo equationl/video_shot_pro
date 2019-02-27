@@ -15,7 +15,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -187,7 +186,7 @@ public class CommandActivity extends AppCompatActivity {
             if (ResultDo == ActivityResultCodeAddTime) {
                 Uri uri = data.getData();
                 ResultDo = 0;
-                Intent intent = new Intent(this, PlayerForData2Activity.class);
+                Intent intent = new Intent(this, PlayerForDataActivity.class);
                 intent.putExtra("do", "getTime");
                 intent.setData(uri);
                 startActivityForResult(intent, ActivityResultCodeAddTime);

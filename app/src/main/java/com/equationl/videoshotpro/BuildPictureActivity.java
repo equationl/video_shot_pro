@@ -169,7 +169,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                     utils.finishActivity(PlayerActivity.instance);
                     utils.finishActivity(MainActivity.instance);
                     utils.finishActivity(ChooseActivity.instance);
-                    utils.finishActivity(MarkPictureActivity2.instance);
+                    utils.finishActivity(MarkPictureActivity.instance);
                     Intent intent = new Intent(BuildPictureActivity.this, MainActivity.class);
                     startActivity(intent);
                     finish();
@@ -217,7 +217,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                 utils.finishActivity(PlayerActivity.instance);
                 utils.finishActivity(MainActivity.instance);
                 utils.finishActivity(ChooseActivity.instance);
-                utils.finishActivity(MarkPictureActivity2.instance);
+                utils.finishActivity(MarkPictureActivity.instance);
                 Intent intent = new Intent(BuildPictureActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
@@ -566,7 +566,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                                     public void onClick(DialogInterface dialog, int which) {
                                         activity.utils.finishActivity(PlayerActivity.instance);
                                         activity.utils.finishActivity(MainActivity.instance);
-                                        activity.utils.finishActivity(MarkPictureActivity2.instance);
+                                        activity.utils.finishActivity(MarkPictureActivity.instance);
                                         Intent intent = new Intent(activity, MainActivity.class);
                                         activity.startActivity(intent);
                                         activity.finish();

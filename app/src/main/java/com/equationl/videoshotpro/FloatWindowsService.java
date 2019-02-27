@@ -121,7 +121,7 @@ public class FloatWindowsService extends Service {
             appIntent = new Intent(this,ChooseActivity.class);
         }
         else {
-            appIntent = new Intent(this,MarkPictureActivity2.class);
+            appIntent = new Intent(this,MarkPictureActivity.class);
         }
         appIntent.setAction(Intent.ACTION_MAIN);
         appIntent.addCategory(Intent.CATEGORY_LAUNCHER);

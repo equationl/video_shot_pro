@@ -45,7 +45,7 @@ import me.toptas.fancyshowcase.DismissListener;
 import me.toptas.fancyshowcase.FancyShowCaseQueue;
 import me.toptas.fancyshowcase.FancyShowCaseView;
 
-public class MarkPictureActivity2 extends AppCompatActivity {
+public class MarkPictureActivity extends AppCompatActivity {
     SwipeCardsView swipeCardsView;
     markPictureAdapter adapter;
     List <String> pictureList =  new ArrayList<>();
@@ -79,13 +79,13 @@ public class MarkPictureActivity2 extends AppCompatActivity {
     private static final int HandlerStatusProgressDone = 10015;
     private static final int HandlerStatusGetImgFail = 10016;
 
-    public static MarkPictureActivity2 instance = null;   //FIXME  暂时这样吧，实在找不到更好的办法了
+    public static MarkPictureActivity instance = null;   //FIXME  暂时这样吧，实在找不到更好的办法了
     private static final String TAG = "EL,In MarkActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_mark_picture2);
+        setContentView(R.layout.activity_mark_picture);
 
         instance = this;
 
@@ -135,12 +135,12 @@ public class MarkPictureActivity2 extends AppCompatActivity {
                 new Runnable() {
                     @Override
                     public void run() {
-                        final FancyShowCaseView fancyShowCaseView1 = new FancyShowCaseView.Builder(MarkPictureActivity2.this)
+                        final FancyShowCaseView fancyShowCaseView1 = new FancyShowCaseView.Builder(MarkPictureActivity.this)
                                 .focusOn(findViewById(R.id.markPicture_menu_guide))
                                 .title(res.getString(R.string.markPicture_guide_guide))
                                 .showOnce("mark_guide")
                                 .build();
-                        final FancyShowCaseView fancyShowCaseView2 = new FancyShowCaseView.Builder(MarkPictureActivity2.this)
+                        final FancyShowCaseView fancyShowCaseView2 = new FancyShowCaseView.Builder(MarkPictureActivity.this)
                                 .focusOn(findViewById(R.id.markPicture_menu_done))
                                 .title(res.getString(R.string.markPicture_guide_done))
                                 .showOnce("mark_done")
@@ -177,7 +177,7 @@ public class MarkPictureActivity2 extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(),"至少需要选择一张图片", Toast.LENGTH_LONG).show();
                 }
                 else {
-                    Intent intent = new Intent(MarkPictureActivity2.this, BuildPictureActivity.class);
+                    Intent intent = new Intent(MarkPictureActivity.this, BuildPictureActivity.class);
                     Bundle bundle = new Bundle();
                     bundle.putStringArray("fileList",fileList);
                     bundle.putBoolean("isFromExtra", isFromExtra);
@@ -243,7 +243,7 @@ public class MarkPictureActivity2 extends AppCompatActivity {
             @Override
             public void onShow(int index) {
                 /*if (index >= pic_num-1) {
-                    Toast.makeText(MarkPictureActivity2.this, R.string.markPicture_toast_markFinish, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MarkPictureActivity.this, R.string.markPicture_toast_markFinish, Toast.LENGTH_SHORT).show();
                     return;
                 }*/
                 curIndex = index;
@@ -296,7 +296,7 @@ public class MarkPictureActivity2 extends AppCompatActivity {
                     deleteImg();
                     break;
                 case R.id.markPicture_fab_addText:
-                    Toast.makeText(MarkPictureActivity2.this, "该功能暂未开放，敬请期待！", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MarkPictureActivity.this, "该功能暂未开放，敬请期待！", Toast.LENGTH_SHORT).show();
                     //TODO 添加文字
                     //markPictureAddText();
                     break;
@@ -320,7 +320,7 @@ public class MarkPictureActivity2 extends AppCompatActivity {
     private void checkOrigin() {
         isFromExtra = this.getIntent().getBooleanExtra("isFromExtra", false);
         if (isFromExtra) {
-            Intent service = new Intent(MarkPictureActivity2.this, FloatWindowsService.class);
+            Intent service = new Intent(MarkPictureActivity.this, FloatWindowsService.class);
             stopService(service);
 
             dialog = new ProgressDialog(this);
@@ -434,7 +434,7 @@ public class MarkPictureActivity2 extends AppCompatActivity {
 
     private void markPictureCut(int pos) {
         if (fileList[pos].equals("text")) {
-            Toast.makeText(MarkPictureActivity2.this, "添加文字后不允许裁切！", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MarkPictureActivity.this, "添加文字后不允许裁切！", Toast.LENGTH_SHORT).show();
             return;
         }
         fileList[pos] = "cut";
@@ -451,15 +451,15 @@ public class MarkPictureActivity2 extends AppCompatActivity {
     }
 
     private static class MyHandler extends Handler {
-        private final WeakReference<MarkPictureActivity2> mActivity;
+        private final WeakReference<MarkPictureActivity> mActivity;
 
-        private MyHandler(MarkPictureActivity2 activity) {
-            mActivity = new WeakReference<MarkPictureActivity2>(activity);
+        private MyHandler(MarkPictureActivity activity) {
+            mActivity = new WeakReference<MarkPictureActivity>(activity);
         }
 
         @Override
         public void handleMessage(Message msg) {
-            MarkPictureActivity2 activity = mActivity.get();
+            MarkPictureActivity activity = mActivity.get();
             if (activity != null) {
                 switch (msg.what) {
                     case HandlerStatusHideTipText:

@@ -43,12 +43,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".PlayerActivity"
-            android:configChanges="keyboard|orientation|screenSize"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.Fullscreen" />
-        <activity
-            android:name=".MarkPictureActivity2"
+            android:name=".MarkPictureActivity"
             android:label="标记图片" />
         <activity android:name=".BuildPictureActivity" />
         <activity
@@ -97,11 +92,6 @@
             android:exported="true" />
 
         <activity
-            android:name=".PlayerForDataActivity"
-            android:configChanges="keyboard|orientation|screenSize"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.Fullscreen" />
-        <activity
             android:name=".FeedbackActivity"
             android:label="@string/title_activity_feedback"
             android:theme="@style/AppTheme.NoActionBar" />
@@ -140,11 +130,11 @@
             android:label="@string/title_activity_chooseBest"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".Player2Activity"
+            android:name=".PlayerActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.Fullscreen" />
-        <activity android:name=".PlayerForData2Activity"
+        <activity android:name=".PlayerForDataActivity"
             android:configChanges="keyboard|orientation|screenSize"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.Fullscreen"

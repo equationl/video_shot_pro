@@ -29,7 +29,16 @@
         \n\n\n
     </string>
 
-    <string name="about_updateHistory_text">
+    <string name="about_updateHistory_text" translatable="false">
+        1.5 léger:\n
+        \t*更加美观实用的播放界面\n
+        \t*外部程序截图模式支持截取GIF\n
+        \t*修复安卓7.0以上用户闪退的问题\n
+        1.4 Pureté Fix6:\n
+        \t*修复生成图片时对话框为正常关闭导致的闪退\n
+        \t*修复多选删除图片导致的闪退\n
+        \t*修复在外部程序截图模式下标记图片时预览图尺寸出错的问题\n
+        \t*修复在文件名含有空格时无法截取GIF的问题\n
         1.4 Pureté Update05:\n
         \t*支持多选删除图片\n
         \t*支持同时预览所有图片\n
@@ -255,8 +264,6 @@
     <string name="main_snackbar_btn_contact">联系开发者</string>
     <string name="main_snackbar_so_notAble">很抱歉，无兼容您手机的so库</string>
     <string name="main_snackbar_isPiracy">您下载的是非法打包版本，建议您前往正规渠道重新下载</string>
-    <string name="main_snackbar_deleteTip">确定要删除吗？</string>
-    <string name="main_snackbar_deleteSure">是的</string>
     <string name="main_snackbar_shareDirectoryTip">不能分享文件夹哦</string>
     <string name="main_snackbar_sure">确定</string>
 
@@ -264,11 +271,9 @@
     <string name="main_toast_choosePictures_fail">选择图片出错！</string>
     <string name="main_toast_unSupportFloatBtn">当前系统版本过低，无法使用该功能！</string>
     <string name="main_toast_canNotStartFloatBtn">无法启动屏幕截图，请联系开发者解决！</string>
-    <string name="main_toast_showNavigationGuider">向右滑动可以打开侧边栏哦~</string>
     <string name="main_toast_confirmExit">再按一次退出程序</string>
     <string name="main_toast_copyFileFail">获取图片失败！</string>
     <string name="main_toast_unSelectedPic">你还没有选择任何图片哦</string>
-    <string name="main_toast_getVideoPath_fail">获取视频失败！请勿使用第三方程序选择视频！请尝试从系统文件选择视频！</string>
 
     <string name="main_nav_text_ffmpeg">FFmpeg命令行</string>
     <string name="main_nav_text_setting">设置</string>
@@ -327,25 +332,14 @@
     <string name="player_toast_shotGif_success">动图已保存</string>
     <string name="player_toast_shotGif_start">开始截取动图</string>
     <string name="player_toast_mark_timeError">结束时间必须大于开始时间</string>
-    <string name="player_toast_FBF_done">截取完成，请进入 %1$s 查看！</string>
     <string name="player_toast_getVideoPath_fail">获取视频失败！请勿使用第三方程序选择视频！请尝试从系统文件选择视频！</string>
     <string name="player_toast_loadUriFail_invalid">抱歉，加载文件失败：文件失效，请重试！</string>
     <string name="player_toast_loadUriFail_lackPermission">抱歉，加载文件失败：无权限，请重试！</string>
     <string name="player_toast_loadUriFail_other">抱歉，加载文件失败：文件格式不支持或其他错误，请重试！</string>
-    <string name="player_toast_getMetaDuration_fail">很抱歉，获取视频时间失败！请重试！</string>
     <string name="player_toast_getWhatToDo_fail">未指定启动模式！</string>
 
-    <string name="player_text_rotationScreen">翻转</string>
     <string name="player_text_shotStatus">%1$d/%2$d</string>
-    <string name="player_text_replay">重新播放</string>
     <string name="player_text_savePicture_fail">保存截图失败</string>
-    <string name="player_text_start_play">开始播放</string>
-    <string name="player_text_done">完成</string>
-    <string name="player_text_shot">截取</string>
-    <string name="player_text_mark">标记</string>
-    <string name="player_text_mark_end">结束</string>
-    <string name="player_text_ok">确定</string>
-    <string name="player_text_back">返回</string>
     <string name="player_text_getCachePath_fail">获取缓存目录出错！</string>
 
     <string name="player_dialog_FBF_title">正在截取中……</string>
@@ -590,8 +584,8 @@
     <string name="title_activity_feedback">反馈</string>
 
 
-    <string name="float_done_channel_name">请勿关闭此通道，否则将无法使用外部程序截图！</string>
-    <string name="float_done_channel_description">使用外部程序截图时，通过该通知提示APP截图完成</string>
+    <string name="float_done_channel_name">开始制作按钮</string>
+    <string name="float_done_channel_description">使用外部程序截图时，通过点击该通知开始制作</string>
 
     <string name="shortcut_quick_ShortLabel">快速开始</string>
     <string name="shortcut_quick_LongLabel">快速开始</string>
