@@ -124,7 +124,7 @@ public class Player2Activity extends AppCompatActivity {
         checkUri(uri);
         video_path = tool.getImageAbsolutePath(this, uri);
         if (video_path == null) {
-            Toast.makeText(this, R.string.player_toast_getVideoPath_fail, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.player_toast_getVideoPath_fail, Toast.LENGTH_LONG).show();
             finish();
         }
 
@@ -189,7 +189,7 @@ public class Player2Activity extends AppCompatActivity {
         }
     };
 
-    // FIXME 文档中没找到检查URi的方法，这样曲线检查吧
+    // FIXME 文档中没找到检查URI的方法，这样曲线检查吧
     private void checkUri(Uri uri) {
         MediaMetadataRetriever rev = new MediaMetadataRetriever();
         try {

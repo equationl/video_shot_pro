@@ -187,7 +187,7 @@ public class CommandActivity extends AppCompatActivity {
             if (ResultDo == ActivityResultCodeAddTime) {
                 Uri uri = data.getData();
                 ResultDo = 0;
-                Intent intent = new Intent(this, PlayerForDataActivity.class);
+                Intent intent = new Intent(this, PlayerForData2Activity.class);
                 intent.putExtra("do", "getTime");
                 intent.setData(uri);
                 startActivityForResult(intent, ActivityResultCodeAddTime);

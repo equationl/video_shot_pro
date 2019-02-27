@@ -4,7 +4,6 @@ package com.equationl.videoshotpro.Image;
 import android.app.Activity;
 import android.content.ContentUris;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
@@ -21,7 +20,6 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
@@ -29,8 +27,6 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.equationl.videoshotpro.R;
-import com.tencent.bugly.crashreport.BuglyLog;
 import com.tencent.bugly.crashreport.CrashReport;
 
 import java.io.BufferedInputStream;
@@ -88,8 +84,10 @@ public class Tools{
         }
         finally {
             try {
-                fOut.flush();
-                fOut.close();
+                if (fOut != null) {
+                    fOut.flush();
+                    fOut.close();
+                }
             } catch (Exception e) {
                 Log.e(TAG, "close file fail"+e);
             }
@@ -155,7 +153,7 @@ public class Tools{
     public Bitmap getBitmapFromFile(String no, File dirPath, String extension, BitmapFactory.Options options) throws Exception {
         File path = new File(dirPath, no+"."+extension);
         FileInputStream f;
-        Bitmap bm = null;
+        Bitmap bm;
         f = new FileInputStream(path);
         BufferedInputStream bis = new BufferedInputStream(f);
         bm = BitmapFactory.decodeStream(bis, null, options);

@@ -139,10 +139,16 @@
             android:name=".ChooseBestPictureActivity"
             android:label="@string/title_activity_chooseBest"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".Player2Activity"
+        <activity
+            android:name=".Player2Activity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.Fullscreen"/>
+            android:theme="@style/AppTheme.Fullscreen" />
+        <activity android:name=".PlayerForData2Activity"
+            android:configChanges="keyboard|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.Fullscreen"
+            />
     </application>
 
 </manifest>

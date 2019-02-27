@@ -381,7 +381,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 //逐帧截取
                 activityResultMode = 0;
                 Uri uri = data.getData();
-                Intent intent = new Intent(MainActivity.this, PlayerForDataActivity.class);
+                Intent intent = new Intent(MainActivity.this, PlayerForData2Activity.class);
                 Bundle bundle = new Bundle();
                 bundle.putString("do", "FrameByFrame");
                 intent.putExtras(bundle);
@@ -986,12 +986,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void btn_help() {
-        String info_text = res.getString(R.string.main_information_content);
-        String content = String.format(info_text, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString());
-        dialog.setTitle(res.getString(R.string.main_information_title));
-        dialog.setMessage(content);
-        dialog.setIcon(R.mipmap.ic_launcher);
-        dialog.create().show();
+        String content = String.format(res.getString(R.string.main_information_content),
+                tool.getSaveRootPath());
+        Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
+                .setTitle(R.string.main_information_title)
+                .setMessage(content)
+                .setIcon(R.mipmap.ic_launcher)
+                .setPositiveButton(res.getString(R.string.main_dialog_btn_ok),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        }).create();
+        dialog.show();
     }
 
     private void btn_feedback() {

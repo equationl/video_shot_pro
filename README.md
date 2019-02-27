@@ -20,6 +20,8 @@
 同时，欢迎各位star
 
 #### 开源许可
+GSYVideoPlayer：https://github.com/CarGuo/GSYVideoPlayer
+***
 FloatWindowPermission：https://github.com/zhaozepeng/FloatWindowPermission  
 ***
 ScreenCapture ： https://github.com/goodbranch/ScreenCapture  

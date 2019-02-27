@@ -158,6 +158,8 @@
     </string>
 
     <string name="about_right_text">
+        GSYVideoPlayer：https://github.com/CarGuo/GSYVideoPlayer  \n
+        -------------\n
         FloatWindowPermission：https://github.com/zhaozepeng/FloatWindowPermission  \n
         -------------\n
         ScreenCapture ： https://github.com/goodbranch/ScreenCapture  \n
@@ -331,6 +333,7 @@
     <string name="player_toast_loadUriFail_lackPermission">抱歉，加载文件失败：无权限，请重试！</string>
     <string name="player_toast_loadUriFail_other">抱歉，加载文件失败：文件格式不支持或其他错误，请重试！</string>
     <string name="player_toast_getMetaDuration_fail">很抱歉，获取视频时间失败！请重试！</string>
+    <string name="player_toast_getWhatToDo_fail">未指定启动模式！</string>
 
     <string name="player_text_rotationScreen">翻转</string>
     <string name="player_text_shotStatus">%1$d/%2$d</string>
@@ -347,6 +350,8 @@
 
     <string name="player_dialog_FBF_title">正在截取中……</string>
     <string name="player_dialog_FBF_content">截取已开始</string>
+    <string name="player_dialog_FBF_content_shot_fail">截取失败：%1$s \n</string>
+    <string name="player_dialog_FBF_content_shot_success">截取成功！</string>
 
     <string name="markPicture_toast_readFile_fail">读取图片列表出错！</string>
     <string name="markPicture_ProgressDialog_msg">请稍候</string>
