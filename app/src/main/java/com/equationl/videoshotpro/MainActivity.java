@@ -91,7 +91,6 @@ import me.toptas.fancyshowcase.FancyShowCaseView;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    AlertDialog.Builder dialog;
     AlertDialog dialog2;
     android.support.design.widget.CoordinatorLayout container;
     Tools tool;
@@ -218,8 +217,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         main_floatBtn_splicing.setOnClickListener(clickListener);
         main_floatBtn_shotScreen.setOnClickListener(clickListener);
         main_floatBtn_frameByFrame.setOnClickListener(clickListener);
-
-        dialog = new AlertDialog.Builder(this);
 
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -381,11 +378,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 //逐帧截取
                 activityResultMode = 0;
                 Uri uri = data.getData();
-                //String path = uri.getPath();
-                String path = tool.getImageAbsolutePath(this, uri);
                 Intent intent = new Intent(MainActivity.this, PlayerForDataActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putString("path", path);
                 bundle.putString("do", "FrameByFrame");
                 intent.putExtras(bundle);
                 intent.setData(uri);
@@ -394,12 +388,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             else if (requestCode == RequestCodeQuickStart){
                 //快速开始
                 Uri uri = data.getData();
-                //String path = uri.getPath();
-                String path = tool.getImageAbsolutePath(this, uri);
-                Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
-                Bundle bundle = new Bundle();
-                bundle.putString("path", path);
-                intent.putExtras(bundle);
+                //Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
+                Intent intent = new Intent(MainActivity.this, PlayerActivity.class);  //FIXME
                 intent.setData(uri);
                 startActivity(intent);
             }
@@ -554,7 +544,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         public void run() {
             loadLib();
-            utils.finishActivity(MarkPictureActivity2.instance);
+            utils.finishActivity(MarkPictureActivity.instance);
             utils.finishActivity(ChooseActivity.instance);
             utils.finishActivity(BuildPictureActivity.instance);
             utils.finishActivity(PlayerActivity.instance);
@@ -993,12 +983,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void btn_help() {
-        String info_text = res.getString(R.string.main_information_content);
-        String content = String.format(info_text, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString());
-        dialog.setTitle(res.getString(R.string.main_information_title));
-        dialog.setMessage(content);
-        dialog.setIcon(R.mipmap.ic_launcher);
-        dialog.create().show();
+        String content = String.format(res.getString(R.string.main_information_content),
+                tool.getSaveRootPath());
+        Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
+                .setTitle(R.string.main_information_title)
+                .setMessage(content)
+                .setIcon(R.mipmap.ic_launcher)
+                .setPositiveButton(res.getString(R.string.main_dialog_btn_ok),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        }).create();
+        dialog.show();
     }
 
     private void btn_feedback() {
@@ -1050,7 +1048,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             activity.startActivity(intent);
                         }
                         else {
-                            Intent intent = new Intent(activity, MarkPictureActivity2.class);
+                            Intent intent = new Intent(activity, MarkPictureActivity.class);
                             activity.startActivity(intent);
                         }
                         break;
@@ -1497,12 +1495,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void deleteSelectedPic(List<WaterFallData> selected) {
         for (WaterFallData data : selected) {
             File f;
-            try {
-                f = new File(data.img);
-            } catch (NullPointerException e) {
-                Log.e(TAG, Log.getStackTraceString(e));
-                continue;
+            Log.i(TAG, "data.img="+data.img);
+            if (data.img != null) {
+                try {
+                    f = new File(data.img);
+                } catch (NullPointerException e) {
+                    Log.e(TAG, Log.getStackTraceString(e));
+                    continue;
+                }
             }
+            else {
+                //FIXME 总觉得这样写不安全，要不还是用 data.text 来弄吧？
+                String filepath =  tool.getSaveRootPath();
+                String[] files = getFiles(filepath);
+                try {
+                    f = new File(filepath+"/"+files[waterFallList.indexOf(data)]);
+                    data.isDirectory = false;   //避免因此而将f设为上一层目录，从而删掉别人珍藏多年的图片（来自开发者自己“血”的教育）
+                } catch (Exception e) {
+                    Log.e(TAG, Log.getStackTraceString(e));
+                    continue;
+                }
+            }
+
             if (data.isDirectory) {
                 f = f.getParentFile();
             }

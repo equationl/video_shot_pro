@@ -28,8 +28,12 @@
         \t推荐直接直接使用系统图库查看\n
         \n\n\n
     </string>
-
-    <string name="about_updateHistory_text">
+    
+    <string name="about_updateHistory_text" translatable="false">
+        1.5 léger:\n
+        \t*更加美观实用的播放界面\n
+        \t*外部程序截图模式支持截取GIF\n
+        \t*修复安卓7.0以上用户闪退的问题\n
         1.4 Pureté Fix6:\n
         \t*修复生成图片时对话框为正常关闭导致的闪退\n
         \t*修复多选删除图片导致的闪退\n
@@ -163,6 +167,8 @@
     </string>
 
     <string name="about_right_text">
+        GSYVideoPlayer：https://github.com/CarGuo/GSYVideoPlayer  \n
+        -------------\n
         FloatWindowPermission：https://github.com/zhaozepeng/FloatWindowPermission  \n
         -------------\n
         ScreenCapture ： https://github.com/goodbranch/ScreenCapture  \n
@@ -258,8 +264,6 @@
     <string name="main_snackbar_btn_contact">联系开发者</string>
     <string name="main_snackbar_so_notAble">很抱歉，无兼容您手机的so库</string>
     <string name="main_snackbar_isPiracy">您下载的是非法打包版本，建议您前往正规渠道重新下载</string>
-    <string name="main_snackbar_deleteTip">确定要删除吗？</string>
-    <string name="main_snackbar_deleteSure">是的</string>
     <string name="main_snackbar_shareDirectoryTip">不能分享文件夹哦</string>
     <string name="main_snackbar_sure">确定</string>
 
@@ -267,7 +271,6 @@
     <string name="main_toast_choosePictures_fail">选择图片出错！</string>
     <string name="main_toast_unSupportFloatBtn">当前系统版本过低，无法使用该功能！</string>
     <string name="main_toast_canNotStartFloatBtn">无法启动屏幕截图，请联系开发者解决！</string>
-    <string name="main_toast_showNavigationGuider">向右滑动可以打开侧边栏哦~</string>
     <string name="main_toast_confirmExit">再按一次退出程序</string>
     <string name="main_toast_copyFileFail">获取图片失败！</string>
     <string name="main_toast_unSelectedPic">你还没有选择任何图片哦</string>
@@ -329,27 +332,20 @@
     <string name="player_toast_shotGif_success">动图已保存</string>
     <string name="player_toast_shotGif_start">开始截取动图</string>
     <string name="player_toast_mark_timeError">结束时间必须大于开始时间</string>
-    <string name="player_toast_FBF_done">截取完成，请进入 %1$s 查看！</string>
+    <string name="player_toast_getVideoPath_fail">获取视频失败！请勿使用第三方程序选择视频！请尝试从系统文件选择视频！</string>
     <string name="player_toast_loadUriFail_invalid">抱歉，加载文件失败：文件失效，请重试！</string>
     <string name="player_toast_loadUriFail_lackPermission">抱歉，加载文件失败：无权限，请重试！</string>
     <string name="player_toast_loadUriFail_other">抱歉，加载文件失败：文件格式不支持或其他错误，请重试！</string>
-    <string name="player_toast_getMetaDuration_fail">很抱歉，获取视频时间失败！请重试！</string>
+    <string name="player_toast_getWhatToDo_fail">未指定启动模式！</string>
 
-    <string name="player_text_rotationScreen">翻转</string>
-    <string name="player_text_shotStatus">标记/已截取：%1$d/%2$d</string>
-    <string name="player_text_replay">重新播放</string>
+    <string name="player_text_shotStatus">%1$d/%2$d</string>
     <string name="player_text_savePicture_fail">保存截图失败</string>
-    <string name="player_text_start_play">开始播放</string>
-    <string name="player_text_done">完成</string>
-    <string name="player_text_shot">截取</string>
-    <string name="player_text_mark">标记</string>
-    <string name="player_text_mark_end">结束</string>
-    <string name="player_text_ok">确定</string>
-    <string name="player_text_back">返回</string>
     <string name="player_text_getCachePath_fail">获取缓存目录出错！</string>
 
     <string name="player_dialog_FBF_title">正在截取中……</string>
     <string name="player_dialog_FBF_content">截取已开始</string>
+    <string name="player_dialog_FBF_content_shot_fail">截取失败：%1$s \n</string>
+    <string name="player_dialog_FBF_content_shot_success">截取成功！</string>
 
     <string name="markPicture_toast_readFile_fail">读取图片列表出错！</string>
     <string name="markPicture_ProgressDialog_msg">请稍候</string>
@@ -373,7 +369,13 @@
     <string name="floatWindowsService_notice_content">点击开始制作</string>
     <string name="floatWindowsService_notice_title">程序运行中</string>
     <string name="floatWindowsService_toast_floatPermissionDenied">没有悬浮窗权限！</string>
-
+    <string name="floatWindowsService_toast_getBitmap_fail">转换 Bitmap 出错！</string>
+    <string name="floatWindowsService_toast_saveBitmap_fail">保存图片出错！</string>
+    <string name="floatWindowsService_toast_setMediaProjection_fail">尝试录制GIF失败：setMediaProjection_fail</string>
+    <string name="floatWindowsService_toast_saveVideo2Gif_start">录制成功，正在转换为GIF&#8230;</string>
+    <string name="floatWindowsService_toast_saveVideo2Gif_fail">生成GIF失败！</string>
+    <string name="floatWindowsService_toast_saveVideo2Gif_success">GIF已保存！</string>
+    <string name="floatWindowsService_toast_deleteCacheFile_fail">清除缓存失败！</string>
 
     <string name="buildPicture_btn_up">上调</string>
     <string name="buildPicture_btn_down">下调</string>
@@ -398,7 +400,7 @@
     <string name="buildPicture_toast_copyPreview_fail">获取预览图片失败！</string>
     <string name="buildPicture_toast_createThumb_fail">生成缩略图失败！</string>
     <string name="buildPicture_toast_sharePicture_fail">分享失败，请尝试在 分享->更多 中选择 微信 进行分享</string>
-
+    <string name="buildPicture_toast_buildPicture_done">导出成功！</string>
 
     <string name="title_activity_choose">确定图片顺序</string>
     <string name="chooseActivity_ProgressDialog_loadImage_title">请稍候&#8230;</string>
@@ -582,8 +584,8 @@
     <string name="title_activity_feedback">反馈</string>
 
 
-    <string name="float_done_channel_name">请勿关闭此通道，否则将无法使用外部程序截图！</string>
-    <string name="float_done_channel_description">使用外部程序截图时，通过该通知提示APP截图完成</string>
+    <string name="float_done_channel_name">开始制作按钮</string>
+    <string name="float_done_channel_description">使用外部程序截图时，通过点击该通知开始制作</string>
 
     <string name="shortcut_quick_ShortLabel">快速开始</string>
     <string name="shortcut_quick_LongLabel">快速开始</string>
