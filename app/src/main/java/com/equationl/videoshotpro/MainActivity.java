@@ -91,7 +91,6 @@ import me.toptas.fancyshowcase.FancyShowCaseView;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    AlertDialog.Builder dialog;
     AlertDialog dialog2;
     android.support.design.widget.CoordinatorLayout container;
     Tools tool;
@@ -218,8 +217,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         main_floatBtn_splicing.setOnClickListener(clickListener);
         main_floatBtn_shotScreen.setOnClickListener(clickListener);
         main_floatBtn_frameByFrame.setOnClickListener(clickListener);
-
-        dialog = new AlertDialog.Builder(this);
 
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -1498,12 +1495,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void deleteSelectedPic(List<WaterFallData> selected) {
         for (WaterFallData data : selected) {
             File f;
-            try {
-                f = new File(data.img);
-            } catch (NullPointerException e) {
-                Log.e(TAG, Log.getStackTraceString(e));
-                continue;
+            Log.i(TAG, "data.img="+data.img);
+            if (data.img != null) {
+                try {
+                    f = new File(data.img);
+                } catch (NullPointerException e) {
+                    Log.e(TAG, Log.getStackTraceString(e));
+                    continue;
+                }
             }
+            else {
+                //FIXME 总觉得这样写不安全，要不还是用 data.text 来弄吧？
+                String filepath =  tool.getSaveRootPath();
+                String[] files = getFiles(filepath);
+                try {
+                    f = new File(filepath+"/"+files[waterFallList.indexOf(data)]);
+                    data.isDirectory = false;   //避免因此而将f设为上一层目录，从而删掉别人珍藏多年的图片（来自开发者自己“血”的教育）
+                } catch (Exception e) {
+                    Log.e(TAG, Log.getStackTraceString(e));
+                    continue;
+                }
+            }
+
             if (data.isDirectory) {
                 f = f.getParentFile();
             }

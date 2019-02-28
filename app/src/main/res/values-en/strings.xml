@@ -450,4 +450,5 @@
     <string name="floatWindowsService_toast_saveVideo2Gif_fail">Create GIF fail!</string>
     <string name="floatWindowsService_toast_saveVideo2Gif_success">GIF has been saved!</string>
     <string name="floatWindowsService_toast_deleteCacheFile_fail">Clear cache fail!</string>
+    <string name="buildPicture_toast_buildPicture_done">All done!</string>
 </resources>

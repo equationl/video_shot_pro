@@ -192,7 +192,8 @@ public class FloatWindowsService extends Service {
             @Override
             public boolean onLongClick(View view) {
                 Log.i(TAG, "long click mFloatView");
-                if (!isOnBuildGif) {
+                if (!isOnBuildGif &&
+                        settings.getBoolean("isShotGif", false)) {
                     mFloatView.setVisibility(View.INVISIBLE);
                     startScreenRecorder();
                 }

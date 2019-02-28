@@ -54,7 +54,7 @@ public class Tools{
      * @param bitName 保存文件名（不含扩展名）
      * @param savePath 保存路径
      * @param isReduce 是否压缩
-     * @param quality 图片质量（仅在开启压缩时有效）
+     * @param quality 图片质量
      *
      * @return File 返回保存的文件
      * */

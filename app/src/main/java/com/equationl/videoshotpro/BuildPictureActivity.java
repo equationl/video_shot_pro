@@ -45,6 +45,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 public class BuildPictureActivity extends AppCompatActivity {
     Button btn_up, btn_down, btn_done;
@@ -391,16 +392,17 @@ public class BuildPictureActivity extends AppCompatActivity {
                 msg.what = HandlerStatusBuildPictureNext;
                 handler.sendMessage(msg);
                 final_bitmap = tool.addRight(final_bitmap);
-                SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+                SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.CHINA);
                 String date    =    sDateFormat.format(new    java.util.Date());
                 try {
-                    if(saveMyBitmap(final_bitmap,date+"-by_EL", settings.getBoolean("isReduce_switch", false))) {
+                    boolean isReduce = settings.getBoolean("isReduce_switch", false);
+                    if(saveMyBitmap(final_bitmap,date+"-by_EL", isReduce)) {
                         msg = Message.obtain();
                         msg.obj = date+"-by_EL";
                         msg.what = HandlerStatusBuildPictureDone;
                         handler.sendMessage(msg);
                     }
-                } catch (IOException e) {
+                } catch (Exception e) {
                     //Toast.makeText(getApplicationContext(),"保存截图失败"+e,Toast.LENGTH_LONG).show();
                     msg = Message.obtain();
                     msg.obj = "保存截图失败"+e;
@@ -431,9 +433,7 @@ public class BuildPictureActivity extends AppCompatActivity {
         }
     }
 
-    private boolean saveMyBitmap(Bitmap bmp, String bitName, boolean isReduce) throws IOException {
-        boolean flag;
-        try {
+    private boolean saveMyBitmap(Bitmap bmp, String bitName, boolean isReduce) throws Exception {
             if (isReduce) {
                 int quality = Integer.parseInt(settings.getString("reduce_value","100"));
                 savePath = tool.saveBitmap2File(bmp,bitName, new File(tool.getSaveRootPath()), true, quality);
@@ -441,12 +441,7 @@ public class BuildPictureActivity extends AppCompatActivity {
             else {
                 savePath = tool.saveBitmap2File(bmp,bitName, new File(tool.getSaveRootPath()));
             }
-            flag = true;
-        } catch (Exception e) {
-            flag = false;
-        }
-
-        return flag;
+            return true;
     }
 
 
@@ -499,7 +494,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                         String temp_path = activity.tool.getSaveRootPath()+"/"+msg.obj.toString();
                         temp_path += activity.settings.getBoolean("isReduce_switch", false) ? ".jpg":".png";
                         MediaScannerConnection.scanFile(activity, new String[]{temp_path}, null, null);
-                        Toast.makeText(activity,"处理完成！图片已保存至 "+ temp_path +" 请进入图库查看", Toast.LENGTH_LONG).show();
+                        Toast.makeText(activity,R.string.buildPicture_toast_buildPicture_done, Toast.LENGTH_LONG).show();
                         break;
 
                     case HandlerStatusBuildPictureUpdateBitmap:

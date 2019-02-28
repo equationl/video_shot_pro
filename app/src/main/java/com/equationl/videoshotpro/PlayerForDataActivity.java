@@ -187,14 +187,14 @@ public class PlayerForDataActivity extends AppCompatActivity {
     }
 
     private void shotFrameOnclickButton() {
-        int time = 0;
+        int time;
         if (markTime[0] == 0 && markTime[1] == 0) {
             btn_shot.setImageResource(R.drawable.arrow_right_thick);
             time = videoPlayer.getCurrentPositionWhenPlaying();
             markTime[0] = time==0 ? 1:time;
         }
         else {
-            if (time >= videoPlayer.getCurrentPositionWhenPlaying()) {
+            if (markTime[0] >= videoPlayer.getCurrentPositionWhenPlaying()) {
                 Toast.makeText(this, R.string.player_toast_mark_timeError, Toast.LENGTH_SHORT).show();
             }
             else {
@@ -240,6 +240,11 @@ public class PlayerForDataActivity extends AppCompatActivity {
             //noinspection ResultOfMethodCallIgnored
             dirFirstFolder.mkdirs();
         }
+        boolean isVideoPathHaveSpace = false;
+        if (video_path.contains(" ")) {  //避免因为视频路径中包含空格而导致按照空格分割命令时出错
+            video_path = video_path.replaceAll(" ", "_");
+            isVideoPathHaveSpace = true;
+        }
         String text_last = settings.getBoolean("isShotToJpg",true)?"jpg -vcodec mjpeg":"png";
         double time_start = markTime[0];
         time_start = time_start/1000.0;
@@ -251,6 +256,9 @@ public class PlayerForDataActivity extends AppCompatActivity {
         FFmpeg ffmpeg = FFmpeg.getInstance(getApplicationContext());
         if (!ffmpeg.isFFmpegCommandRunning()) {
             String cmd[] = text.split(" ");
+            if (isVideoPathHaveSpace) {   //FIXME 现在的索引确定是5，小心以后变化啊
+                cmd[5] = cmd[5].replaceAll("_", " ");
+            }
             try {
                 ffmpeg.execute(cmd, new ExecuteBinaryResponseHandler() {
                     @Override
@@ -304,6 +312,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
                         message = String.format(message, msg.obj.toString());
                         activity.dialog.setMessage(message);
                         activity.dialog.setCancelable(true);
+                        Log.e(TAG, msg.obj.toString());
                         break;
                     case HandlerFBFonSuccess:
                         activity.dialog.setMessage(activity.res.getString(R.string.player_dialog_FBF_content_shot_success));
