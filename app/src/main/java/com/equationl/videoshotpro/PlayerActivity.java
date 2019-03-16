@@ -13,6 +13,7 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatDelegate;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -57,6 +58,7 @@ public class PlayerActivity extends AppCompatActivity {
     Boolean isShotFinish = false;
     Boolean isDone = false;
     Boolean isShotGif = false, isShotingGif = false;
+    Boolean isOnBuildGifPalettePic = false;
     int mark_count=0, shot_count=0;
     int gif_start_time=0, gif_end_time=0;
 
@@ -71,6 +73,10 @@ public class PlayerActivity extends AppCompatActivity {
     private static final int HandlerShotGifFail = 10013;
     private static final int HandlerShotGifSuccess = 10014;
     private static final int HandlerShotGifRunning = 10015;
+
+    static {
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -360,75 +366,100 @@ public class PlayerActivity extends AppCompatActivity {
     private class ShotGifThread implements Runnable {
         @Override
         public void run(){
-            String gif_RP = settings.getString("gifRP_value", "-1");
-            gif_RP = tool.getVideo2GifRP(video_path, gif_RP);
-            String gif_frameRate = settings.getString("gifFrameRate_value", "14");
+            String palettePicPath = new File(getExternalCacheDir(), "PalettePic.png").getAbsolutePath();
             SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.CHINA);
             String date    =    sDateFormat.format(new    java.util.Date());
             date += "-by_EL.gif";
-            final String save_path =  tool.getSaveRootPath() + "/" + date;
-            boolean isVideoPathHaveSpace = false;
-            if (video_path.contains(" ")) {  //避免因为视频路径中包含空格而导致按照空格分割命令时出错
-                video_path = video_path.replaceAll(" ", "_");
-                isVideoPathHaveSpace = true;
-            }
-            String cmd = String.format(Locale.CHINA,
-                    "-ss %f -t %f -i %s",
-                    (gif_start_time/1000.0),
-                    ((gif_end_time-gif_start_time)/1000.0),
-                    video_path);
-            //String cmd = "-ss "+(gif_start_time/1000.0)+" -t "+((gif_end_time-gif_start_time)/1000.0)+" -i "+video_path;
-            Log.i(TAG, "gif start time(s)="+(gif_start_time/1000.0)+" time(ms)="+gif_start_time+" all="+((gif_end_time-gif_start_time)/1000.0));
-            cmd += gif_RP.equals("-1")?"":" -s "+gif_RP;
-            cmd += " -f gif";
-            cmd += gif_frameRate.equals("-1")?"":" -r "+gif_frameRate;
-            cmd += " "+save_path;
-            String gif_cmd[] = cmd.split(" ");
-            if (isVideoPathHaveSpace) {   //FIXME 现在的索引确定是5，小心以后变化啊
-                gif_cmd[5] = gif_cmd[5].replaceAll("_", " ");
-            }
-            Log.i(TAG, "cmd = "+Arrays.toString(gif_cmd));
+            String save_path =  tool.getSaveRootPath() + "/" + date;
+            String gif_RP = settings.getString("gifRP_value", "-1");
+            gif_RP = tool.getVideo2GifRP(video_path, gif_RP);
+            gif_RP = gif_RP.equals("-1")?"-1:-1":gif_RP.replace("x", ":");
+            String[] cmd = {"-ss", String.valueOf(gif_start_time/1000.0), "-t",
+                    String.valueOf((gif_end_time-gif_start_time)/1000.0),"-i",
+                    video_path, "-vf",
+                    "scale="+gif_RP+":flags=lanczos,palettegen", "-y",
+                    palettePicPath};
+            isOnBuildGifPalettePic = true;
+            executeBuildGif(cmd, save_path);
+        }
+    }
 
-            while (ffmpeg.isFFmpegCommandRunning()) {
-                //阻塞等待执行结束
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e){
-                    Log.e(TAG, Log.getStackTraceString(e));
-                }
-            }
+    private String[] getShotGifCmd(String save_path) {
+        String gif_RP = settings.getString("gifRP_value", "-1");
+        gif_RP = tool.getVideo2GifRP(video_path, gif_RP);
+        String gif_frameRate = settings.getString("gifFrameRate_value", "14");
+
+        boolean isVideoPathHaveSpace = false;
+        if (video_path.contains(" ")) {  //避免因为视频路径中包含空格而导致按照空格分割命令时出错
+            video_path = video_path.replaceAll(" ", "_");
+            isVideoPathHaveSpace = true;
+        }
+        String palettePicPath = new File(getExternalCacheDir(), "PalettePic.png").getAbsolutePath();
+        String cmd = String.format(Locale.CHINA,
+                "-ss %f -t %f -i %s -i %s -r %s -b %s -lavfi scale=%s:flags=lanczos[x];[x][1:v]paletteuse -y %s",
+                (gif_start_time/1000.0),
+                ((gif_end_time-gif_start_time)/1000.0),
+                video_path,
+                palettePicPath,
+                gif_frameRate.equals("-1")? "24":gif_frameRate,
+                "100k",
+                gif_RP.equals("-1")?"-1:-1":gif_RP.replace("x", ":"),
+                save_path);
+        String gif_cmd[] = cmd.split(" ");
+        if (isVideoPathHaveSpace) {   //FIXME 现在的索引确定是5，小心以后变化啊
+            gif_cmd[5] = gif_cmd[5].replaceAll("_", " ");
+        }
+        Log.i(TAG, "cmd = "+Arrays.toString(gif_cmd));
+        return gif_cmd;
+    }
+
+    private void executeBuildGif(String[] gif_cmd, final String save_path) {
+        while (ffmpeg.isFFmpegCommandRunning()) {
+            //阻塞等待执行结束
             try {
-                ffmpeg.execute(gif_cmd, new ExecuteBinaryResponseHandler() {
+                Thread.sleep(100);
+            } catch (InterruptedException e){
+                Log.e(TAG, Log.getStackTraceString(e));
+            }
+        }
+        try {
+            ffmpeg.execute(gif_cmd, new ExecuteBinaryResponseHandler() {
 
-                    @Override
-                    public void onStart() {
-                        handler.sendEmptyMessage(HandlerShotGifRunning);
+                @Override
+                public void onStart() {
+                    handler.sendEmptyMessage(HandlerShotGifRunning);
+                }
+
+                @Override
+                public void onProgress(String message) {}
+
+                @Override
+                public void onFailure(String message) {
+                    Log.e(TAG, "截取GIF失败："+message);
+                    handler.sendEmptyMessage(HandlerShotGifFail);
+                }
+
+                @Override
+                public void onSuccess(String message) {
+                    if (isOnBuildGifPalettePic) {
+                        isOnBuildGifPalettePic = false;
+                        String[] cmd = getShotGifCmd(save_path);
+                        executeBuildGif(cmd, save_path);
                     }
-
-                    @Override
-                    public void onProgress(String message) {}
-
-                    @Override
-                    public void onFailure(String message) {
-                        Log.e(TAG, "截取GIF失败："+message);
-                        handler.sendEmptyMessage(HandlerShotGifFail);
-                    }
-
-                    @Override
-                    public void onSuccess(String message) {
+                    else {
                         Message msg = Message.obtain();
-                        msg.obj = save_path;
                         msg.what = HandlerShotGifSuccess;
+                        msg.obj = save_path;
                         handler.sendMessage(msg);
                     }
+                }
 
-                    @Override
-                    public void onFinish() {}
-                });
-            } catch (FFmpegCommandAlreadyRunningException e) {
-                Log.e(TAG, Log.getStackTraceString(e));
-                handler.sendEmptyMessage(HandlerShotGifFail);
-            }
+                @Override
+                public void onFinish() {}
+            });
+        } catch (FFmpegCommandAlreadyRunningException e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+            handler.sendEmptyMessage(HandlerShotGifFail);
         }
     }
 
@@ -465,6 +496,10 @@ public class PlayerActivity extends AppCompatActivity {
                         activity.isShotingGif = false;
                         MediaScannerConnection.scanFile(activity, new String[]{msg.obj.toString()}, null, null);
                         Toast.makeText(activity, R.string.player_toast_shotGif_success, Toast.LENGTH_SHORT).show();
+                        File palettePicFile = new File(activity.getExternalCacheDir(), "PalettePic.png");
+                        if (!palettePicFile.delete()) {
+                            Log.e(TAG, "delete palettePicFile fail");
+                        }
                         break;
                     case HandlerShotGifFail:
                         Toast.makeText(activity, R.string.player_toast_shotGif_fail, Toast.LENGTH_SHORT).show();

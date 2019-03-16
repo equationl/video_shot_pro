@@ -81,6 +81,7 @@ public class FloatWindowsService extends Service {
     int shot_num = 0;
     boolean isOnScreenRecorder = false;
     boolean isOnBuildGif = false;
+    boolean isOnBuildGifPalettePic = false;
 
     private final MyHandler handler = new MyHandler(this);
     private static final String TAG = "el,In FWService";
@@ -265,7 +266,7 @@ public class FloatWindowsService extends Service {
         String video_RP = settings.getString("gifRP_value", "-1");
         video_RP = tool.getRP(mScreenWidth, mScreenHeight, video_RP);
         String video_frameRate = settings.getString("gifFrameRate_value", "30");
-        video_frameRate = video_frameRate.equals("-1")? "30" : video_RP;
+        video_frameRate = video_frameRate.equals("-1")? "30" : video_frameRate;
         int width, height;
         if (video_RP.equals("-1")) {
             width = mScreenWidth;
@@ -296,6 +297,7 @@ public class FloatWindowsService extends Service {
             }
         }
         Log.i(TAG, "video cache path: "+file.getAbsolutePath());
+        //Log.i(TAG, "video_frameRate= "+video_frameRate);
         mRecorder = new ScreenRecorder(width, height, Integer.valueOf(video_frameRate), 1, mMediaProjection, file.getAbsolutePath());
         mRecorder.start();
     }
@@ -537,14 +539,20 @@ public class FloatWindowsService extends Service {
                         activity.isOnBuildGif = true;
                         break;
                     case HandlerVideo2GifSuccess:
-                        MediaScannerConnection.scanFile(activity, new String[]{msg.obj.toString()}, null, null);
-                        Toast.makeText(activity, R.string.floatWindowsService_toast_saveVideo2Gif_success, Toast.LENGTH_SHORT).show();
+                        if (!activity.isOnBuildGifPalettePic) {
+                            MediaScannerConnection.scanFile(activity, new String[]{msg.obj.toString()}, null, null);
+                            Toast.makeText(activity, R.string.floatWindowsService_toast_saveVideo2Gif_success, Toast.LENGTH_SHORT).show();
+                        }
                         //activity.mFloatView.setClickable(true);
                         break;
                     case HandlerVideo2GifFinish:
                         File f = (File) msg.obj;
                         if (!f.delete()) {
                             Log.i(TAG, "delete cache file fail");
+                        }
+                        File palettePicFile = new File(activity.getExternalCacheDir(), "PalettePic.png");
+                        if (!palettePicFile.delete()) {
+                            Log.e(TAG, "delete palettePicFile fail");
                         }
                         activity.isOnBuildGif = false;
                         break;
@@ -559,56 +567,81 @@ public class FloatWindowsService extends Service {
             SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.CHINA);
             String date    =    sDateFormat.format(new    java.util.Date());
             date += "-by_EL.gif";
+            String palettePicPath = new File(getExternalCacheDir(), "PalettePic.png").getAbsolutePath();
             final String save_path =  tool.getSaveRootPath() + "/" + date;
             final File video_path = new File(getExternalCacheDir(), "temp.mp4");
-            String[] cmd = {"-i", video_path.getAbsolutePath(), save_path};
-
-            while (ffmpeg.isFFmpegCommandRunning()) {
-                //阻塞等待执行结束
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e){
-                    Log.e(TAG, Log.getStackTraceString(e));
-                }
+            String cmd[];
+            if (!isOnBuildGifPalettePic) {
+                isOnBuildGifPalettePic = true;
+                cmd = new String[]{"-i", video_path.getAbsolutePath(), "-vf",
+                        "scale=-1:-1:flags=lanczos,palettegen", "-y",
+                        palettePicPath};
+                executeShotGif(cmd, save_path, video_path);
             }
+        }
+    }
+
+    private void executeShotGif(String[] cmd, final String save_path, final File video_path) {
+        while (ffmpeg.isFFmpegCommandRunning()) {
+            //阻塞等待执行结束
             try {
-                ffmpeg.execute(cmd, new ExecuteBinaryResponseHandler() {
+                Thread.sleep(100);
+            } catch (InterruptedException e){
+                Log.e(TAG, Log.getStackTraceString(e));
+            }
+        }
+        try {
+            ffmpeg.execute(cmd, new ExecuteBinaryResponseHandler() {
 
-                    @Override
-                    public void onStart() {
-                        handler.sendEmptyMessage(HandlerVideo2GifStart);
+                @Override
+                public void onStart() {
+                    handler.sendEmptyMessage(HandlerVideo2GifStart);
+                }
+
+                @Override
+                public void onProgress(String message) {}
+
+                @Override
+                public void onFailure(String message) {
+                    Message msg = Message.obtain();
+                    msg.obj = message;
+                    msg.what = HandlerVideo2GifFail;
+                    handler.sendMessage(msg);
+                }
+
+                @Override
+                public void onSuccess(String message) {
+                    if (isOnBuildGifPalettePic) {
+                        isOnBuildGifPalettePic = false;
+                        String palettePicPath = new File(getExternalCacheDir(), "PalettePic.png").getAbsolutePath();
+                        String gif_frameRate = settings.getString("gifFrameRate_value", "14");
+                        gif_frameRate = gif_frameRate.equals("-1") ? "24":gif_frameRate;
+                        String[] cmd = new String[]{"-i", video_path.getAbsolutePath(), "-i",
+                                palettePicPath,"-r", gif_frameRate,
+                                "-lavfi", "scale=-1:-1:flags=lanczos[x];[x][1:v]paletteuse",
+                                "-y",  save_path};
+                        executeShotGif(cmd, save_path, video_path);
                     }
-
-                    @Override
-                    public void onProgress(String message) {}
-
-                    @Override
-                    public void onFailure(String message) {
-                        Message msg = Message.obtain();
-                        msg.obj = message;
-                        msg.what = HandlerVideo2GifFail;
-                        handler.sendMessage(msg);
-                    }
-
-                    @Override
-                    public void onSuccess(String message) {
+                    else {
                         Message msg = Message.obtain();
                         msg.obj = save_path;
                         msg.what = HandlerVideo2GifSuccess;
                         handler.sendMessage(msg);
                     }
+                }
 
-                    @Override
-                    public void onFinish() {
+                @Override
+                public void onFinish() {
+                    if (isOnBuildGifPalettePic) {
                         Message msg = Message.obtain();
                         msg.obj = video_path;
                         msg.what = HandlerVideo2GifFinish;
                         handler.sendMessage(msg);
                     }
-                });
-            } catch (FFmpegCommandAlreadyRunningException e) {
-                Log.e(TAG, Log.getStackTraceString(e));
-            }
+                }
+            });
+        } catch (FFmpegCommandAlreadyRunningException e) {
+            Log.e(TAG, Log.getStackTraceString(e));
         }
     }
 }

@@ -401,6 +401,7 @@
     <string name="buildPicture_toast_createThumb_fail">生成缩略图失败！</string>
     <string name="buildPicture_toast_sharePicture_fail">分享失败，请尝试在 分享->更多 中选择 微信 进行分享</string>
     <string name="buildPicture_toast_buildPicture_done">导出成功！</string>
+    <string name="buildPicture_toast_getBundle_fail">获取数据出错：非法访问！</string>
 
     <string name="title_activity_choose">确定图片顺序</string>
     <string name="chooseActivity_ProgressDialog_loadImage_title">请稍候&#8230;</string>

@@ -1,5 +1,6 @@
 package com.equationl.videoshotpro;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -42,7 +43,6 @@ import com.tencent.tauth.UiError;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -72,6 +72,7 @@ public class BuildPictureActivity extends AppCompatActivity {
 
     private final MyHandler handler = new MyHandler(this);
 
+    @SuppressLint("StaticFieldLeak")
     public static BuildPictureActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
 
     private static final String TAG = "EL,InBuildActivity";
@@ -91,11 +92,11 @@ public class BuildPictureActivity extends AppCompatActivity {
 
         instance = this;
 
-        btn_up    = (Button)   findViewById(R.id.button_up);
-        btn_down  = (Button)    findViewById(R.id.button_down);
-        btn_done  = (Button)    findViewById(R.id.button_final_done);
-        imageTest = (ImageView) findViewById(R.id.imageTest);
-        text_memory = (TextView) findViewById(R.id.buildPicture_text_memory);
+        btn_up      =   findViewById(R.id.button_up);
+        btn_down    =   findViewById(R.id.button_down);
+        btn_done    =   findViewById(R.id.button_final_done);
+        imageTest   =   findViewById(R.id.imageTest);
+        text_memory =   findViewById(R.id.buildPicture_text_memory);
 
         res = getResources();
 
@@ -105,8 +106,14 @@ public class BuildPictureActivity extends AppCompatActivity {
         sp_init = getSharedPreferences("init", Context.MODE_PRIVATE);
 
         Bundle bundle = this.getIntent().getExtras();
-        fileList = bundle.getStringArray("fileList");
-        isFromExtra = bundle.getBoolean("isFromExtra");
+        if (bundle != null) {
+            fileList = bundle.getStringArray("fileList");
+            isFromExtra = bundle.getBoolean("isFromExtra");
+        }
+        else {
+            Toast.makeText(this, R.string.buildPicture_toast_getBundle_fail, Toast.LENGTH_SHORT).show();
+            finish();
+        }
 
         t_2 = new Thread(new MyThread());
 
@@ -457,7 +464,7 @@ public class BuildPictureActivity extends AppCompatActivity {
         private final WeakReference<BuildPictureActivity> mActivity;
 
         private MyHandler(BuildPictureActivity activity) {
-            mActivity = new WeakReference<BuildPictureActivity>(activity);
+            mActivity = new WeakReference<>(activity);
         }
 
         @Override
@@ -503,7 +510,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                             activity.imageTest.setImageBitmap((Bitmap) msg.obj);
                         }
                         else {
-                            DisplayMetrics dm = new DisplayMetrics();
+                            DisplayMetrics dm;
                             dm = activity.getResources().getDisplayMetrics();
                             int screenHeight = dm.heightPixels;
 
@@ -546,7 +553,6 @@ public class BuildPictureActivity extends AppCompatActivity {
                                         activity.reduceQuality();
                                         Bitmap bm_temp = activity.getCutImg();
                                         activity.bWidth = bm_temp.getWidth();
-                                        bm_temp = null;
                                         if (activity.t.isAlive()) {
                                             activity.t.interrupt();
                                             activity.t = null;
@@ -613,6 +619,7 @@ public class BuildPictureActivity extends AppCompatActivity {
             int colorMode = Integer.parseInt(settings.getString("colorMode_value", "1"));
             switch (colorMode) {
                 case 1:
+                    //noinspection ConstantConditions
                     mode = Bitmap.Config.ARGB_8888;
                     break;
                 case 2:

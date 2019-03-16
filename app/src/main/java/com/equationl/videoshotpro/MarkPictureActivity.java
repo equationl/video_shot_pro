@@ -48,16 +48,16 @@ import me.toptas.fancyshowcase.FancyShowCaseView;
 public class MarkPictureActivity extends AppCompatActivity {
     SwipeCardsView swipeCardsView;
     markPictureAdapter adapter;
-    List <String> pictureList =  new ArrayList<>();
+    List<String> pictureList = new ArrayList<>();
     int curIndex;
     Tools tool;
     String[] fileList;
-    int pic_num, pic_no=0;
+    int pic_num, pic_no = 0;
     Boolean isFromExtra;
     Resources res;
     ProgressDialog dialog;
     SharedPreferences settings, sp_init;
-    boolean isLongPress=false;
+    boolean isLongPress = false;
     TextView text_markStatus, text_markDoneTip;
     Utils utils = new Utils();
 
@@ -91,15 +91,15 @@ public class MarkPictureActivity extends AppCompatActivity {
 
         tool = new Tools();
 
-        fab_undo    = findViewById(R.id.markPicture_fab_undo);
-        fab_delete  = findViewById(R.id.markPicture_fab_delete);
+        fab_undo = findViewById(R.id.markPicture_fab_undo);
+        fab_delete = findViewById(R.id.markPicture_fab_delete);
         fab_addText = findViewById(R.id.markPicture_fab_addText);
-        fab_menu    = findViewById(R.id.markPicture_fab_menu);
+        fab_menu = findViewById(R.id.markPicture_fab_menu);
 
         text_markStatus = findViewById(R.id.mark_text_markStatus);
         text_markDoneTip = findViewById(R.id.mark_text_doneTip);
 
-        fab_undo .setOnClickListener(clickListener);
+        fab_undo.setOnClickListener(clickListener);
         fab_delete.setOnClickListener(clickListener);
         fab_addText.setOnClickListener(clickListener);
 
@@ -109,14 +109,14 @@ public class MarkPictureActivity extends AppCompatActivity {
 
         String filepath = getExternalCacheDir().toString();
         fileList = tool.getFileOrderByName(filepath, 1);
-        for (String s: fileList) {
-            s = filepath+"/"+s;
-            Log.i(TAG, "S= "+s);
+        for (String s : fileList) {
+            s = filepath + "/" + s;
+            Log.i(TAG, "S= " + s);
             pictureList.add(s);
         }
         pic_num = fileList.length;
 
-        for (int i=0;i<pic_num;i++) {
+        for (int i = 0; i < pic_num; i++) {
             fileList[i] = "del";
         }
 
@@ -127,7 +127,7 @@ public class MarkPictureActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu){
+    public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.activity_mark_picture, menu);
 
@@ -169,17 +169,16 @@ public class MarkPictureActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item){
+    public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.markPicture_menu_done:
                 //Toast.makeText(this, "确定", Toast.LENGTH_SHORT).show();
                 if (pic_no <= 0) {
-                    Toast.makeText(getApplicationContext(),"至少需要选择一张图片", Toast.LENGTH_LONG).show();
-                }
-                else {
+                    Toast.makeText(getApplicationContext(), "至少需要选择一张图片", Toast.LENGTH_LONG).show();
+                } else {
                     Intent intent = new Intent(MarkPictureActivity.this, BuildPictureActivity.class);
                     Bundle bundle = new Bundle();
-                    bundle.putStringArray("fileList",fileList);
+                    bundle.putStringArray("fileList", fileList);
                     bundle.putBoolean("isFromExtra", isFromExtra);
                     intent.putExtras(bundle);
                     startActivity(intent);
@@ -210,7 +209,7 @@ public class MarkPictureActivity extends AppCompatActivity {
             adapter.setData(pictureList);
             if (pic_no > 0) {
                 swipeCardsView.notifyDatasetChanged(pic_no - 1);    //此处使用 pos_no 代替 curIndex ，因为使用 cureIndex 时，在最后一张图片也标记后，curIndex的值会不正常
-            }else{
+            } else {
                 //已经是第一张卡片
             }
         }
@@ -218,16 +217,16 @@ public class MarkPictureActivity extends AppCompatActivity {
     }
 
     private void deleteImg() {
-            if (pic_no < pic_num) {
-                if (pictureList != null) {
-                    pic_no++;
-                    adapter.setData(pictureList);
-                    swipeCardsView.notifyDatasetChanged(pic_no);
-                    text_markStatus.setText(String.format(res.getString(R.string.markPicture_text_markStatus), pic_no, pic_num));
-                }
-                if (pic_no >= pic_num) {
-                    text_markDoneTip.setVisibility(View.VISIBLE);
-                }
+        if (pic_no < pic_num) {
+            if (pictureList != null) {
+                pic_no++;
+                adapter.setData(pictureList);
+                swipeCardsView.notifyDatasetChanged(pic_no);
+                text_markStatus.setText(String.format(res.getString(R.string.markPicture_text_markStatus), pic_no, pic_num));
+            }
+            if (pic_no >= pic_num) {
+                text_markDoneTip.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -247,18 +246,17 @@ public class MarkPictureActivity extends AppCompatActivity {
                     return;
                 }*/
                 curIndex = index;
-                Log.i(TAG, "onShow "+index);
+                Log.i(TAG, "onShow " + index);
             }
 
             @Override
             public void onCardVanish(int index, SwipeCardsView.SlideType type) {
-                if (index >= pic_num-1) {
+                if (index >= pic_num - 1) {
                     text_markDoneTip.setVisibility(View.VISIBLE);
-                }
-                else {
+                } else {
                     text_markDoneTip.setVisibility(View.GONE);
                 }
-                switch (type){
+                switch (type) {
                     case LEFT:
                         //向左飞出
                         markPictureCut(index);
@@ -276,8 +274,8 @@ public class MarkPictureActivity extends AppCompatActivity {
                 SparseArray<ImageView> imageGroupList = new SparseArray<>();
                 imageGroupList.put(0, imageview);
                 String path = getExternalCacheDir().toString();
-                String extension = settings.getBoolean("isShotToJpg", true) ? "jpg":"png";
-                String file = path+"/"+index+"."+extension;
+                String extension = settings.getBoolean("isShotToJpg", true) ? "jpg" : "png";
+                String file = path + "/" + index + "." + extension;
                 Log.i(TAG, file);
                 vImageWatcher.show(imageview, imageGroupList, Collections.singletonList(Uri.parse(file)));
             }
@@ -338,9 +336,9 @@ public class MarkPictureActivity extends AppCompatActivity {
             Toast.makeText(this, R.string.markPicture_toast_readFile_fail, Toast.LENGTH_SHORT).show();
             finish();
         }
-        else {
+        /*else {
             init();
-        }
+        }   */
     }
 
 
@@ -350,32 +348,30 @@ public class MarkPictureActivity extends AppCompatActivity {
             Message msg;
             int i = 0;
             File path = new File(getExternalCacheDir().toString());
-            String extension = settings.getBoolean("isShotToJpg", true) ? "jpg":"png";
-            String [] files = path.list();
+            Boolean isShotToJpg = settings.getBoolean("isShotToJpg", true);
+            String[] files = path.list();
             String name;
             Bitmap bitmap;
 
-            for (String file:files) {
+            for (String file : files) {
                 msg = Message.obtain();
                 msg.obj = String.format(res.getString(R.string.markPicture_ProgressDialog_msgOnRunning),
-                        ""+(i+1));
+                        "" + (i + 1));
                 msg.what = HandlerStatusProgressRunning;
                 handler.sendMessage(msg);
 
                 if (file.contains("_")) {
                     name = file.split("_")[0];
-                }
-                else {
+                } else {
                     name = file.split("\\.")[0];
                 }
-                Log.i("cao", "file= "+file);
-                Log.i("cao", "name= "+name);
+                Log.i("cao", "file= " + file);
+                Log.i("cao", "name= " + name);
                 tool.AllowCheckBlackLines = Integer.valueOf(settings.getString("AllowCheckBlackLines", "10"));
                 tool.AllowNotBlackNums = Integer.valueOf(settings.getString("AllowNotBlackNums", "20"));
                 if (settings.getBoolean("isCheckBlankLines", true)) {
-                    bitmap = tool.removeImgBlackSide(getBitmapFromFile(file.split("\\.")[0]));
-                }
-                else {
+                    bitmap = tool.removeImgBlackSide(getBitmapFromFile(file.split("\\.")[0]), isShotToJpg);
+                } else {
                     bitmap = getBitmapFromFile(file.split("\\.")[0]);
                 }
                 try {
@@ -401,11 +397,10 @@ public class MarkPictureActivity extends AppCompatActivity {
         boolean flag;
         try {
             if (settings.getBoolean("isShotToJpg", true)) {
-                tool.saveBitmap2File(bmp,bitName, getExternalCacheDir(), true, 100);
+                tool.saveBitmap2File(bmp, bitName, getExternalCacheDir(), true, 100);
                 flag = true;
-            }
-            else {
-                tool.saveBitmap2File(bmp,bitName, getExternalCacheDir());
+            } else {
+                tool.saveBitmap2File(bmp, bitName, getExternalCacheDir());
                 flag = true;
             }
         } catch (Exception e) {
@@ -417,10 +412,10 @@ public class MarkPictureActivity extends AppCompatActivity {
 
     private Bitmap getBitmapFromFile(String no) {
         Bitmap bm = null;
-        String extension = settings.getBoolean("isShotToJpg", true) ? "jpg":"png";
+        String extension = settings.getBoolean("isShotToJpg", true) ? "jpg" : "png";
         try {
-            bm = tool.getBitmapFromFile(no, getExternalCacheDir(),extension);
-        }  catch (Exception e) {
+            bm = tool.getBitmapFromFile(no, getExternalCacheDir(), extension);
+        } catch (Exception e) {
             Message msg;
             msg = Message.obtain();
             msg.obj = e;
@@ -470,10 +465,10 @@ public class MarkPictureActivity extends AppCompatActivity {
                         activity.isLongPress = false;
                         break;
                     case HandlerCheckImgSaveFail:
-                        Toast.makeText(activity, "保存图片失败："+msg.obj, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(activity, "保存图片失败：" + msg.obj, Toast.LENGTH_SHORT).show();
                         break;
                     case HandlerStatusProgressRunning:
-                        activity.dialog.setProgress(activity.dialog.getProgress()+1);
+                        activity.dialog.setProgress(activity.dialog.getProgress() + 1);
                         activity.dialog.setMessage(msg.obj.toString());
                         break;
                     case HandlerStatusProgressDone:
@@ -482,7 +477,7 @@ public class MarkPictureActivity extends AppCompatActivity {
                         activity.init();
                         break;
                     case HandlerStatusGetImgFail:
-                        Toast.makeText(activity, "获取图片失败："+msg.obj, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(activity, "获取图片失败：" + msg.obj, Toast.LENGTH_SHORT).show();
                         break;
                 }
             }
@@ -490,20 +485,18 @@ public class MarkPictureActivity extends AppCompatActivity {
     }
 
     private void chooseUndo() {
-        if (pic_no<=0) {
+        if (pic_no <= 0) {
             return;
         }
 
-        if (pic_no<pic_num && fileList[pic_no].equals("text")) {
+        if (pic_no < pic_num && fileList[pic_no].equals("text")) {
             fileList[pic_no] = "del";
-        }
-        else if (pic_no<pic_num && fileList[pic_no-1].equals("text")) {
+        } else if (pic_no < pic_num && fileList[pic_no - 1].equals("text")) {
             fileList[pic_no] = "del";
             pic_no--;
             text_markStatus.setText(String.format(res.getString(R.string.markPicture_text_markStatus), pic_no, pic_num));
-        }
-        else if (pic_no <= pic_num){
-            fileList[pic_no-1] = "del";
+        } else if (pic_no <= pic_num) {
+            fileList[pic_no - 1] = "del";
             pic_no--;
             text_markStatus.setText(String.format(res.getString(R.string.markPicture_text_markStatus), pic_no, pic_num));
         }
@@ -533,12 +526,12 @@ public class MarkPictureActivity extends AppCompatActivity {
                 //.showOnce("choose_done")
                 .build();
         final FancyShowCaseView fancyShowCaseView4 = new FancyShowCaseView.Builder(this)
-                .titleStyle(R.style.GuideViewTextVertical,  Gravity.CENTER | Gravity.LEFT)
+                .titleStyle(R.style.GuideViewTextVertical, Gravity.CENTER | Gravity.LEFT)
                 .title(res.getString(R.string.markPicture_guide_swipeLeft))
                 //.showOnce("choose_done")
                 .build();
         final FancyShowCaseView fancyShowCaseView5 = new FancyShowCaseView.Builder(this)
-                .titleStyle(R.style.GuideViewTextVertical,  Gravity.CENTER | Gravity.RIGHT)
+                .titleStyle(R.style.GuideViewTextVertical, Gravity.CENTER | Gravity.RIGHT)
                 .title(res.getString(R.string.markPicture_guide_swipeRight))
                 //.showOnce("choose_done")
                 .build();
@@ -575,5 +568,14 @@ public class MarkPictureActivity extends AppCompatActivity {
         initCardView();
         showCardView();
         initPictureWathcher();
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (dialog != null && dialog.isShowing()) {
+            dialog.dismiss();
+        }
     }
 }

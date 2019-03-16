@@ -388,8 +388,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             else if (requestCode == RequestCodeQuickStart){
                 //快速开始
                 Uri uri = data.getData();
-                //Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
-                Intent intent = new Intent(MainActivity.this, PlayerActivity.class);  //FIXME
+                Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
                 intent.setData(uri);
                 startActivity(intent);
             }

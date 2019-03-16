@@ -39,6 +39,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 
 public class Tools{
@@ -444,13 +445,18 @@ public class Tools{
 
     public Boolean copyFileToCache(List <String> files, String save_path, String extension) {
         int i = 0;
-        for (String path : files) {
-            try {
-                copyFile(new File(path), new File(save_path + "/" + + i + "." + extension));
-            } catch (IOException e) {
-                return false;
+        try {
+            for (String path : files) {
+                try {
+                    copyFile(new File(path), new File(save_path + "/" + + i + "." + extension));
+                } catch (IOException e) {
+                    return false;
+                }
+                i++;
             }
-            i++;
+        } catch (ConcurrentModificationException e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+            return false;
         }
         return true;
     }
@@ -664,16 +670,17 @@ public class Tools{
      * 去除图片中的黑色无内容区域
      *
      * @param  bitmap 源图片
+     * @param isJpg 传入图片是否是jpg格式
      * @return 处理完成的bitmap
      *
      * */
-    public Bitmap removeImgBlackSide(Bitmap bitmap) {
+    public Bitmap removeImgBlackSide(Bitmap bitmap, Boolean isJpg) {
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
 
         Log.i(TAG, "width="+width+" height="+height);
 
-        int[] area = getImgBlackArea(bitmap);
+        int[] area = getImgBlackArea(bitmap, isJpg);
 
         Log.i(TAG, "area="+area[0]+" "+area[1]);
 
@@ -695,7 +702,7 @@ public class Tools{
      * @return 是否为无内容区域
      *
      * */
-    public boolean checkLineColorIsBlack(Bitmap bitmap, int y) {
+    private boolean checkLineColorIsBlack(Bitmap bitmap, int y, boolean isjpg) {
         int len = bitmap.getWidth();
         int NotBlackNum = 0;
         int color;
@@ -704,8 +711,16 @@ public class Tools{
             //Log.i("nidaye", "i="+i+" y="+y);
             //Log.i("nidaye", "color="+color);
             //Log.i("el", "ALPHA="+Color.alpha(color));
-            if (color != Color.BLACK || Color.alpha(color) != 255) {
-                NotBlackNum++;
+            if (isjpg) {
+                if (color != Color.BLACK || Color.alpha(color) != 255) {
+                    NotBlackNum++;
+                }
+            }
+            else {
+                if (Color.alpha(color) == 255 |   //不是透明边
+                        (color != Color.BLACK & Color.alpha(color) == 255)) {   //不是黑边
+                    NotBlackNum++;
+                }
             }
         }
 
@@ -721,10 +736,10 @@ public class Tools{
      * @param bitmap 源bitmap
      * @return 无内容区域的终点坐标
      * */
-    public int[] getImgBlackArea(Bitmap bitmap) {
+    private int[] getImgBlackArea(Bitmap bitmap, boolean isJpg) {
         int i = 0;
         int temp1, temp2, blackLineNums=0;
-        Boolean lineIsBlack = checkLineColorIsBlack(bitmap,i);
+        Boolean lineIsBlack = checkLineColorIsBlack(bitmap, i, isJpg);
         while (true) {
             if (i >= bitmap.getHeight()/2) {
                 Log.i(TAG, "i >= bitmap.getHeight()/2");
@@ -737,59 +752,21 @@ public class Tools{
             }
             if (blackLineNums >= AllowCheckBlackLines) break;
             i++;
-            lineIsBlack = checkLineColorIsBlack(bitmap,i);
+            lineIsBlack = checkLineColorIsBlack(bitmap, i, isJpg);
         }
         temp1 = i-AllowCheckBlackLines;
-
-
-        /*blackLineNums = 0;
-        //i = (int)((bitmap.getHeight())*0.6);
-        Log.i("cao", "i="+i);
-        lineIsBlack = checkLineColorIsBlack(bitmap,i);
-        while (true) {
-            Log.i(TAG, "i="+i+" lineIsBlack="+lineIsBlack);
-            if (i >= (bitmap.getHeight()-1) ) {
-                Log.i("cao", "jiushi ni l ");
-                i = AllowCheckBlackLines*2;
-                break;
-            }
-            if (lineIsBlack) {
-                blackLineNums++;
-                Log.i(TAG, "lineIsBlack:true");
-            }
-            else {
-                blackLineNums = 0;
-            }
-            if (blackLineNums >= AllowCheckBlackLines) {
-                Log.i(TAG, "break: blackLineNums="+blackLineNums+"AllowCheckBlackLines="+AllowCheckBlackLines);
-                break;
-            }
-            i++;
-            lineIsBlack = checkLineColorIsBlack(bitmap,i);
-        }
-        Log.i(TAG, "i="+i+" lineIsBlack="+lineIsBlack);
-
-        Log.i(TAG, "AllowCheckBlackLines="+AllowCheckBlackLines);
-        temp2 = i-AllowCheckBlackLines*2;
-
-        int temp_AllowCheckBlackLines = AllowCheckBlackLines;
-        while (Math.abs(temp1-temp2) < 50) {
-            temp2 = getImgBlackAreaDown(bitmap, temp1+AllowCheckBlackLines);
-        }
-        AllowCheckBlackLines = temp_AllowCheckBlackLines;*/
-
-        temp2 = getImgBlackAreaDown(bitmap);
+        temp2 = getImgBlackAreaDown(bitmap, isJpg);
 
         return new int[]{temp1, temp2};
     }
 
-    private int getImgBlackAreaDown(Bitmap bitmap) {
+    private int getImgBlackAreaDown(Bitmap bitmap, boolean isJpg) {
         int blackLineNums = 0;
         boolean lineIsBlack;
         int i = bitmap.getHeight()-1;
         //i = (int)((bitmap.getHeight())*0.6);
         Log.i("cao", "i="+i);
-        lineIsBlack = checkLineColorIsBlack(bitmap,i);
+        lineIsBlack = checkLineColorIsBlack(bitmap, i, isJpg);
         while (true) {
             Log.i(TAG, "i="+i+" lineIsBlack="+lineIsBlack);
             if (i <= bitmap.getHeight()/2) {
@@ -809,7 +786,7 @@ public class Tools{
                 break;
             }
             i--;
-            lineIsBlack = checkLineColorIsBlack(bitmap,i);
+            lineIsBlack = checkLineColorIsBlack(bitmap, i, isJpg);
         }
         Log.i(TAG, "i="+i+" lineIsBlack="+lineIsBlack);
 

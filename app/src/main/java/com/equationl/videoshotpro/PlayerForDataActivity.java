@@ -13,6 +13,7 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatDelegate;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -63,6 +64,10 @@ public class PlayerForDataActivity extends AppCompatActivity {
     private static final int HandlerFBFonFail = 10002;
     private static final int HandlerFBFRunningFail = 10003;
     private static final int HandlerFBFRunningFinish = 10004;
+
+    static {
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
