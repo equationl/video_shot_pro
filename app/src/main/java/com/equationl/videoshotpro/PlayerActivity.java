@@ -374,24 +374,30 @@ public class PlayerActivity extends AppCompatActivity {
             String gif_RP = settings.getString("gifRP_value", "-1");
             gif_RP = tool.getVideo2GifRP(video_path, gif_RP);
             gif_RP = gif_RP.equals("-1")?"-1:-1":gif_RP.replace("x", ":");
-            String[] cmd = {"-ss", String.valueOf(gif_start_time/1000.0), "-t",
-                    String.valueOf((gif_end_time-gif_start_time)/1000.0),"-i",
-                    video_path, "-vf",
-                    "scale="+gif_RP+":flags=lanczos,palettegen", "-y",
-                    palettePicPath};
-            isOnBuildGifPalettePic = true;
-            executeBuildGif(cmd, save_path);
+            if (settings.getBoolean("isShotHighQualityGif", false)) {
+                String[] cmd = {"-ss", String.valueOf(gif_start_time/1000.0), "-t",
+                        String.valueOf((gif_end_time-gif_start_time)/1000.0),"-i",
+                        video_path, "-vf",
+                        "scale="+gif_RP+":flags=lanczos,palettegen", "-y",
+                        palettePicPath};
+                isOnBuildGifPalettePic = true;
+                executeBuildGif(cmd, save_path);
+            }
+            else {
+                executeBuildGif(getShotGifCmdNormal(save_path), save_path);
+            }
         }
     }
 
-    private String[] getShotGifCmd(String save_path) {
+    private String[] getShotGifCmdHigh(String save_path) {
         String gif_RP = settings.getString("gifRP_value", "-1");
         gif_RP = tool.getVideo2GifRP(video_path, gif_RP);
         String gif_frameRate = settings.getString("gifFrameRate_value", "14");
 
+        String video_path_no_space = video_path;
         boolean isVideoPathHaveSpace = false;
         if (video_path.contains(" ")) {  //避免因为视频路径中包含空格而导致按照空格分割命令时出错
-            video_path = video_path.replaceAll(" ", "_");
+            video_path_no_space = video_path.replaceAll(" ", "_");
             isVideoPathHaveSpace = true;
         }
         String palettePicPath = new File(getExternalCacheDir(), "PalettePic.png").getAbsolutePath();
@@ -399,7 +405,7 @@ public class PlayerActivity extends AppCompatActivity {
                 "-ss %f -t %f -i %s -i %s -r %s -b %s -lavfi scale=%s:flags=lanczos[x];[x][1:v]paletteuse -y %s",
                 (gif_start_time/1000.0),
                 ((gif_end_time-gif_start_time)/1000.0),
-                video_path,
+                video_path_no_space,
                 palettePicPath,
                 gif_frameRate.equals("-1")? "24":gif_frameRate,
                 "100k",
@@ -410,6 +416,36 @@ public class PlayerActivity extends AppCompatActivity {
             gif_cmd[5] = gif_cmd[5].replaceAll("_", " ");
         }
         Log.i(TAG, "cmd = "+Arrays.toString(gif_cmd));
+        return gif_cmd;
+    }
+
+    private String[] getShotGifCmdNormal(String save_path) {
+        String gif_RP = settings.getString("gifRP_value", "-1");
+        gif_RP = tool.getVideo2GifRP(video_path, gif_RP);
+        String gif_frameRate = settings.getString("gifFrameRate_value", "14");
+
+        boolean isVideoPathHaveSpace = false;
+        if (video_path.contains(" ")) {  //避免因为视频路径中包含空格而导致按照空格分割命令时出错
+            video_path = video_path.replaceAll(" ", "_");
+            isVideoPathHaveSpace = true;
+        }
+        String cmd = String.format(Locale.CHINA,
+                "-ss %f -t %f -i %s",
+                (gif_start_time/1000.0),
+                ((gif_end_time-gif_start_time)/1000.0),
+                video_path);
+        //String cmd = "-ss "+(gif_start_time/1000.0)+" -t "+((gif_end_time-gif_start_time)/1000.0)+" -i "+video_path;
+        Log.i(TAG, "gif start time(s)="+(gif_start_time/1000.0)+" time(ms)="+gif_start_time+" all="+((gif_end_time-gif_start_time)/1000.0));
+        cmd += gif_RP.equals("-1")?"":" -s "+gif_RP;
+        cmd += " -f gif";
+        cmd += gif_frameRate.equals("-1")?"":" -r "+gif_frameRate;
+        cmd += " "+save_path;
+        String gif_cmd[] = cmd.split(" ");
+        if (isVideoPathHaveSpace) {   //FIXME 现在的索引确定是5，小心以后变化啊
+            gif_cmd[5] = gif_cmd[5].replaceAll("_", " ");
+        }
+        Log.i(TAG, "cmd = "+Arrays.toString(gif_cmd));
+
         return gif_cmd;
     }
 
@@ -443,7 +479,7 @@ public class PlayerActivity extends AppCompatActivity {
                 public void onSuccess(String message) {
                     if (isOnBuildGifPalettePic) {
                         isOnBuildGifPalettePic = false;
-                        String[] cmd = getShotGifCmd(save_path);
+                        String[] cmd = getShotGifCmdHigh(save_path);
                         executeBuildGif(cmd, save_path);
                     }
                     else {
@@ -507,7 +543,12 @@ public class PlayerActivity extends AppCompatActivity {
                     case HandlerShotGifRunning:
                         Animation animation = AnimationUtils.loadAnimation(activity, R.anim.rotate);
                         activity.btn_shot.startAnimation(animation);
-                        Toast.makeText(activity, R.string.player_toast_shotGif_start, Toast.LENGTH_SHORT).show();
+                        if (activity.isOnBuildGifPalettePic) {
+                            Toast.makeText(activity, R.string.player_toast_shotGif_start_getPalettegen, Toast.LENGTH_SHORT).show();
+                        }
+                        else {
+                            Toast.makeText(activity, R.string.player_toast_shotGif_start, Toast.LENGTH_SHORT).show();
+                        }
                         break;
                 }
             }

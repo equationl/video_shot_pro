@@ -30,6 +30,11 @@
     </string>
     
     <string name="about_updateHistory_text" translatable="false">
+        1.5 léger Fix01:\n
+        \t*新增截取高质量GIF功能\n
+        \t*修复关闭截取为JPG时的除黑边错误\n
+        \t*修复复制缓存文件出错闪退的问题\n
+        \t*修复安卓5.0以下设备因兼容性问题闪退的问题\n
         1.5 léger:\n
         \t*更加美观实用的播放界面\n
         \t*外部程序截图模式支持截取GIF\n
@@ -330,7 +335,7 @@
     <string name="player_toast_needMoreShot">至少需要截取一张图片！</string>
     <string name="player_toast_shotGif_fail">截取动图失败！</string>
     <string name="player_toast_shotGif_success">动图已保存</string>
-    <string name="player_toast_shotGif_start">开始截取动图</string>
+    <string name="player_toast_shotGif_start">正在截取动图：开始生成</string>
     <string name="player_toast_mark_timeError">结束时间必须大于开始时间</string>
     <string name="player_toast_getVideoPath_fail">获取视频失败！请勿使用第三方程序选择视频！请尝试从系统文件选择视频！</string>
     <string name="player_toast_loadUriFail_invalid">抱歉，加载文件失败：文件失效，请重试！</string>
@@ -536,6 +541,9 @@
         <item>3</item>
     </string-array>
 
+    <string name="pref_description_isShotHighQualityGif">启用该选项将大幅提高GIF的画质，但也会大幅增加生成的动图大小和生成所需要的时间</string>
+    <string name="pref_title_isShotHighQualityGif">截取为高清动图</string>
+
     <string name="pref_title_isShotGif">长按截取动图</string>
     <string name="pref_description_isShotGif">选择是否在截取图片时长按 截取按钮 截取GIF动图</string>
     <string name="pref_title_gif_RP">动图分辨率</string>
@@ -617,4 +625,5 @@
     <string name="chooseBest_dialog_deleteAll_content">您确定一张都不保存吗？</string>
     <string name="chooseBest_dialog_deleteAll_btn_ok">是的</string>
     <string name="chooseBest_dialog_deleteAll_btn_cancel">不是</string>
+    <string name="player_toast_shotGif_start_getPalettegen">正在截取动图：开始扫描视频</string>
 </resources>

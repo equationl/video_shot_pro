@@ -135,6 +135,13 @@
             android:title="@string/pref_title_gif_frameRate"
             android:dependency="isShotGif"/>
 
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="isShotHighQualityGif"
+            android:dependency="isShotGif"
+            android:summary="@string/pref_description_isShotHighQualityGif"
+            android:title="@string/pref_title_isShotHighQualityGif" />
+
     </PreferenceCategory>
 
     <PreferenceCategory xmlns:android="http://schemas.android.com/apk/res/android"
@@ -183,18 +190,6 @@
                     android:singleLine="true"
                     android:dependency="isCheckBlankLines"
                     android:title="@string/pref_edit_AllowCheckBlackLines_title" />
-            </PreferenceCategory>
-
-            <PreferenceCategory xmlns:android="http://schemas.android.com/apk/res/android"
-                android:title="@string/pref_category_title_PlayVideo" >
-                <EditTextPreference
-                    android:defaultValue="@string/pref_edit_gestureSensibility_default"
-                    android:inputType="number"
-                    android:key="gestureSensibility"
-                    android:maxLines="1"
-                    android:selectAllOnFocus="true"
-                    android:singleLine="true"
-                    android:title="@string/pref_edit_gestureSensibility_title" />
             </PreferenceCategory>
 
         </PreferenceScreen>

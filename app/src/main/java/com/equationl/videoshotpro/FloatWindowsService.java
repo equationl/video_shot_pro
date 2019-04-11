@@ -572,11 +572,17 @@ public class FloatWindowsService extends Service {
             final File video_path = new File(getExternalCacheDir(), "temp.mp4");
             String cmd[];
             if (!isOnBuildGifPalettePic) {
-                isOnBuildGifPalettePic = true;
-                cmd = new String[]{"-i", video_path.getAbsolutePath(), "-vf",
-                        "scale=-1:-1:flags=lanczos,palettegen", "-y",
-                        palettePicPath};
-                executeShotGif(cmd, save_path, video_path);
+                if (settings.getBoolean("isShotHighQualityGif", false)) {
+                    isOnBuildGifPalettePic = true;
+                    cmd = new String[]{"-i", video_path.getAbsolutePath(), "-vf",
+                            "scale=-1:-1:flags=lanczos,palettegen", "-y",
+                            palettePicPath};
+                    executeShotGif(cmd, save_path, video_path);
+                }
+                else {
+                    cmd = new String[] {"-i", video_path.getAbsolutePath(), save_path};
+                    executeShotGif(cmd, save_path, video_path);
+                }
             }
         }
     }

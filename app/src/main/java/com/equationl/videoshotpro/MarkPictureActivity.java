@@ -1,5 +1,6 @@
 package com.equationl.videoshotpro;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -60,6 +61,7 @@ public class MarkPictureActivity extends AppCompatActivity {
     boolean isLongPress = false;
     TextView text_markStatus, text_markDoneTip;
     Utils utils = new Utils();
+    Thread checkPictureThread = new Thread(new CheckPictureThread());
 
 
     FloatingActionButton fab_undo, fab_delete, fab_addText;
@@ -79,6 +81,7 @@ public class MarkPictureActivity extends AppCompatActivity {
     private static final int HandlerStatusProgressDone = 10015;
     private static final int HandlerStatusGetImgFail = 10016;
 
+    @SuppressLint("StaticFieldLeak")
     public static MarkPictureActivity instance = null;   //FIXME  暂时这样吧，实在找不到更好的办法了
     private static final String TAG = "EL,In MarkActivity";
 
@@ -305,7 +308,14 @@ public class MarkPictureActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-            if (!vImageWatcher.handleBackPressed()) {    //没有打开预览图片
+            if (vImageWatcher != null) {
+                if (!vImageWatcher.handleBackPressed()) {    //没有打开预览图片
+                    utils.finishActivity(ChooseActivity.instance);
+                    finish();
+                    return true;
+                }
+            }
+            else {
                 utils.finishActivity(ChooseActivity.instance);
                 finish();
                 return true;
@@ -330,15 +340,20 @@ public class MarkPictureActivity extends AppCompatActivity {
             dialog.setMax(fileList.length);
             dialog.show();
             dialog.setProgress(0);
-            new Thread(new CheckPictureThread()).start();
+            if (!checkPictureThread.isAlive()) {
+                checkPictureThread = new Thread(new CheckPictureThread());
+                checkPictureThread.start();
+            }
         }
         if (pic_num < 1) {
             Toast.makeText(this, R.string.markPicture_toast_readFile_fail, Toast.LENGTH_SHORT).show();
             finish();
         }
-        /*else {
-            init();
-        }   */
+        else {
+            if (!checkPictureThread.isAlive()) {
+                init();
+            }
+        }
     }
 
 

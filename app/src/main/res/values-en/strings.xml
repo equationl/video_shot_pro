@@ -451,4 +451,8 @@
     <string name="floatWindowsService_toast_saveVideo2Gif_success">GIF has been saved!</string>
     <string name="floatWindowsService_toast_deleteCacheFile_fail">Clear cache fail!</string>
     <string name="buildPicture_toast_buildPicture_done">All done!</string>
+    <string name="player_toast_shotGif_start_getPalettegen">Create GIF: start scanning the video</string>
+    <string name="buildPicture_toast_getBundle_fail">Error getting data: illegal access!</string>
+    <string name="pref_description_isShotHighQualityGif">Enabling this option will greatly improve the quality of the GIF, but will also greatly increase the size of the generated animation and the time required for generation.</string>
+    <string name="pref_title_isShotHighQualityGif">Shot to high quality gif</string>
 </resources>
