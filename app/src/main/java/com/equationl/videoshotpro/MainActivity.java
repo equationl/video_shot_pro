@@ -25,7 +25,6 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -50,6 +49,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.equationl.videoshotpro.Image.CheckPictureText;
+import com.equationl.videoshotpro.Adapter.MainWaterFallAdapter;
 import com.equationl.videoshotpro.Image.Tools;
 import com.equationl.videoshotpro.rom.HuaweiUtils;
 import com.equationl.videoshotpro.rom.MeizuUtils;
@@ -57,7 +57,6 @@ import com.equationl.videoshotpro.rom.MiuiUtils;
 import com.equationl.videoshotpro.rom.QikuUtils;
 import com.equationl.videoshotpro.rom.RomUtils;
 import com.equationl.videoshotpro.utils.GlideSimpleLoader;
-import com.equationl.videoshotpro.utils.OnRecylerViewItemClickListener;
 import com.equationl.videoshotpro.utils.Share;
 import com.equationl.videoshotpro.utils.Utils;
 import com.equationl.videoshotpro.utils.WaterFallData;
@@ -94,7 +93,6 @@ import me.toptas.fancyshowcase.FancyShowCaseView;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    AlertDialog.Builder dialog;
     AlertDialog dialog2;
     android.support.design.widget.CoordinatorLayout container;
     Tools tool;
@@ -107,10 +105,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     ProgressDialog dialog_copyFile;
     DrawerLayout drawer;
     int activityResultMode = 0;
+    int selectedCount = 0;
     Boolean isFirstBoot = false;
     boolean isTranslucentStatus = false;
-
     CheckPictureText cpt = new CheckPictureText();
+    boolean isMultiSelect = false;
     Utils utils = new Utils();
     FloatingActionsMenu main_floatBtn_menu;
     FloatingActionButton main_floatBtn_quick;
@@ -216,6 +215,42 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             //showGuide();
         }
 
+        else {
+            //FIXME 仅在该版本做统计
+            if (sp_init.getBoolean("YWRkJTIwYWQ2", true)) {
+                new AlertDialog.Builder(this)
+                        .setTitle("邀请参加调查")
+                        .setMessage("亲爱的用户您好，为了能给您带来更好的使用体验，我们希望能占用您1分钟的时间完成一个问卷调查。")
+                        .setPositiveButton("好的", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                SharedPreferences.Editor editor = sp_init.edit();
+                                editor.putBoolean("YWRkJTIwYWQ2", false);
+                                editor.apply();
+                                Intent intent = new Intent();
+                                //Intent intent = new Intent(Intent.ACTION_VIEW,uri);
+                                intent.setAction("android.intent.action.VIEW");
+                                Uri content_url = Uri.parse("https://www.wjx.cn/jq/37542400.aspx");
+                                intent.setData(content_url);
+                                startActivity(intent);
+                            }
+                        })
+                        .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) { }
+                        })
+                        .setNeutralButton("不再提示", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                SharedPreferences.Editor editor = sp_init.edit();
+                                editor.putBoolean("YWRkJTIwYWQ2", false);
+                                editor.apply();
+                            }
+                        }).setCancelable(false).show();
+            }
+        }
+
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -239,8 +274,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         main_floatBtn_splicing.setOnClickListener(clickListener);
         main_floatBtn_shotScreen.setOnClickListener(clickListener);
         main_floatBtn_frameByFrame.setOnClickListener(clickListener);
-
-        dialog = new AlertDialog.Builder(this);
 
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -276,13 +309,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.activity_main, menu);
+        if (isMultiSelect) {
+            getMenuInflater().inflate(R.menu.activity_main_multi_select, menu);
+        }
+        else {
+            getMenuInflater().inflate(R.menu.activity_main, menu);
+        }
         return true;
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        menu.findItem(R.id.main_menu_isDirFirst).setChecked(sp_init.getBoolean("mainSortIsDirFirst", true));
+        if (!isMultiSelect) {
+            menu.findItem(R.id.main_menu_isDirFirst).setChecked(sp_init.getBoolean("mainSortIsDirFirst", true));
+        }
         return true;
     }
 
@@ -302,7 +342,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 editor.apply();
                 refreshWaterfall();
                 break;
-            case R.id.main_menu_sort_tyoe:
+            case R.id.main_menu_sort_type:
                 editor.putString("mainSort", "type");
                 editor.apply();
                 refreshWaterfall();
@@ -322,8 +362,60 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.main_menu_refresh:
                 refreshWaterfall();
                 break;
+            case R.id.main_menu_multiSelect:
+                isMultiSelect = true;
+                setTitle(R.string.main_title_multiSelect);
+                invalidateOptionsMenu();
+                break;
+            case R.id.main_menu_exitSelect:
+                exitMultiSelect();
+                break;
+            case R.id.main_menu_allDelete:
+                allDelete();
+                break;
+            case R.id.main_menu_allSelect:
+                clickAllSelect();
+                break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void exitMultiSelect() {
+        isMultiSelect = false;
+        setTitle(R.string.app_name);
+        selectedCount = 0;
+        invalidateOptionsMenu();
+        for (WaterFallData data : waterFallList) {
+            data.isSelected = false;
+        }
+        mRecyclerView.getAdapter().notifyDataSetChanged();
+    }
+
+    private void clickAllSelect() {
+        int hasSelectedCount = 0;
+        for (WaterFallData data : waterFallList) {
+            if (data.isSelected) {
+                hasSelectedCount++;
+            }
+            data.isSelected = true;
+            selectedCount++;
+        }
+        if (hasSelectedCount == waterFallList.size()) {
+            for (WaterFallData data : waterFallList) {
+                data.isSelected = false;
+            }
+            selectedCount = 0;
+        }
+        mRecyclerView.getAdapter().notifyDataSetChanged();
+    }
+
+    private void allDelete() {
+        if (selectedCount < 1) {
+            Toast.makeText(this, R.string.main_toast_unSelectedPic, Toast.LENGTH_SHORT).show();
+        }
+        else {
+            showDeletePicDialog(null, 0, false);
+        }
     }
 
     @Override
@@ -343,11 +435,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 //逐帧截取
                 activityResultMode = 0;
                 Uri uri = data.getData();
-                //String path = uri.getPath();
-                String path = tool.getImageAbsolutePath(this, uri);
                 Intent intent = new Intent(MainActivity.this, PlayerForDataActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putString("path", path);
                 bundle.putString("do", "FrameByFrame");
                 intent.putExtras(bundle);
                 intent.setData(uri);
@@ -356,12 +445,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             else if (requestCode == RequestCodeQuickStart){
                 //快速开始
                 Uri uri = data.getData();
-                //String path = uri.getPath();
-                String path = tool.getImageAbsolutePath(this, uri);
                 Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
-                Bundle bundle = new Bundle();
-                bundle.putString("path", path);
-                intent.putExtras(bundle);
                 intent.setData(uri);
                 startActivity(intent);
             }
@@ -516,7 +600,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         public void run() {
             loadLib();
-            utils.finishActivity(MarkPictureActivity2.instance);
+            utils.finishActivity(MarkPictureActivity.instance);
             utils.finishActivity(ChooseActivity.instance);
             utils.finishActivity(BuildPictureActivity.instance);
             utils.finishActivity(PlayerActivity.instance);
@@ -797,8 +881,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void showDeletePicDialog(final File f, final int pos, final boolean fromDir) {
         boolean isDeleteLocalPic = sp_init.getBoolean("isDeleteLocalPic", true);
         boolean initChoiceSets[] = {isDeleteLocalPic};
+        int title = isMultiSelect ? R.string.main_dialog_deleteAllPic_title : R.string.main_dialog_deletePic_title;
         Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
-                .setTitle(R.string.main_dialog_deletePic_title)
+                .setTitle(title)
                 .setMultiChoiceItems(R.array.main_dialog_deletePic_content, initChoiceSets,
                         new DialogInterface.OnMultiChoiceClickListener() {
                             @Override
@@ -819,7 +904,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                clickDeletePic(f, pos, fromDir);
+                                if (isMultiSelect) {
+                                    clickDeleteAllPic();
+                                }
+                                else {
+                                    clickDeletePic(f, pos, fromDir);
+                                }
                             }
                         })
                 .setNegativeButton(R.string.main_dialog_btn_cancel,
@@ -887,13 +977,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         startActivity(intent);
     }
 
-    /*@Override
+    @Override
     public void onResume() {
         super.onResume();
-        if (dialog_copyFile.isShowing()) {
-            dialog_copyFile.dismiss();
-        }
-    }  */
+        refreshWaterfall();
+    }
 
 
     @Override
@@ -928,12 +1016,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void btn_help() {
-        String info_text = res.getString(R.string.main_information_content);
-        String content = String.format(info_text, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString());
-        dialog.setTitle(res.getString(R.string.main_information_title));
-        dialog.setMessage(content);
-        dialog.setIcon(R.mipmap.ic_launcher);
-        dialog.create().show();
+        String content = String.format(res.getString(R.string.main_information_content),
+                tool.getSaveRootPath());
+        Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
+                .setTitle(R.string.main_information_title)
+                .setMessage(content)
+                .setIcon(R.mipmap.ic_launcher)
+                .setPositiveButton(res.getString(R.string.main_dialog_btn_ok),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        }).create();
+        dialog.show();
     }
 
     private void btn_feedback() {
@@ -985,7 +1081,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             activity.startActivity(intent);
                         }
                         else {
-                            Intent intent = new Intent(activity, MarkPictureActivity2.class);
+                            Intent intent = new Intent(activity, MarkPictureActivity.class);
                             activity.startActivity(intent);
                         }
                         break;
@@ -1043,7 +1139,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK
                 && event.getAction() == KeyEvent.ACTION_DOWN) {
-            if (!vImageWatcher.handleBackPressed() && !drawer.isDrawerOpen(GravityCompat.START)) {    //没有打开预览图片或者侧边栏
+            if (drawer.isDrawerOpen(GravityCompat.START)) {
+                drawer.closeDrawer(GravityCompat.START);
+                return true;
+            }
+            if (isMultiSelect) {
+                exitMultiSelect();
+                return true;
+            }
+            if (!vImageWatcher.handleBackPressed()) {    //没有打开预览图片
                 if ((System.currentTimeMillis() - exitTime) > 2000) {
                     Toast.makeText(MainActivity.this,R.string.main_toast_confirmExit,Toast.LENGTH_SHORT).show();
                     exitTime = System.currentTimeMillis();
@@ -1052,10 +1156,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     finish();
                 }
                 return true;
-            }
-
-            if (drawer.isDrawerOpen(GravityCompat.START)) {
-                drawer.closeDrawer(GravityCompat.START);
             }
 
             return false;
@@ -1098,6 +1198,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             data.text = res.getString(R.string.main_text_waterFall_firstUse);
             data.imgHeight = 0;
             data.isDirectory = false;
+            data.isSelected = false;
             waterFallList.add(data);
         }
         mLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
@@ -1106,6 +1207,54 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mRecyclerView.setLayoutManager(mLayoutManager);
         //mRecyclerView.setAdapter(mAdapter);
 
+        mAdapter.setOnItemClickListener(new MainWaterFallAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(RecyclerView.ViewHolder vh) {
+                String filepath =  tool.getSaveRootPath();
+                String[] files = getFiles(filepath);
+                MainWaterFallAdapter.MyViewHolder holder2;
+                try {   //避免点击vh为autoLoadMore对象导致转换类型出错闪退
+                    holder2 = (MainWaterFallAdapter.MyViewHolder) vh;
+                } catch (Exception e) {
+                    return;
+                }
+                if (files.length > 0) {
+                    if (vh.getAdapterPosition() < files.length && vh.getAdapterPosition() != RecyclerView.NO_POSITION) {
+                        int position = vh.getAdapterPosition();
+                        if (isMultiSelect) {
+                            boolean isSelected = waterFallList.get(position).isSelected;
+                            selectedCount += isSelected ? -1 : 1;
+                            waterFallList.get(position).isSelected = !isSelected;
+                            mRecyclerView.getAdapter().notifyDataSetChanged();
+                        }
+                        else {
+                            showPicture(holder2.img, filepath+"/"+files[position]);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onItemLongClick(RecyclerView.ViewHolder vh) {
+                Log.i(TAG, "call onItemLongClick");
+                String filepath =  tool.getSaveRootPath();
+                String[] files = getFiles(filepath);
+                MainWaterFallAdapter.MyViewHolder holder2;
+                try {     //避免长按vh为autoLoadMore对象导致转换类型出错闪退
+                    holder2 = (MainWaterFallAdapter.MyViewHolder) vh;
+                } catch (Exception e) {
+                    return;
+                }
+                if (files.length > 0) {
+                    //避免因为首次使用添加了一个 提示cardView 导致的闪退
+                    if (vh.getAdapterPosition() < files.length &&
+                            vh.getAdapterPosition() != RecyclerView.NO_POSITION &&
+                            !isMultiSelect) {
+                        showPopupMenu(holder2.img, filepath+"/"+files[vh.getAdapterPosition()], vh.getAdapterPosition());
+                    }
+                }
+            }
+        });
 
         mAutoLoadMoreAdapter = new AutoLoadMoreAdapter(this, mAdapter);
         mAutoLoadMoreAdapter.setOnLoadListener(new AutoLoadMoreAdapter.OnLoadListener() {
@@ -1124,50 +1273,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
         mRecyclerView.setAdapter(mAutoLoadMoreAdapter);
-
-        mRecyclerView.addOnItemTouchListener(new OnRecylerViewItemClickListener(mRecyclerView) {
-            @Override
-            public void onItemClick(RecyclerView.ViewHolder vh) {
-                //Toast.makeText(MainActivity.this,vh.getAdapterPosition()+"",Toast.LENGTH_SHORT).show();
-                String filepath =  tool.getSaveRootPath();
-                String[] files = getFiles(filepath);//tool.getFileOrderByName(filepath, -1);
-                //ImageZoom.show(MainActivity.this, filepath+"/"+files[vh.getAdapterPosition()], ImageUrlType.LOCAL);
-                Log.i(TAG, "ViewHolder object name="+vh.getClass().toString());
-                MainWaterFallAdapter.MyViewHolder holder2;
-                try {   //避免点击vh为autoLoadMore对象导致转换类型出错闪退
-                    holder2 = (MainWaterFallAdapter.MyViewHolder) vh;
-                } catch (Exception e) {
-                    return;
-                }
-                if (files.length > 0) {
-                    if (vh.getAdapterPosition() < files.length && vh.getAdapterPosition() != RecyclerView.NO_POSITION) {
-                        showPicture(holder2.img, filepath+"/"+files[vh.getAdapterPosition()]);
-                    }
-                }
-            }
-
-            @Override
-            public void onItemLongClick(RecyclerView.ViewHolder vh) {
-                /*if (vh.getLayoutPosition()!=waterFallList.size()-1) {
-                    //helper.startDrag(vh);
-                }
-                Toast.makeText(MainActivity.this,vh.getAdapterPosition()+"buke",Toast.LENGTH_SHORT).show();  */
-                String filepath =  tool.getSaveRootPath();
-                String[] files = getFiles(filepath);//tool.getFileOrderByName(filepath, -1);
-                MainWaterFallAdapter.MyViewHolder holder2;
-                try {     //避免长按vh为autoLoadMore对象导致转换类型出错闪退
-                    holder2 = (MainWaterFallAdapter.MyViewHolder) vh;
-                } catch (Exception e) {
-                    return;
-                }
-                if (files.length > 0) {
-                    if (vh.getAdapterPosition() < files.length && vh.getAdapterPosition() != RecyclerView.NO_POSITION) {    //避免因为首次使用添加了一个 提示cardView 导致的闪退
-                        showPopupMenu(holder2.img, filepath+"/"+files[vh.getAdapterPosition()], vh.getAdapterPosition());
-                    }
-                }
-            }
-        });
-
 
         initOnPictureLongPressListener();
         vImageWatcher = ImageWatcherHelper.with(this, new GlideSimpleLoader()) // 一般来讲， ImageWatcher 需要占据全屏的位置
@@ -1241,6 +1346,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             data.img = data.img+"/"+imgs[0];
                         }
                     }
+                    data.isSelected = false;
                     waterFallList.add(data);
                 }
                 waterFallDataPager++;
@@ -1263,6 +1369,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             data.text = res.getString(R.string.main_text_waterFall_noData);
             data.imgHeight = 0;
             data.isDirectory = false;
+            data.isSelected = false;
             waterFallList.add(data);
         }
 
@@ -1289,6 +1396,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     data.img = data.img+"/"+imgs[0];
                 }
             }
+            data.isSelected = false;
             waterFallList.add(data);
         }
         waterFallDataPager++;
@@ -1327,9 +1435,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void showPopupMenu(View view, final String img, final int pos) {
-        final PopupMenu popupMenu = new PopupMenu(MainActivity.this, view);
+        final PopupMenu popupMenu;
+        popupMenu = new PopupMenu(MainActivity.this, view);
         popupMenu.getMenuInflater().inflate(R.menu.main_card_popup_menu, popupMenu.getMenu());
-        popupMenu.show();
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -1343,12 +1451,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         break;
                 }
                 return false;
-            }
-        });
-        popupMenu.setOnDismissListener(new PopupMenu.OnDismissListener() {
-            @Override
-            public void onDismiss(PopupMenu menu) {
-                // 控件消失时的事件
             }
         });
         popupMenu.show();
@@ -1413,7 +1515,53 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         initRecycleView();
     }
 
-    private void clickDeletePic(File f, int pos, boolean fromDir) {
+    private void clickDeleteAllPic() {
+        List<WaterFallData> selected = new ArrayList<>();
+        for (WaterFallData data : waterFallList) {
+            if (data.isSelected) {
+                selected.add(data);
+            }
+        }
+        deleteSelectedPic(selected);
+    }
+
+    private void deleteSelectedPic(List<WaterFallData> selected) {
+        for (WaterFallData data : selected) {
+            File f;
+            Log.i(TAG, "data.img="+data.img);
+            if (data.img != null) {
+                try {
+                    f = new File(data.img);
+                } catch (NullPointerException e) {
+                    Log.e(TAG, Log.getStackTraceString(e));
+                    continue;
+                }
+            }
+            else {
+                //FIXME 总觉得这样写不安全，要不还是用 data.text 来弄吧？
+                String filepath =  tool.getSaveRootPath();
+                String[] files = getFiles(filepath);
+                try {
+                    f = new File(filepath+"/"+files[waterFallList.indexOf(data)]);
+                    data.isDirectory = false;   //避免因此而将f设为上一层目录，从而删掉别人珍藏多年的图片（来自开发者自己“血”的教育）
+                } catch (Exception e) {
+                    Log.e(TAG, Log.getStackTraceString(e));
+                    continue;
+                }
+            }
+
+            if (data.isDirectory) {
+                f = f.getParentFile();
+            }
+            deletePic(f);
+        }
+        waterFallList.removeAll(selected);
+        mRecyclerView.getAdapter().notifyDataSetChanged();
+    }
+
+
+    private void deletePic(File f) {
+        Log.i(TAG, "in deletePic, f= "+f.toString());
         if (!sp_init.getBoolean("isDeleteLocalPic", true)) {
             if (f.isDirectory()) {
                 try {
@@ -1435,6 +1583,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             tool.deleteDirectory(f);
         else
             tool.deleteFile(f);
+    }
+
+    private void clickDeletePic(File f, int pos, boolean fromDir) {
+       deletePic(f);
 
         if (fromDir) {
             //FIXME 应当改为直接退出imagewatcher界面而不是靠模拟返回键来退出
@@ -1445,7 +1597,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
         else{
-            if (waterFallList.size() >= pos) {
+            if (waterFallList.size() > pos) {
                 waterFallList.remove(pos);
             }
             mRecyclerView.getAdapter().notifyDataSetChanged();

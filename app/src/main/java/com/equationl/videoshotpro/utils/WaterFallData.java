@@ -10,4 +10,5 @@ public class WaterFallData implements Serializable{
     public String text;
     public int imgHeight;
     public boolean isDirectory;
+    public boolean isSelected;
 }

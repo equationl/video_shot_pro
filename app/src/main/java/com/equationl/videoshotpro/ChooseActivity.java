@@ -25,6 +25,7 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.equationl.videoshotpro.Adapter.ChoosePictureAdapter;
 import com.equationl.videoshotpro.Image.Tools;
 import com.equationl.videoshotpro.utils.GlideSimpleLoader;
 import com.github.ielse.imagewatcher.ImageWatcher;
@@ -38,17 +39,17 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import me.toptas.fancyshowcase.FancyShowCaseQueue;
 import me.toptas.fancyshowcase.FancyShowCaseView;
 
-public class ChooseActivity extends AppCompatActivity {
+public class ChooseActivity extends AppCompatActivity implements ChoosePictureAdapter.OnPictureDeleteListener{
 
     HandyGridView gridView;
     List<Bitmap> images = new ArrayList<>();
     List<String> imagePaths = new ArrayList<>();
+    List<Uri> fullFiles = new ArrayList<>();
     String[] files;
     ProgressDialog dialog;
     Resources res;
@@ -106,7 +107,7 @@ public class ChooseActivity extends AppCompatActivity {
         dialog.setProgress(0);
         new Thread(new LoadImageThread()).start();
 
-        initPictureWathcher();
+        initPictureWatcher();
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -115,10 +116,9 @@ public class ChooseActivity extends AppCompatActivity {
                 //ChoosePictureAdapter.ViewHolder viewHolder = (ChoosePictureAdapter.ViewHolder) pictureAdapter.getView(position, view, parent).getTag();
                 ImageView imageview = (ImageView) pictureAdapter.getView(position, view, parent);
                 SparseArray<ImageView> imageGroupList = new SparseArray<>();
-                imageGroupList.put(0, imageview);
+                imageGroupList.put(position, imageview);
                 imagePaths = pictureAdapter.getImagePaths();
-                String path = getExternalCacheDir().toString();
-                String file = path+"/"+imagePaths.get(position);
+
                 new FancyShowCaseView.Builder(ChooseActivity.this)
                         .focusOn(imageview)
                         .title(res.getString(R.string.choosePicture_guideView_clickImage))
@@ -126,7 +126,8 @@ public class ChooseActivity extends AppCompatActivity {
                         .titleStyle(R.style.GuideViewTextBlank, Gravity.CENTER)
                         .build()
                         .show();
-                vImageWatcher.show(imageview, imageGroupList, Collections.singletonList(Uri.parse(file)));
+                fullFiles = pictureAdapter.getImagesUri();
+                vImageWatcher.show(imageview, imageGroupList, fullFiles);
             }
         });
 
@@ -149,16 +150,23 @@ public class ChooseActivity extends AppCompatActivity {
     }
 
 
+    //删除图片回调
+    @Override
+    public void onDelete(int position) {}
+
+
     private class LoadImageThread implements Runnable {
         @Override
         public void run() {
             String path = getExternalCacheDir().toString();
             for (int i = 0; i < files.length; i++) {
-                Bitmap bitmap = tool.getBitmapThumbnailFromFile(path+"/"+files[i], 128, 160);
+                String file = path+"/"+files[i];
+                Bitmap bitmap = tool.getBitmapThumbnailFromFile(file, 128, 160);
                 if (bitmap == null) {
                     bitmap = tool.drawableToBitmap(R.mipmap.error_picture, ChooseActivity.this);
                 }
                 images.add(bitmap);
+                fullFiles.add(Uri.parse(file));
                 handler.sendEmptyMessage(HandlerStatusLoadImageNext);
             }
             handler.sendEmptyMessage(HandlerStatusLoadImageDone);
@@ -181,7 +189,8 @@ public class ChooseActivity extends AppCompatActivity {
                         activity.dialog.setProgress(activity.dialog.getProgress()+1);
                         break;
                     case HandlerStatusLoadImageDone:
-                        activity.pictureAdapter = new ChoosePictureAdapter(activity.images, activity.files, activity);
+                        activity.pictureAdapter = new ChoosePictureAdapter(activity.images, activity.files, activity.fullFiles, activity);
+                        activity.pictureAdapter.setOnPictureDeleteListener(activity);
                         activity.gridView.setAdapter(activity.pictureAdapter);
                         activity.gridView.setMode(HandyGridView.MODE.LONG_PRESS);
                         activity.gridView.setAutoOptimize(false);
@@ -192,7 +201,6 @@ public class ChooseActivity extends AppCompatActivity {
                             CrashReport.postCatchedException(e);
                         }
                         if (activity.sp_init.getBoolean("isFirstUseSortPicture", true)) {
-                            activity.showGuideDialog();
                             SharedPreferences.Editor editor = activity.sp_init.edit();
                             editor.putBoolean("isFirstUseSortPicture", false);
                             editor.apply();
@@ -254,7 +262,7 @@ public class ChooseActivity extends AppCompatActivity {
             case R.id.choosePicture_menu_done:
                 imagePaths = pictureAdapter.getImagePaths();
                 tool.sortCachePicture(imagePaths, this);
-                Intent intent = new Intent(ChooseActivity.this, MarkPictureActivity2.class);
+                Intent intent = new Intent(ChooseActivity.this, MarkPictureActivity.class);
                 if (isFromExtra) {
                     intent.putExtra("isFromExtra", true);
                 }
@@ -275,66 +283,7 @@ public class ChooseActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-   /* private void showPictureDialog(int position) {
-        imagePaths = pictureAdapter.getImagePaths();
-        //Log.i(TAG, imagePaths.toString());
-        String path = getExternalCacheDir().toString();
-        Bitmap bitmap = tool.getBitmapFromFile(path+"/"+imagePaths.get(position));
-        if (bitmap == null) {
-            bitmap = tool.drawableToBitmap(R.drawable.load_image_fail, ChooseActivity.this);
-        }
-        DialogInterface.OnClickListener dialogOnclicListener=new DialogInterface.OnClickListener(){
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch(which){
-                    case Dialog.BUTTON_POSITIVE:
-                        break;
-                }
-            }
-        };
-        mLayoutInflater= LayoutInflater.from(ChooseActivity.this);
-        view=mLayoutInflater.inflate(R.layout.dialog_show_picture, null, false);
-        ImageView imageView = (ImageView) view.findViewById(R.id.showPicture_image);
-        imageView.setImageBitmap(bitmap);
-        builder = new AlertDialog.Builder(ChooseActivity.this);
-        builder.setView(view)
-                .setPositiveButton("确定",dialogOnclicListener)
-                .setCancelable(true)
-                .create();
-        builder.show();
-    }   */
-
-    private void showGuideDialog() {
-        /*Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
-                .setTitle(R.string.choosePicture_tip_dialog_title)
-                .setMessage(R.string.choosePicture_tip_dialog_content)
-                .setPositiveButton(res.getString(R.string.choosePicture_tip_dialog_btn_ok),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        }).create();
-        dialog.show();   */
-        /*final FancyShowCaseView fancyShowCaseView1 = new FancyShowCaseView.Builder(this)
-                .focusOn(findViewById(R.id.main_guide_pos))
-                .title("Focus on View")
-                //.showOnce("fancy1")
-                .build();
-        final FancyShowCaseView fancyShowCaseView2 = new FancyShowCaseView.Builder(this)
-                .focusOn(findViewById(R.id.main_recyclerView))
-                .title("Focus on View")
-                .roundRectRadius(100)
-                //.showOnce("fancy1")
-                .build();
-        FancyShowCaseQueue mQueue = new FancyShowCaseQueue()
-                .add(fancyShowCaseView1)
-                .add(fancyShowCaseView2);
-
-        mQueue.show();   */
-    }
-
-    private void initPictureWathcher() {
+    private void initPictureWatcher() {
         mOnPictureLongPressListener = new ImageWatcher.OnPictureLongPressListener() {
             @Override
             public void onPictureLongPress(ImageView v, final Uri url, final int pos) {

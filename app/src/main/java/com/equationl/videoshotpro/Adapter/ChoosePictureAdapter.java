@@ -1,4 +1,4 @@
-package com.equationl.videoshotpro;
+package com.equationl.videoshotpro.Adapter;
 
 import java.io.File;
 import java.lang.reflect.Array;
@@ -9,6 +9,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Picture;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -18,37 +19,35 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.equationl.videoshotpro.ChooseActivity;
 import com.equationl.videoshotpro.Image.Tools;
+import com.equationl.videoshotpro.R;
 import com.equationl.videoshotpro.utils.ChooseTagView;
 import com.huxq17.handygridview.scrollrunner.OnItemMovedListener;
 
 public class ChoosePictureAdapter extends BaseAdapter  implements OnItemMovedListener, ChooseTagView.OnTagDeleteListener{
     private Context context;
 
-    private List<Bitmap> pictures = new ArrayList<Bitmap>();
-
     private final static String TAG = "EL,In ChooseAdapter";
 
-    private List<String> imagePaths = new ArrayList<>();
+    private List<Bitmap> pictures;   //用于更新UI
+    private List<String> imagePaths;   //用于将正确的顺序返回给Activity
+    private List<Uri> imagesUri;     //用于预览图片
 
     private GridView mGridView;
     public boolean inEditMode = false;
 
 
-    public ChoosePictureAdapter( List<Bitmap> images, String[] files, Context context) {
+    public ChoosePictureAdapter( List<Bitmap> images, String[] files, List <Uri> imagesUri, Context context) {
         super();
         this.context = context;
 
         List list = Arrays.asList(files);
         imagePaths = new ArrayList(list);
-
-        /*for (Bitmap image : images) {
-            Picture picture = new Picture(image);
-            pictures.add(picture);
-        }  */
-
         pictures = images;
+        this.imagesUri = imagesUri;
     }
 
     public void setInEditMode(boolean inEditMode) {
@@ -58,6 +57,10 @@ public class ChoosePictureAdapter extends BaseAdapter  implements OnItemMovedLis
 
     public List<String> getImagePaths() {
         return imagePaths;
+    }
+
+    public List<Uri> getImagesUri() {
+        return imagesUri;
     }
 
     @Override
@@ -148,6 +151,8 @@ public class ChoosePictureAdapter extends BaseAdapter  implements OnItemMovedLis
         imagePaths.add(to, s);
         Bitmap b =  pictures.remove(from);
         pictures.add(to, b);
+        Uri u = imagesUri.remove(from);
+        imagesUri.add(to, u);
     }
 
     @Override
@@ -166,6 +171,11 @@ public class ChoosePictureAdapter extends BaseAdapter  implements OnItemMovedLis
 
     @Override
     public void onDelete(View deleteView) {
+        if (mPictureDeleteListener == null) {
+            Log.e(TAG, "Delete picture fail: not set mPictureDeleteListener");
+            Toast.makeText(context, R.string.choosePicture_toast_deletePictureFail, Toast.LENGTH_SHORT).show();
+            return;
+        }
         int index = mGridView.indexOfChild(deleteView);
         //if (index <= 0) return;
         int position = index + mGridView.getFirstVisiblePosition();
@@ -173,7 +183,9 @@ public class ChoosePictureAdapter extends BaseAdapter  implements OnItemMovedLis
         tool.deleteFile(new File(ChooseActivity.instance.getExternalCacheDir().toString()+"/"+imagePaths.get(position)));
         imagePaths.remove(position);
         pictures.remove(position);
+        imagesUri.remove(position);
         notifyDataSetChanged();
+        mPictureDeleteListener.onDelete(position);
     }
 
    /* class Picture {
@@ -189,4 +201,20 @@ public class ChoosePictureAdapter extends BaseAdapter  implements OnItemMovedLis
         }
 
     }*/
+
+    private OnPictureDeleteListener mPictureDeleteListener;
+
+    public void setOnPictureDeleteListener(OnPictureDeleteListener listener) {
+        mPictureDeleteListener = listener;
+    }
+
+    public interface OnPictureDeleteListener {
+        /**
+         * 删除图片
+         *
+         * @param position 删除了第 position 张图片
+         */
+        void onDelete(int position);
+    }
+
 }

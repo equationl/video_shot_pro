@@ -1,5 +1,6 @@
 package com.equationl.videoshotpro;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -42,9 +43,9 @@ import com.tencent.tauth.UiError;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 public class BuildPictureActivity extends AppCompatActivity {
     Button btn_up, btn_down, btn_done;
@@ -71,6 +72,7 @@ public class BuildPictureActivity extends AppCompatActivity {
 
     private final MyHandler handler = new MyHandler(this);
 
+    @SuppressLint("StaticFieldLeak")
     public static BuildPictureActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
 
     private static final String TAG = "EL,InBuildActivity";
@@ -90,11 +92,11 @@ public class BuildPictureActivity extends AppCompatActivity {
 
         instance = this;
 
-        btn_up    = (Button)   findViewById(R.id.button_up);
-        btn_down  = (Button)    findViewById(R.id.button_down);
-        btn_done  = (Button)    findViewById(R.id.button_final_done);
-        imageTest = (ImageView) findViewById(R.id.imageTest);
-        text_memory = (TextView) findViewById(R.id.buildPicture_text_memory);
+        btn_up      =   findViewById(R.id.button_up);
+        btn_down    =   findViewById(R.id.button_down);
+        btn_done    =   findViewById(R.id.button_final_done);
+        imageTest   =   findViewById(R.id.imageTest);
+        text_memory =   findViewById(R.id.buildPicture_text_memory);
 
         res = getResources();
 
@@ -104,8 +106,14 @@ public class BuildPictureActivity extends AppCompatActivity {
         sp_init = getSharedPreferences("init", Context.MODE_PRIVATE);
 
         Bundle bundle = this.getIntent().getExtras();
-        fileList = bundle.getStringArray("fileList");
-        isFromExtra = bundle.getBoolean("isFromExtra");
+        if (bundle != null) {
+            fileList = bundle.getStringArray("fileList");
+            isFromExtra = bundle.getBoolean("isFromExtra");
+        }
+        else {
+            Toast.makeText(this, R.string.buildPicture_toast_getBundle_fail, Toast.LENGTH_SHORT).show();
+            finish();
+        }
 
         t_2 = new Thread(new MyThread());
 
@@ -122,6 +130,10 @@ public class BuildPictureActivity extends AppCompatActivity {
         try {
             bm_test = getCutImg().copy(Bitmap.Config.ARGB_8888,true);
         } catch (NullPointerException e) {
+            CrashReport.postCatchedException(e);
+            Toast.makeText(this, R.string.buildPicture_toast_copyPreview_fail, Toast.LENGTH_SHORT).show();
+            finish();
+        } catch (RuntimeException e) {
             CrashReport.postCatchedException(e);
             Toast.makeText(this, R.string.buildPicture_toast_copyPreview_fail, Toast.LENGTH_SHORT).show();
             finish();
@@ -165,7 +177,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                     utils.finishActivity(PlayerActivity.instance);
                     utils.finishActivity(MainActivity.instance);
                     utils.finishActivity(ChooseActivity.instance);
-                    utils.finishActivity(MarkPictureActivity2.instance);
+                    utils.finishActivity(MarkPictureActivity.instance);
                     Intent intent = new Intent(BuildPictureActivity.this, MainActivity.class);
                     startActivity(intent);
                     finish();
@@ -213,7 +225,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                 utils.finishActivity(PlayerActivity.instance);
                 utils.finishActivity(MainActivity.instance);
                 utils.finishActivity(ChooseActivity.instance);
-                utils.finishActivity(MarkPictureActivity2.instance);
+                utils.finishActivity(MarkPictureActivity.instance);
                 Intent intent = new Intent(BuildPictureActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
@@ -387,16 +399,17 @@ public class BuildPictureActivity extends AppCompatActivity {
                 msg.what = HandlerStatusBuildPictureNext;
                 handler.sendMessage(msg);
                 final_bitmap = tool.addRight(final_bitmap);
-                SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+                SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.CHINA);
                 String date    =    sDateFormat.format(new    java.util.Date());
                 try {
-                    if(saveMyBitmap(final_bitmap,date+"-by_EL", settings.getBoolean("isReduce_switch", false))) {
+                    boolean isReduce = settings.getBoolean("isReduce_switch", false);
+                    if(saveMyBitmap(final_bitmap,date+"-by_EL", isReduce)) {
                         msg = Message.obtain();
                         msg.obj = date+"-by_EL";
                         msg.what = HandlerStatusBuildPictureDone;
                         handler.sendMessage(msg);
                     }
-                } catch (IOException e) {
+                } catch (Exception e) {
                     //Toast.makeText(getApplicationContext(),"保存截图失败"+e,Toast.LENGTH_LONG).show();
                     msg = Message.obtain();
                     msg.obj = "保存截图失败"+e;
@@ -416,25 +429,26 @@ public class BuildPictureActivity extends AppCompatActivity {
     }
 
     private Bitmap addBitmap(Bitmap first, Bitmap second) {
-        return tool.jointBitmap(first, second);
+        Bitmap bitmap = tool.jointBitmap(first, second);
+        if (bitmap != null) {
+            return bitmap;
+        }
+         else {
+            //避免因为拼接失败直接返回错误，如果拼接失败就只返回第一个bitmap
+            Log.e(TAG, "joint bitmap fail, just return first bitmap");
+            return first;
+        }
     }
 
-    private boolean saveMyBitmap(Bitmap bmp, String bitName, boolean isReduce) throws IOException {
-        boolean flag;
-        try {
+    private boolean saveMyBitmap(Bitmap bmp, String bitName, boolean isReduce) throws Exception {
             if (isReduce) {
                 int quality = Integer.parseInt(settings.getString("reduce_value","100"));
-                savePath = tool.saveBitmap2png(bmp,bitName, new File(tool.getSaveRootPath()), true, quality);
+                savePath = tool.saveBitmap2File(bmp,bitName, new File(tool.getSaveRootPath()), true, quality);
             }
             else {
-                savePath = tool.saveBitmap2png(bmp,bitName, new File(tool.getSaveRootPath()));
+                savePath = tool.saveBitmap2File(bmp,bitName, new File(tool.getSaveRootPath()));
             }
-            flag = true;
-        } catch (Exception e) {
-            flag = false;
-        }
-
-        return flag;
+            return true;
     }
 
 
@@ -450,7 +464,7 @@ public class BuildPictureActivity extends AppCompatActivity {
         private final WeakReference<BuildPictureActivity> mActivity;
 
         private MyHandler(BuildPictureActivity activity) {
-            mActivity = new WeakReference<BuildPictureActivity>(activity);
+            mActivity = new WeakReference<>(activity);
         }
 
         @Override
@@ -487,7 +501,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                         String temp_path = activity.tool.getSaveRootPath()+"/"+msg.obj.toString();
                         temp_path += activity.settings.getBoolean("isReduce_switch", false) ? ".jpg":".png";
                         MediaScannerConnection.scanFile(activity, new String[]{temp_path}, null, null);
-                        Toast.makeText(activity,"处理完成！图片已保存至 "+ temp_path +" 请进入图库查看", Toast.LENGTH_LONG).show();
+                        Toast.makeText(activity,R.string.buildPicture_toast_buildPicture_done, Toast.LENGTH_LONG).show();
                         break;
 
                     case HandlerStatusBuildPictureUpdateBitmap:
@@ -496,7 +510,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                             activity.imageTest.setImageBitmap((Bitmap) msg.obj);
                         }
                         else {
-                            DisplayMetrics dm = new DisplayMetrics();
+                            DisplayMetrics dm;
                             dm = activity.getResources().getDisplayMetrics();
                             int screenHeight = dm.heightPixels;
 
@@ -539,7 +553,6 @@ public class BuildPictureActivity extends AppCompatActivity {
                                         activity.reduceQuality();
                                         Bitmap bm_temp = activity.getCutImg();
                                         activity.bWidth = bm_temp.getWidth();
-                                        bm_temp = null;
                                         if (activity.t.isAlive()) {
                                             activity.t.interrupt();
                                             activity.t = null;
@@ -554,7 +567,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                                     public void onClick(DialogInterface dialog, int which) {
                                         activity.utils.finishActivity(PlayerActivity.instance);
                                         activity.utils.finishActivity(MainActivity.instance);
-                                        activity.utils.finishActivity(MarkPictureActivity2.instance);
+                                        activity.utils.finishActivity(MarkPictureActivity.instance);
                                         Intent intent = new Intent(activity, MainActivity.class);
                                         activity.startActivity(intent);
                                         activity.finish();
@@ -606,6 +619,7 @@ public class BuildPictureActivity extends AppCompatActivity {
             int colorMode = Integer.parseInt(settings.getString("colorMode_value", "1"));
             switch (colorMode) {
                 case 1:
+                    //noinspection ConstantConditions
                     mode = Bitmap.Config.ARGB_8888;
                     break;
                 case 2:
@@ -651,6 +665,14 @@ public class BuildPictureActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Tencent.onActivityResultData(requestCode, resultCode, data, shareListener);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(dialog.isShowing()){
+            dialog.dismiss();
+        }
     }
 
 }

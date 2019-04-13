@@ -98,7 +98,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         bindPreferenceSummaryToValue(findPreference("colorMode_value"));
         bindPreferenceSummaryToValue(findPreference("AllowNotBlackNums"));
         bindPreferenceSummaryToValue(findPreference("AllowCheckBlackLines"));
-        bindPreferenceSummaryToValue(findPreference("gestureSensibility"));
     }
 
     /**

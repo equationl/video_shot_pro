@@ -82,18 +82,20 @@
          <string name="main_snackbar_btn_retry">try again</string>
          <string name="main_snackbar_btn_contact">Contact Developer </string>
          <string name="main_snackbar_so_notAble">Sorry, there is no so library compatible with your phone</string>
-         <string name="main_snackbar_isPiracy">"You downloaded an illegally packaged version,may you should go to the google play to re-download "</string>
-         <string name="main_snackbar_deleteTip">Are you sure you want to delete it? </string>
-         <string name="main_snackbar_deleteSure">Yes </string>
-         <string name="main_snackbar_shareDirectoryTip">Cannot share folders </string>
+         <string name="main_snackbar_isPiracy">"You downloaded an illegally packaged version,may you should go to the google play to re-download "</string><![CDATA[
+        
+        
+         ]]>
+    <string name="main_snackbar_shareDirectoryTip">Cannot share folders </string>
          <string name="main_snackbar_sure">OK</string>
 
     <string name="main_toast_getPermission_success">Permission Allowed!</string>
          <string name="main_toast_choosePictures_fail">Select picture error! </string>
          <string name="main_toast_unSupportFloatBtn">The current system version is too low to use this feature! </string>
-         <string name="main_toast_canNotStartFloatBtn">Unable to start the screenshot, please contact the developer to solve! </string>
-         <string name="main_toast_showNavigationGuider">Swipe right to open the sidebar~</string>
-         <string name="main_toast_confirmExit"> Press again to exit</string>
+         <string name="main_toast_canNotStartFloatBtn">Unable to start the screenshot, please contact the developer to solve! </string><![CDATA[
+        
+         ]]>
+    <string name="main_toast_confirmExit"> Press again to exit</string>
          <string name="main_toast_copyFileFail">Failed to get the picture! </string>
 
     <string name="main_nav_text_ffmpeg">FFmpeg command line </string>
@@ -138,23 +140,24 @@
          <string name="player_toast_shotGif_fail">Failed to intercept the animation! </string>
          <string name="player_toast_shotGif_success">The animation has been saved </string>
          <string name="player_toast_shotGif_start">Start to intercept the animation </string>
-         <string name="player_toast_mark_timeError">End time must be greater than start time </string>
-         <string name="player_toast_FBF_done">The interception is complete, please go to %1$s to view! </string>
-         <string name="player_toast_loadUriFail_invalid">Sorry, the file failed to load: the file is invalid, please try again! </string>
+         <string name="player_toast_mark_timeError">End time must be greater than start time </string><![CDATA[
+        
+         ]]>
+    <string name="player_toast_loadUriFail_invalid">Sorry, the file failed to load: the file is invalid, please try again! </string>
          <string name="player_toast_loadUriFail_lackPermission">Sorry, the file failed to load: no permission, please try again! </string>
-         <string name="player_toast_loadUriFail_other">Sorry, file loading failed: file format is not supported or other errors, please try again! </string>
-         <string name="player_toast_getMetaDuration_fail">Sorry, the time to get the video failed! Please try again! </string>
+         <string name="player_toast_loadUriFail_other">Sorry, file loading failed: file format is not supported or other errors, please try again! </string><![CDATA[
+        
 
-    <string name="player_text_rotationScreen">Rotation</string>
-         <string name="player_text_shotStatus">Mark / Shoted: %1$d/%2$d</string>
-         <string name="player_text_replay"> Replay </string>
-         <string name="player_text_savePicture_fail">Save screenshot failed</string>
-         <string name="player_text_start_play"> Start playing </string>
-         <string name="player_text_done">Complete </string>
-         <string name="player_text_shot">Shot</string>
-         <string name="player_text_mark">Mark</string>
-         <string name="player_text_mark_end">End</string>
-         <string name="player_text_ok">OK</string>
+         ]]><string name="player_text_shotStatus">%1$d/%2$d</string><![CDATA[
+        
+         ]]><string name="player_text_savePicture_fail">Save screenshot failed</string><![CDATA[
+        
+        
+        
+        
+        
+        
+    ]]>
     <string name="player_text_getCachePath_fail">Get the cache directory error! </string>
 
     <string name="player_dialog_FBF_title">Shotting&#8230;</string>
@@ -386,8 +389,8 @@
         <string name="title_activity_feedback">Feedback</string>
 
 
-        <string name="float_done_channel_name">Do not close this channel, otherwise you will not be able to use Screenshot on other APP mode!</string>
-        <string name="float_done_channel_description">When using Screenshot on other APP, the notification is completed by the notification</string>
+        <string name="float_done_channel_name">Begin Build Button</string>
+        <string name="float_done_channel_description">When using Screenshot on other APP, Click to start</string>
 
         <string name="shortcut_quick_ShortLabel">Quick start </string>
         <string name="shortcut_quick_LongLabel">Quick start </string>
@@ -412,8 +415,7 @@
         <string name="about_dialog_title_support">Support author </string>
         <string name="about_dialog_text_support">Dear users, this app is the best honor for you to get your favor. If you want to support my work, please recommend this app to your friends~(On the homepage Click on the sidebar and recommend it to your friends for quick sharing)\n\nYour support is my biggest motivation! If you can give me a five-star rating, I will be more happy~ (click on the logo on this page to quickly jump to the application market)\n\nThis APP has been open source,welcome to pull and star~"</string>
     <string name="main_mail_title">VideoShotPro Feedback</string>
-    <string name="player_text_back">Back</string>
-    <string name="main_menu_referesh">Refresh</string>
+    <string name="main_menu_refresh">Refresh</string>
     <string name="main_menu_sort_title">Sort by</string>
     <string name="main_menu_sort_date_dese">Date(desc)</string>
     <string name="main_menu_sort_date_asc">Date(asc)</string>
@@ -424,4 +426,33 @@
     <string-array name="main_dialog_deletePic_content">
         <item>Delete local file too</item>
     </string-array>
+    <string name="choosePicture_toast_deletePictureFail">Delete picture fail, please try again!</string>
+    <string name="main_menu_MultiSelect">MultiSelect</string>
+    <string name="main_menu_allDelete">Delete</string>
+    <string name="main_menu_allSelect">Select all</string>
+    <string name="main_menu_exitSelect">Exit</string>
+    <string name="main_dialog_deleteAllPic_title">Would you like delete all pictures which you selected?</string>
+    <string name="main_title_multiSelect">Multi Select</string>
+    <string name="main_toast_unSelectedPic">You have no select any picture</string>
+    <string name="title_activity_chooseBest">Choose Picture To Save</string>
+    <string name="chooseBest_menu_save">Save</string>
+    <string name="chooseBest_dialog_deleteAll_content">Are you sure not save any picture?</string>
+    <string name="chooseBest_dialog_deleteAll_btn_ok">Yes</string>
+    <string name="chooseBest_dialog_deleteAll_btn_cancel">No</string>
+    <string name="player_toast_getVideoPath_fail">" Failed to load video! Do not use a third-party program to select videos! Please try to select a video from the system document!"</string>
+    <string name="player_toast_getWhatToDo_fail">" Unknown mode!"</string>
+    <string name="player_dialog_FBF_content_shot_fail">Shot fail: %1$s</string>
+    <string name="player_dialog_FBF_content_shot_success">Shot success!</string>
+    <string name="floatWindowsService_toast_getBitmap_fail">Create Bitamp fail!</string>
+    <string name="floatWindowsService_toast_saveBitmap_fail">Failed to save image!</string>
+    <string name="floatWindowsService_toast_setMediaProjection_fail">" Attempt to record GIF failed: setMediaProjection_fail"</string>
+    <string name="floatWindowsService_toast_saveVideo2Gif_start">" Recording is successful and is being converted to GIF&#8230;"</string>
+    <string name="floatWindowsService_toast_saveVideo2Gif_fail">Create GIF fail!</string>
+    <string name="floatWindowsService_toast_saveVideo2Gif_success">GIF has been saved!</string>
+    <string name="floatWindowsService_toast_deleteCacheFile_fail">Clear cache fail!</string>
+    <string name="buildPicture_toast_buildPicture_done">All done!</string>
+    <string name="player_toast_shotGif_start_getPalettegen">Create GIF: start scanning the video</string>
+    <string name="buildPicture_toast_getBundle_fail">Error getting data: illegal access!</string>
+    <string name="pref_description_isShotHighQualityGif">Enabling this option will greatly improve the quality of the GIF, but will also greatly increase the size of the generated animation and the time required for generation.</string>
+    <string name="pref_title_isShotHighQualityGif">Shot to high quality gif</string>
 </resources>
