@@ -1,9 +1,17 @@
 package com.equationl.videoshotpro.Image;
 
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.util.Log;
+
+import com.googlecode.tesseract.android.TessBaseAPI;
+
+import java.io.File;
+import java.security.acl.LastOwnerException;
+import java.util.ArrayList;
 
 public class CheckPictureText {
     public final int StateCutPicture = 1000;
@@ -14,12 +22,12 @@ public class CheckPictureText {
     /**
      * 二值化阀值
     * */
-    private final static int BinaryzationT = 150;
+    private final static int BinaryzationT = 200;
 
     /**
     * 对比两张截图是否在同一台词时的容差
     * */
-    private final static float isSameSubtitleTolerance = 0.03f;
+    private final static float isSameSubtitleTolerance = 0.6f;
 
     /**
     * 根据图片中包含的白色像素点确定是否是文字的概率
@@ -31,10 +39,17 @@ public class CheckPictureText {
     * */
     private int subtitleHeight = 0;
 
-    private Bitmap lastBitmap = null;
+    private String lastText = null;
 
     private int fullHeight = 0;
 
+    private TessBaseAPI tessBaseAPI;
+
+    private final static  String TAG = "el, in CPT";
+
+    public CheckPictureText(Context context) {
+        initTess(context);
+    }
 
     /**
     * 获取最终的字幕高度
@@ -52,16 +67,39 @@ public class CheckPictureText {
         int height = bitmap.getHeight();
         fullHeight = height;
         if (subtitleHeight == 0) {
-            subtitleHeight = (int)(bitmap.getHeight() * 0.7);
+            subtitleHeight = (int)(bitmap.getHeight() * 0.75);
         }
 
-        Log.i("el", "字幕高度为"+subtitleHeight);
+        Log.i(TAG, "字幕高度为"+subtitleHeight);
 
         //预裁剪，减少遍历数
-        bitmap = Bitmap.createBitmap(bitmap, (int)(width*0.35), subtitleHeight, width-(int)(width*0.35)*2, height-subtitleHeight);
+        //bitmap = Bitmap.createBitmap(bitmap, (int)(width*0.35), subtitleHeight, width-(int)(width*0.35)*2, height-subtitleHeight);
+        bitmap = Bitmap.createBitmap(bitmap, 0, subtitleHeight, width, height-subtitleHeight);
         bitmap = getBinaryzationPicture(bitmap);
 
-        if (!isSubtitlePicture(bitmap)) {
+        String text = getOCRString(bitmap);
+        Log.i(TAG, "识别到文字："+text);
+        int charNum = 0;
+        if (text.contains("_")) {
+            charNum = text.length() - text.replaceAll("_", "").length();
+        }
+        if (text.equals("") || charNum > 2) {
+            Log.i(TAG, "不是字幕因为没有文字");
+            lastText = text;
+            return StateDelPicture;
+        }
+        else if (lastText != null) {
+            float similarity = levenshtein(text, lastText);
+            Log.i(TAG, "similarity="+similarity);
+            if (similarity > isSameSubtitleTolerance) {
+                Log.i(TAG, "不是字幕因为两张图片一样！");
+                lastText = text;
+                return StateDelPicture;
+            }
+        }
+
+
+        /*if (!isSubtitlePicture(bitmap)) {
             Log.i("el", "不是字幕因为没有文字");
             lastBitmap = bitmap;
             return StateDelPicture;
@@ -72,11 +110,35 @@ public class CheckPictureText {
                 lastBitmap = bitmap;
                 return StateDelPicture;
             }
-        }
-        lastBitmap = bitmap;
+        }  */
+
+        Log.i(TAG, "是非重复的字幕");
+        lastText = text;
         return StateCutPicture;
     }
 
+    private String getOCRString(Bitmap bitmap) {
+        tessBaseAPI.setImage(bitmap);
+        String text = tessBaseAPI.getUTF8Text();
+        /*ArrayList<Rect> wordRects = tessBaseAPI.getRegions().getBoxRects();
+        for (Rect rect : wordRects) {
+            Log.i(TAG, "word rect="+rect.toString());
+        }   */
+        text = text.replaceAll("[^a-zA-Z_\u4e00-\u9fa5]", "");
+        return text;
+    }
+
+    private void initTess(Context context) {
+        String DATAPATH = context.getExternalFilesDir("tessdata").toString();
+        String PATH = context.getExternalFilesDir(null).toString();
+        Log.i(TAG, "PATH="+PATH);
+        String DEFAULT_LANGUAGE = "chi_sim";
+        tessBaseAPI = new TessBaseAPI();
+        if (!tessBaseAPI.init(PATH+ File.separator, DEFAULT_LANGUAGE)) {
+            //TODO
+            Log.i(TAG, "init tess fail");
+        }
+    }
 
     /**
      * 检测该图片是否是有字幕图片
@@ -214,6 +276,53 @@ public class CheckPictureText {
             }
         }
         return binarymap;
+    }
+
+
+    /*
+    * from: https://wdhdmx.iteye.com/blog/1343856
+    * */
+    public static float levenshtein(String str1,String str2) {
+        //计算两个字符串的长度。
+        int len1 = str1.length();
+        int len2 = str2.length();
+        //建立上面说的数组，比字符长度大一个空间
+        int[][] dif = new int[len1 + 1][len2 + 1];
+        //赋初值，步骤B。
+        for (int a = 0; a <= len1; a++) {
+            dif[a][0] = a;
+        }
+        for (int a = 0; a <= len2; a++) {
+            dif[0][a] = a;
+        }
+        //计算两个字符是否一样，计算左上的值
+        int temp;
+        for (int i = 1; i <= len1; i++) {
+            for (int j = 1; j <= len2; j++) {
+                if (str1.charAt(i - 1) == str2.charAt(j - 1)) {
+                    temp = 0;
+                } else {
+                    temp = 1;
+                }
+                //取三个值中最小的
+                dif[i][j] = min(dif[i - 1][j - 1] + temp, dif[i][j - 1] + 1,
+                        dif[i - 1][j] + 1);
+            }
+        }
+        //计算相似度
+        float similarity =1 - (float) dif[len1][len2] / Math.max(str1.length(), str2.length());
+        return similarity;
+    }
+
+    //得到最小值
+    private static int min(int... is) {
+        int min = Integer.MAX_VALUE;
+        for (int i : is) {
+            if (min > i) {
+                min = i;
+            }
+        }
+        return min;
     }
 
 }

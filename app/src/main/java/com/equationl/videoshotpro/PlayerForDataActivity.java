@@ -35,6 +35,7 @@ import com.shuyu.gsyvideoplayer.utils.OrientationUtils;
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -381,8 +382,10 @@ public class PlayerForDataActivity extends AppCompatActivity {
                         activity.dialog.setMessage(msg.obj.toString());
                         break;
                     case HandlerFBFRunningFinish:
-                        activity.videoPlayer.onVideoResume();
-                        activity.btn_shot.setImageResource(R.drawable.marked);
+                        if (!activity.Do.equals("AutoBuild")) {
+                            activity.videoPlayer.onVideoResume();
+                            activity.btn_shot.setImageResource(R.drawable.marked);
+                        }
                     case HandlerABonFail:
                         //FIXME
                         //activity.dialog.setMessage(msg.obj.toString());
@@ -412,7 +415,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
     private class CheckTextThread implements Runnable {
         @Override
         public void run(){
-            CheckPictureText cpt = new CheckPictureText();
+            CheckPictureText cpt = new CheckPictureText(PlayerForDataActivity.this);
             if (externalCacheDir == null) {
                 Message msg = Message.obtain();
                 msg.obj = res.getString(R.string.player_text_getCachePath_fail);
@@ -421,9 +424,16 @@ public class PlayerForDataActivity extends AppCompatActivity {
                 handler.sendMessage(msg);
             }
             else {
+                String extension = settings.getBoolean("isShotToJpg",true)?"jpg":"png";
+                try {
+                    tool.copyFile(new File(externalCacheDir, "1."+extension), new File(externalCacheDir, "0."+extension));
+                } catch (IOException e) {
+                    Log.e(TAG, Log.getStackTraceString(e));
+                }
                 String[] fileList = tool.getFileOrderByName(externalCacheDir.toString(), 1);
                 boolean isFirst = true;
-                for (int i=0;i<fileList.length;i++) {
+                fileList[0] = "del";
+                for (int i=1;i<fileList.length;i++) {
                     Message msg = Message.obtain();
                     msg.obj = String.format(res.getString(R.string.player_dialog_AB_content_shot_progress), i+1);
                     msg.what = HandlerABonProgress;
@@ -496,6 +506,8 @@ public class PlayerForDataActivity extends AppCompatActivity {
         GSYVideoManager.releaseAllVideos();
         if (orientationUtils != null)
             orientationUtils.releaseListener();
+        if (dialog != null)
+            dialog.dismiss();
     }
 
     @Override
