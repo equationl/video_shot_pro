@@ -108,7 +108,7 @@ public class BuildPictureActivity extends AppCompatActivity {
         Bundle bundle = this.getIntent().getExtras();
         if (bundle != null) {
             fileList = bundle.getStringArray("fileList");
-            isFromExtra = bundle.getBoolean("isFromExtra");
+            isFromExtra = bundle.getBoolean("isFromExtra");   //FIXME 如果没有开启图片排序，岂不是就废了？
         }
         else {
             Toast.makeText(this, R.string.buildPicture_toast_getBundle_fail, Toast.LENGTH_SHORT).show();

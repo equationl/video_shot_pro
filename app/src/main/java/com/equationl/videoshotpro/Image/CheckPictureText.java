@@ -6,6 +6,11 @@ import android.graphics.Color;
 import android.util.Log;
 
 public class CheckPictureText {
+    public final int StateCutPicture = 1000;
+    public final int StateAllPicture = 1001;
+    public final int StateDelPicture = 1002;
+
+
     /**
      * 二值化阀值
     * */
@@ -42,7 +47,7 @@ public class CheckPictureText {
      * 是否是非重复的有字幕图片
      * @param bitmap 欲检测的图片(原图)
      * */
-    public boolean isSingleSubtitlePicture(Bitmap bitmap) {
+    public int isSingleSubtitlePicture(Bitmap bitmap) {
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
         fullHeight = height;
@@ -59,17 +64,17 @@ public class CheckPictureText {
         if (!isSubtitlePicture(bitmap)) {
             Log.i("el", "不是字幕因为没有文字");
             lastBitmap = bitmap;
-            return false;
+            return StateDelPicture;
         }
         else if (lastBitmap != null) {
             if (contrastPicture(lastBitmap, bitmap)) {
                 Log.i("el", "不是字幕因为两张图片一样！");
                 lastBitmap = bitmap;
-                return false;
+                return StateDelPicture;
             }
         }
         lastBitmap = bitmap;
-        return true;
+        return StateCutPicture;
     }
 
 

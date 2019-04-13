@@ -1,11 +1,13 @@
 package com.equationl.videoshotpro;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Handler;
@@ -20,6 +22,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.equationl.videoshotpro.Image.CheckPictureText;
 import com.equationl.videoshotpro.Image.Tools;
 import com.equationl.videoshotpro.utils.Utils;
 import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
@@ -46,6 +49,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
     Utils utils = new Utils();
     FFmpeg ffmpeg;
     Uri video_uri;
+    File externalCacheDir;
 
     ImageView btn_shot, btn_done;
 
@@ -64,6 +68,10 @@ public class PlayerForDataActivity extends AppCompatActivity {
     private static final int HandlerFBFonFail = 10002;
     private static final int HandlerFBFRunningFail = 10003;
     private static final int HandlerFBFRunningFinish = 10004;
+    private static final int HandlerABonProgress= 20001;
+    private static final int HandlerABonSuccess= 20002;
+    private static final int HandlerABonFail= 20003;
+
 
     static {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
@@ -165,6 +173,11 @@ public class PlayerForDataActivity extends AppCompatActivity {
                 btn_done.setVisibility(View.INVISIBLE);
                 btn_shot.setImageResource(R.drawable.add);
                 break;
+            case "AutoBuild":
+                btn_done.setVisibility(View.INVISIBLE);
+                btn_shot.setImageResource(R.drawable.marked);
+                externalCacheDir = getExternalCacheDir();
+                break;
         }
     }
 
@@ -180,7 +193,18 @@ public class PlayerForDataActivity extends AppCompatActivity {
             case "getTime":
                 insertTimeOnClickButton();
                 break;
+            case "AutoBuild":
+                startAutoBuild();
+                break;
         }
+    }
+
+    private void startAutoBuild() {
+        shotFrameOnclickButton();
+    }
+
+    private void autoBuildStartCheckText() {
+        new Thread(new CheckTextThread()).start();
     }
 
     private void insertTimeOnClickButton() {
@@ -239,11 +263,13 @@ public class PlayerForDataActivity extends AppCompatActivity {
         SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.CHINA);
         String date    =    sDateFormat.format(new    java.util.Date());
         final String save_path = tool.getSaveRootPath()+"/"+date+"/";
-        File dirFirstFolder = new File(save_path);
-        if(!dirFirstFolder.exists())
-        {
-            //noinspection ResultOfMethodCallIgnored
-            dirFirstFolder.mkdirs();
+        if (!Do.equals("AutoBuild")) {
+            File dirFirstFolder = new File(save_path);
+            if(!dirFirstFolder.exists())
+            {
+                //noinspection ResultOfMethodCallIgnored
+                dirFirstFolder.mkdirs();
+            }
         }
         boolean isVideoPathHaveSpace = false;
         if (video_path.contains(" ")) {  //避免因为视频路径中包含空格而导致按照空格分割命令时出错
@@ -256,7 +282,22 @@ public class PlayerForDataActivity extends AppCompatActivity {
         double time_end = markTime[1];
         time_end = time_end/1000.0;
         time_end = time_end - time_start;
-        String text = "-ss "+time_start+" -t "+time_end+" -i "+video_path+" "+save_path+"%08d."+text_last;
+
+        String text;
+        if (Do.equals("AutoBuild")) {
+            if (externalCacheDir == null) {
+                Message msg = Message.obtain();
+                msg.obj = res.getString(R.string.player_text_getCachePath_fail);
+                msg.what = HandlerFBFonFail;
+                handler.sendMessage(msg);
+                return;
+            }
+            text = "-ss "+time_start+" -t "+time_end+" -i "+video_path+" -r 0.5 "+externalCacheDir.toString()+"/%d."+text_last;
+        }
+        else {
+            text = "-ss "+time_start+" -t "+time_end+" -i "+video_path+" "+save_path+"%08d."+text_last;
+        }
+
         Log.i(TAG, "cmd="+text);
         FFmpeg ffmpeg = FFmpeg.getInstance(getApplicationContext());
         if (!ffmpeg.isFFmpegCommandRunning()) {
@@ -320,13 +361,21 @@ public class PlayerForDataActivity extends AppCompatActivity {
                         Log.e(TAG, msg.obj.toString());
                         break;
                     case HandlerFBFonSuccess:
-                        activity.dialog.setMessage(activity.res.getString(R.string.player_dialog_FBF_content_shot_success));
-                        activity.dialog.dismiss();
-                        activity.markTime[0] = 0;
-                        activity.markTime[1] = 0;
-                        Intent intent2 = new Intent(activity, ChooseBestPictureActivity.class);
-                        intent2.putExtra("filePath", msg.obj.toString());
-                        activity.startActivity(intent2);
+                        if (activity.Do.equals("AutoBuild")) {
+                            activity.dialog.setMessage(activity.res.getString(R.string.player_dialog_FBF_content_shot_success));
+                            activity.markTime[0] = 0;
+                            activity.markTime[1] = 0;
+                            activity.autoBuildStartCheckText();
+                        }
+                        else {
+                            activity.dialog.setMessage(activity.res.getString(R.string.player_dialog_FBF_content_shot_success));
+                            activity.dialog.dismiss();
+                            activity.markTime[0] = 0;
+                            activity.markTime[1] = 0;
+                            Intent intent2 = new Intent(activity, ChooseBestPictureActivity.class);
+                            intent2.putExtra("filePath", msg.obj.toString());
+                            activity.startActivity(intent2);
+                        }
                         break;
                     case HandlerFBFonProgress:
                         activity.dialog.setMessage(msg.obj.toString());
@@ -334,7 +383,75 @@ public class PlayerForDataActivity extends AppCompatActivity {
                     case HandlerFBFRunningFinish:
                         activity.videoPlayer.onVideoResume();
                         activity.btn_shot.setImageResource(R.drawable.marked);
+                    case HandlerABonFail:
+                        //FIXME
+                        //activity.dialog.setMessage(msg.obj.toString());
+                        //activity.dialog.setCancelable(true);
+                        break;
+                    case HandlerABonSuccess:
+                        //TODO
+                        String fileList[] = (String[]) msg.obj;
+                        Intent intent = new Intent(activity, BuildPictureActivity.class);
+                        Bundle bundle = new Bundle();
+                        bundle.putStringArray("fileList", fileList);
+                        bundle.putBoolean("isFromExtra", true);
+                        intent.putExtras(bundle);
+                        activity.startActivity(intent);
+
+                        Log.i(TAG, "AB done!");
+                        activity.dialog.dismiss();
+                        break;
+                    case HandlerABonProgress:
+                        activity.dialog.setMessage(msg.obj.toString());
+                        break;
                 }
+            }
+        }
+    }
+
+    private class CheckTextThread implements Runnable {
+        @Override
+        public void run(){
+            CheckPictureText cpt = new CheckPictureText();
+            if (externalCacheDir == null) {
+                Message msg = Message.obtain();
+                msg.obj = res.getString(R.string.player_text_getCachePath_fail);
+                //Log.i(TAG, "msg.obj= "+res.getString(R.string.player_text_getCachePath_fail));
+                msg.what = HandlerABonFail;
+                handler.sendMessage(msg);
+            }
+            else {
+                String[] fileList = tool.getFileOrderByName(externalCacheDir.toString(), 1);
+                boolean isFirst = true;
+                for (int i=0;i<fileList.length;i++) {
+                    Message msg = Message.obtain();
+                    msg.obj = String.format(res.getString(R.string.player_dialog_AB_content_shot_progress), i+1);
+                    msg.what = HandlerABonProgress;
+                    handler.sendMessage(msg);
+                    Bitmap bitmap = tool.getBitmapFromFile(externalCacheDir.toString()+"/"+fileList[i]);
+                    int pictureState = cpt.isSingleSubtitlePicture(bitmap);
+                    if (pictureState == cpt.StateCutPicture) {
+                        Log.i(TAG, fileList[i]+" is cut");
+                        if (isFirst) {
+                            fileList[i] = "all";
+                            isFirst = false;
+                        }
+                        else {
+                            fileList[i] = "cut";
+                        }
+                    }
+                    else if (pictureState == cpt.StateDelPicture){
+                        Log.i(TAG, fileList[i]+" is del");
+                        fileList[i] = "del";
+                    }
+                    else {
+                        fileList[i] = "del";
+                    }
+                }
+                Message msg = Message.obtain();
+                msg.obj = fileList;
+                msg.what = HandlerABonSuccess;
+                handler.sendMessage(msg);
             }
         }
     }

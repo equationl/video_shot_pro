@@ -12,7 +12,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.media.MediaScannerConnection;
 import android.media.projection.MediaProjectionManager;
@@ -48,7 +47,6 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.equationl.videoshotpro.Image.CheckPictureText;
 import com.equationl.videoshotpro.Adapter.MainWaterFallAdapter;
 import com.equationl.videoshotpro.Image.Tools;
 import com.equationl.videoshotpro.rom.HuaweiUtils;
@@ -108,7 +106,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     int selectedCount = 0;
     Boolean isFirstBoot = false;
     boolean isTranslucentStatus = false;
-    CheckPictureText cpt = new CheckPictureText();
     boolean isMultiSelect = false;
     Utils utils = new Utils();
     FloatingActionsMenu main_floatBtn_menu;
@@ -186,24 +183,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         tool = new Tools();
         res = getResources();
-
-       /* try {
-            //Bitmap bm = cpt.getTextPicture(tool.getBitmapFromFile("0", getExternalCacheDir(),"jpg"));
-            //tool.saveBitmap2png(bm, "test0", getExternalCacheDir());
-            for (int i=0;i<30;i++) {
-                //Bitmap bm = cpt.isSingleSubtitlePicture(tool.getBitmapFromFile(i+"", getExternalCacheDir(),"jpg"));
-                //tool.saveBitmap2png(bm, "test"+i, getExternalCacheDir());
-                if (cpt.isSingleSubtitlePicture(tool.getBitmapFromFile(i+"", getExternalCacheDir(),"jpg"))) {
-                    Log.i(TAG, i+" is!!!!");
-                }
-                else {
-                    Log.i(TAG, i+" not!!!!!");
-                }
-            }
-        } catch (Exception e) {
-            Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show();
-            Log.e(TAG, Log.getStackTraceString(e));
-        }   */
 
         if (sp_init.getBoolean("isFirstBoot", true)) {
             //FIXME 显示警告某些应用商城审核就不给过？？？？
@@ -444,8 +423,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
             else if (requestCode == RequestCodeQuickStart){
                 //快速开始
-                Uri uri = data.getData();
+                //FIXME DEBUG 记得改回来
+                /*Uri uri = data.getData();
                 Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
+                intent.setData(uri);
+                startActivity(intent);  */
+                Uri uri = data.getData();
+                Intent intent = new Intent(MainActivity.this, PlayerForDataActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("do", "AutoBuild");
+                intent.putExtras(bundle);
                 intent.setData(uri);
                 startActivity(intent);
             }

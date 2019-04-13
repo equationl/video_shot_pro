@@ -616,6 +616,9 @@ public class Tools{
     }
 
     public void MakeCacheToStandard(Context context) {
+
+
+
         File path = new File(context.getExternalCacheDir().toString());
         String files[] = path.list();
 
