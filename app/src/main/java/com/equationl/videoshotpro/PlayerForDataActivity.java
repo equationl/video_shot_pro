@@ -51,6 +51,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
     FFmpeg ffmpeg;
     Uri video_uri;
     File externalCacheDir;
+    CheckPictureText cpt;
 
     ImageView btn_shot, btn_done;
 
@@ -398,6 +399,8 @@ public class PlayerForDataActivity extends AppCompatActivity {
                         Bundle bundle = new Bundle();
                         bundle.putStringArray("fileList", fileList);
                         bundle.putBoolean("isFromExtra", true);
+                        bundle.putBoolean("isAutoBuild", true);
+                        bundle.putInt("SubtitleHeight", activity.cpt.getSubtitleHeight());
                         intent.putExtras(bundle);
                         activity.startActivity(intent);
 
@@ -415,7 +418,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
     private class CheckTextThread implements Runnable {
         @Override
         public void run(){
-            CheckPictureText cpt = new CheckPictureText(PlayerForDataActivity.this);
+            cpt = new CheckPictureText(PlayerForDataActivity.this);
             if (externalCacheDir == null) {
                 Message msg = Message.obtain();
                 msg.obj = res.getString(R.string.player_text_getCachePath_fail);

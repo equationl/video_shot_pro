@@ -77,6 +77,8 @@ public class CheckPictureText {
         bitmap = Bitmap.createBitmap(bitmap, 0, subtitleHeight, width, height-subtitleHeight);
         bitmap = getBinaryzationPicture(bitmap);
 
+        Log.i(TAG, "origin bitmap width="+bitmap.getWidth()+", height="+bitmap.getHeight());
+
         String text = getOCRString(bitmap);
         Log.i(TAG, "识别到文字："+text);
         int charNum = 0;
@@ -119,12 +121,23 @@ public class CheckPictureText {
 
     private String getOCRString(Bitmap bitmap) {
         tessBaseAPI.setImage(bitmap);
-        String text = tessBaseAPI.getUTF8Text();
-        /*ArrayList<Rect> wordRects = tessBaseAPI.getRegions().getBoxRects();
+        String text_o = tessBaseAPI.getUTF8Text();
+        ArrayList<Rect> wordRects = tessBaseAPI.getRegions().getBoxRects();
         for (Rect rect : wordRects) {
-            Log.i(TAG, "word rect="+rect.toString());
-        }   */
-        text = text.replaceAll("[^a-zA-Z_\u4e00-\u9fa5]", "");
+            Log.i(TAG, "word rect, top="+rect.top+", bottom="+rect.bottom+", right="+rect.right+", left="+rect.left);
+        }
+        Log.i(TAG, "origin text="+text_o);
+        text_o = text_o.replaceAll(" ", "");   //FIXME 避免双语字幕时空格过多影响测试字幕高度
+        String text = text_o.replaceAll("[^a-zA-Z_\u4e00-\u9fa5]", "");
+        int charNum = text_o.length() - text.length();
+        if (charNum < 3 && !text.equals("")) {
+            try {
+                subtitleHeight = subtitleHeight+wordRects.get(0).top-5;
+                Log.i(TAG, "改变字幕高度为："+subtitleHeight);
+            } catch (IndexOutOfBoundsException e) {
+                Log.e(TAG, Log.getStackTraceString(e));
+            }
+        }
         return text;
     }
 

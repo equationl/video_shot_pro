@@ -59,10 +59,11 @@ public class BuildPictureActivity extends AppCompatActivity {
     int bWidth,bHeight;
     ProgressDialog dialog;
     int isDone=0;
+    int SubtitleHeight;
     File savePath=null;
     SharedPreferences settings, sp_init;
     Tools tool = new Tools();
-    Boolean isFromExtra;
+    Boolean isFromExtra, isAutoBuild;
     Resources res;
     Thread t, t_2;
     Tencent mTencent;
@@ -109,6 +110,8 @@ public class BuildPictureActivity extends AppCompatActivity {
         if (bundle != null) {
             fileList = bundle.getStringArray("fileList");
             isFromExtra = bundle.getBoolean("isFromExtra");   //FIXME 如果没有开启图片排序，岂不是就废了？
+            isAutoBuild = bundle.getBoolean("isAutoBuild", false);
+            SubtitleHeight = bundle.getInt("SubtitleHeight", 0);
         }
         else {
             Toast.makeText(this, R.string.buildPicture_toast_getBundle_fail, Toast.LENGTH_SHORT).show();
@@ -143,7 +146,16 @@ public class BuildPictureActivity extends AppCompatActivity {
         startY = (float) (bHeight*0.8);
         stopY = startY;
 
-        if (!isAllFullPicture){
+        if (isAutoBuild) {
+            if (SubtitleHeight != 0) {
+                startY = SubtitleHeight;
+            }
+            t = new Thread(new MyThread());
+            t.start();
+            dialog.show();
+            dialog.setProgress(0);
+        }
+        else if (!isAllFullPicture){
             Toast.makeText(this,"请调整剪切字幕的位置", Toast.LENGTH_LONG).show();
             canvas = new Canvas(bm_test);
             paint = new Paint();
