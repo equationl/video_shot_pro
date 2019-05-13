@@ -1,6 +1,7 @@
 package com.equationl.videoshotpro;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
@@ -127,6 +128,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     int waterFallDataPager = 0;
 
     private final MyHandler handler = new MyHandler(this);
+    @SuppressLint("StaticFieldLeak")
     public static MainActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
 
     private static final int HandlerStatusLoadLibsFailure = 0;
@@ -138,10 +140,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final int ActivityResultFrameByFrame = 100;
 
     private static final int RequestCodeQuickStart = 1000;
+    private static final int RequestCodeAutoBuild = 1001;
+    private static final int RequestCodeGoToSetting = 1002;
 
     private static final int SnackBarOnClickDoSure = 200;
     private static final int SnackBarOnClickDoReloadFFmpeg = 201;
-    private static final int SnackBarOnClickDoDeletePicture = 202;
     private static final int SnackBarOnClickDoFeedback = 203;
 
     private static final String TAG = "el,In MainActivity";
@@ -179,7 +182,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         settings = PreferenceManager.getDefaultSharedPreferences(this);
         sp_init = getSharedPreferences("init", Context.MODE_PRIVATE);
 
-        container =  (android.support.design.widget.CoordinatorLayout)findViewById(R.id.container);
+        container = findViewById(R.id.container);
 
         tool = new Tools();
         res = getResources();
@@ -238,29 +241,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        main_floatBtn_menu = (FloatingActionsMenu) findViewById(R.id.main_floatBtn_menu);
-        main_floatBtn_quick = (FloatingActionButton) findViewById(R.id.main_floatBtn_quick);
-        main_floatBtn_splicing = (FloatingActionButton) findViewById(R.id.main_floatBtn_splicing);
-        main_floatBtn_shotScreen = (FloatingActionButton) findViewById(R.id.main_floatBtn_shotScreen);
-        main_floatBtn_frameByFrame = (FloatingActionButton) findViewById(R.id.main_floatBtn_frameByFrame);
+        main_floatBtn_menu = findViewById(R.id.main_floatBtn_menu);
+        main_floatBtn_quick = findViewById(R.id.main_floatBtn_quick);
+        main_floatBtn_splicing = findViewById(R.id.main_floatBtn_splicing);
+        main_floatBtn_shotScreen = findViewById(R.id.main_floatBtn_shotScreen);
+        main_floatBtn_frameByFrame = findViewById(R.id.main_floatBtn_frameByFrame);
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.main_recyclerView);
+        mRecyclerView = findViewById(R.id.main_recyclerView);
 
         main_floatBtn_quick.setOnClickListener(clickListener);
         main_floatBtn_splicing.setOnClickListener(clickListener);
         main_floatBtn_shotScreen.setOnClickListener(clickListener);
         main_floatBtn_frameByFrame.setOnClickListener(clickListener);
 
-        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
 
@@ -423,11 +426,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
             else if (requestCode == RequestCodeQuickStart){
                 //快速开始
-                //FIXME DEBUG 记得改回来
-                /*Uri uri = data.getData();
+                Uri uri = data.getData();
                 Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
                 intent.setData(uri);
-                startActivity(intent);  */
+                startActivity(intent);
+            }
+
+            else if (requestCode == RequestCodeAutoBuild) {
                 Uri uri = data.getData();
                 Intent intent = new Intent(MainActivity.this, PlayerForDataActivity.class);
                 Bundle bundle = new Bundle();
@@ -436,7 +441,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 intent.setData(uri);
                 startActivity(intent);
             }
-            else if (requestCode == 123) {
+            else if (requestCode == RequestCodeGoToSetting) {
                 if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
                             || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED
@@ -451,14 +456,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             }
         }
-        /*else {
-            Toast.makeText(getApplicationContext(),R.string.main_toast_chooseFile_fail,Toast.LENGTH_LONG).show();
-        }*/
     }
 
 
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         Intent intent;
         int id = item.getItemId();
         activityResultMode = 0;
@@ -483,6 +485,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.main_nav_ffmpeg:
                 intent = new Intent(MainActivity.this, CommandActivity.class);
                 startActivity(intent);
+                break;
+            case R.id.main_nav_autoBuild:
+                intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("video/*");
+                intent.addCategory(intent.CATEGORY_OPENABLE);
+                startActivityForResult(Intent.createChooser(intent, "请选择视频文件"),RequestCodeAutoBuild);
                 break;
         }
 
@@ -566,7 +574,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Uri uri = Uri.fromParts("package", getPackageName(), null);
         intent.setData(uri);
 
-        startActivityForResult(intent, 123);
+        startActivityForResult(intent, RequestCodeGoToSetting);
     }
 
     private void loadLib() {

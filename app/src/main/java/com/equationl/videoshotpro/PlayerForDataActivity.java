@@ -1,7 +1,6 @@
 package com.equationl.videoshotpro;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -73,6 +72,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
     private static final int HandlerABonProgress= 20001;
     private static final int HandlerABonSuccess= 20002;
     private static final int HandlerABonFail= 20003;
+    private static final int HandlerABonInitFail= 20004;
 
 
     static {
@@ -202,6 +202,11 @@ public class PlayerForDataActivity extends AppCompatActivity {
     }
 
     private void startAutoBuild() {
+        File data = new File(getExternalFilesDir("tessdata"), "chi_sim.traineddata");
+        if (!data.exists()) {
+            //TODO 下载文件
+            Log.i(TAG, "need download tessdata");
+        }
         shotFrameOnclickButton();
     }
 
@@ -294,7 +299,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
                 handler.sendMessage(msg);
                 return;
             }
-            text = "-ss "+time_start+" -t "+time_end+" -i "+video_path+" -r 0.5 "+externalCacheDir.toString()+"/%d."+text_last;
+            text = "-ss "+time_start+" -t "+time_end+" -i "+video_path+" -r 1 "+externalCacheDir.toString()+"/%d."+text_last;
         }
         else {
             text = "-ss "+time_start+" -t "+time_end+" -i "+video_path+" "+save_path+"%08d."+text_last;
@@ -368,6 +373,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
                             activity.markTime[0] = 0;
                             activity.markTime[1] = 0;
                             activity.autoBuildStartCheckText();
+                            activity.dialog.setTitle(R.string.player_dialog_AB_title);
                         }
                         else {
                             activity.dialog.setMessage(activity.res.getString(R.string.player_dialog_FBF_content_shot_success));
@@ -387,13 +393,12 @@ public class PlayerForDataActivity extends AppCompatActivity {
                             activity.videoPlayer.onVideoResume();
                             activity.btn_shot.setImageResource(R.drawable.marked);
                         }
+                        break;
                     case HandlerABonFail:
-                        //FIXME
-                        //activity.dialog.setMessage(msg.obj.toString());
-                        //activity.dialog.setCancelable(true);
+                        activity.dialog.setMessage(msg.obj.toString());
+                        activity.dialog.setCancelable(true);
                         break;
                     case HandlerABonSuccess:
-                        //TODO
                         String fileList[] = (String[]) msg.obj;
                         Intent intent = new Intent(activity, BuildPictureActivity.class);
                         Bundle bundle = new Bundle();
@@ -406,9 +411,15 @@ public class PlayerForDataActivity extends AppCompatActivity {
 
                         Log.i(TAG, "AB done!");
                         activity.dialog.dismiss();
+                        activity.finish();
                         break;
                     case HandlerABonProgress:
                         activity.dialog.setMessage(msg.obj.toString());
+                        break;
+                    case HandlerABonInitFail:
+                        Toast.makeText(activity,
+                                activity.res.getString(R.string.player_toast_AB_init_fail)+msg.obj.toString(),
+                                Toast.LENGTH_SHORT).show();
                         break;
                 }
             }
@@ -418,11 +429,25 @@ public class PlayerForDataActivity extends AppCompatActivity {
     private class CheckTextThread implements Runnable {
         @Override
         public void run(){
-            cpt = new CheckPictureText(PlayerForDataActivity.this);
-            if (externalCacheDir == null) {
+            boolean isInit = false;
+            try {
+                cpt = new CheckPictureText(PlayerForDataActivity.this);
+                isInit = true;
+            } catch (Exception e) {
+                Log.e(TAG, Log.getStackTraceString(e));
+                Message msg = Message.obtain();
+                msg.obj = e;
+                msg.what = HandlerABonInitFail;
+                handler.sendMessage(msg);
+            }
+
+            if (!isInit) {
+                Log.i(TAG, "need init tess");
+            }
+            else if (externalCacheDir == null) {
                 Message msg = Message.obtain();
                 msg.obj = res.getString(R.string.player_text_getCachePath_fail);
-                //Log.i(TAG, "msg.obj= "+res.getString(R.string.player_text_getCachePath_fail));
+                Log.i(TAG, "msg.obj= "+res.getString(R.string.player_text_getCachePath_fail));
                 msg.what = HandlerABonFail;
                 handler.sendMessage(msg);
             }

@@ -4,6 +4,9 @@
     <item android:title="@string/main_nav_title_more">
         <menu>
             <item
+                android:id="@+id/main_nav_autoBuild"
+                android:title="@string/main_nav_text_autoBuild" />
+            <item
                 android:id="@+id/main_nav_ffmpeg"
                 android:icon="@android:drawable/ic_menu_sort_by_size"
                 android:title="@string/main_nav_text_ffmpeg" />

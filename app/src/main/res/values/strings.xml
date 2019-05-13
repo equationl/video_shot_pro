@@ -280,6 +280,7 @@
     <string name="main_toast_copyFileFail">获取图片失败！</string>
     <string name="main_toast_unSelectedPic">你还没有选择任何图片哦</string>
 
+    <string name="main_nav_text_autoBuild">智能合成（Alpha）</string>
     <string name="main_nav_text_ffmpeg">FFmpeg命令行</string>
     <string name="main_nav_text_setting">设置</string>
     <string name="main_nav_text_help">使用说明</string>
@@ -342,6 +343,7 @@
     <string name="player_toast_loadUriFail_lackPermission">抱歉，加载文件失败：无权限，请重试！</string>
     <string name="player_toast_loadUriFail_other">抱歉，加载文件失败：文件格式不支持或其他错误，请重试！</string>
     <string name="player_toast_getWhatToDo_fail">未指定启动模式！</string>
+    <string name="player_toast_AB_init_fail">初始化识别库失败：</string>
 
     <string name="player_text_shotStatus">%1$d/%2$d</string>
     <string name="player_text_savePicture_fail">保存截图失败</string>
@@ -352,6 +354,7 @@
     <string name="player_dialog_FBF_content_shot_fail">截取失败：%1$s \n</string>
     <string name="player_dialog_FBF_content_shot_success">截取成功！</string>
 
+    <string name="player_dialog_AB_title">正在识别图片……</string>
     <string name="player_dialog_AB_content_shot_progress">正在处理第 %1$d 张图片&#8230;</string>
 
 
