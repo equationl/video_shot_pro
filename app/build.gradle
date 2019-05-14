@@ -15,8 +15,8 @@ android {
         applicationId "com.equationl.videoshotpro"
         minSdkVersion 17
         targetSdkVersion 26
-        versionCode 30
-        versionName "1.5 léger Fix01"
+        versionCode 31
+        versionName "1.5 léger Fix02"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         ndk {
             //设置支持的SO库架构
@@ -68,7 +68,7 @@ dependencies {
     implementation 'com.squareup.okio:okio:1.13.0'
     implementation 'com.huxq17.handygridview:handygridview:1.1.0'
     implementation 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:+'
-    implementation 'me.solidev.library:auto-loadmore:1.0.1'
+    implementation 'me.solidev.library:auto-loadmore:1.0.3'
     implementation 'com.github.faruktoptas:FancyShowCaseView:1.0.1'
     implementation 'com.shuyu:gsyVideoPlayer-java:6.0.3'
     //implementation 'com.shuyu:gsyVideoPlayer-armv7a:6.0.3'

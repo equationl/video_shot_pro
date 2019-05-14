@@ -138,6 +138,10 @@ public class BuildPictureActivity extends AppCompatActivity {
             Toast.makeText(this, R.string.buildPicture_toast_copyPreview_fail, Toast.LENGTH_SHORT).show();
             finish();
         }
+        if (bm_test == null) {
+            Toast.makeText(this, R.string.buildPicture_toast_copyPreview_fail, Toast.LENGTH_SHORT).show();
+            finish();
+        }
         bHeight = bm_test.getHeight();
         bWidth = bm_test.getWidth();
         startY = (float) (bHeight*0.8);

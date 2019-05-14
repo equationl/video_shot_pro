@@ -1,24 +1,19 @@
 package com.equationl.videoshotpro.Adapter;
 
 import java.io.File;
-import java.lang.reflect.Array;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Picture;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.equationl.videoshotpro.ChooseActivity;
@@ -180,7 +175,11 @@ public class ChoosePictureAdapter extends BaseAdapter  implements OnItemMovedLis
         //if (index <= 0) return;
         int position = index + mGridView.getFirstVisiblePosition();
         Tools tool = new Tools();
-        tool.deleteFile(new File(ChooseActivity.instance.getExternalCacheDir().toString()+"/"+imagePaths.get(position)));
+        try {
+            tool.deleteFile(new File(ChooseActivity.instance.getExternalCacheDir().toString()+"/"+imagePaths.get(position)));
+        } catch (IOException e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+        }
         imagePaths.remove(position);
         pictures.remove(position);
         imagesUri.remove(position);

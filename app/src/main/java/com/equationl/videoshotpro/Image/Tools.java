@@ -490,17 +490,26 @@ public class Tools{
         out.close();
     }
 
-    public void deleteFile(File file) {
-        file.delete();
+    public void deleteFile(File file) throws IOException{
+        if (!file.delete()) {
+            throw new IOException("删除文件出错:"+file.toString());
+        }
     }
 
-    public void deleteDirectory(File directory) {
+    public void deleteDirectory(File directory) throws IOException{
         if (directory != null && directory.exists() && directory.isDirectory()) {
             for (File item : directory.listFiles()) {
-                item.delete();
+                if (!item.delete()) {
+                    throw new IOException("删除子文件出错:"+item.toString());
+                }
             }
         }
-        directory.delete();
+        else {
+            throw new IOException("传递参数不合法");
+        }
+        if (!directory.delete()) {
+            throw new IOException("删除文件夹出错:"+directory.toString());
+        }
     }
 
     public void cleanExternalCache(Context context) {
@@ -672,9 +681,13 @@ public class Tools{
      * @param  bitmap 源图片
      * @param isJpg 传入图片是否是jpg格式
      * @return 处理完成的bitmap
+     * <p>如果处理失败则返回 null</p>
      *
      * */
     public Bitmap removeImgBlackSide(Bitmap bitmap, Boolean isJpg) {
+        if (bitmap == null) {
+            return null;
+        }
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
 

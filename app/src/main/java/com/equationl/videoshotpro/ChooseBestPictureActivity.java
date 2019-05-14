@@ -2,9 +2,8 @@ package com.equationl.videoshotpro;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.net.Uri;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,9 +18,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.CheckBox;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.equationl.videoshotpro.Adapter.ChooseBestAdapter;
 import com.equationl.videoshotpro.Image.Tools;
@@ -29,6 +26,7 @@ import com.equationl.videoshotpro.utils.GlideSimpleLoader;
 import com.github.ielse.imagewatcher.ImageWatcherHelper;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,9 +36,11 @@ public class ChooseBestPictureActivity extends AppCompatActivity {
     List<Uri> imgDataUri = new ArrayList<>();
     Tools tool;
     RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mLayoutManager;
+    RecyclerView.LayoutManager mLayoutManager;
     private ChooseBestAdapter mAdapter;
     ImageWatcherHelper vImageWatcher;
+
+    private static final String TAG = "EL,In CBPA";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,9 +54,12 @@ public class ChooseBestPictureActivity extends AppCompatActivity {
 
     private void initLayout() {
         tool = new Tools();
-        Toolbar toolbar = (Toolbar) findViewById(R.id.chooseBest_toolbar);
+        Toolbar toolbar = findViewById(R.id.chooseBest_toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
     }
 
     private void initRecyclerView() {
@@ -112,7 +115,11 @@ public class ChooseBestPictureActivity extends AppCompatActivity {
                     .setPositiveButton(R.string.chooseBest_dialog_deleteAll_btn_ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            tool.deleteDirectory(new File(filePath));
+                            try {
+                                tool.deleteDirectory(new File(filePath));
+                            } catch (IOException e) {
+                                Log.e(TAG, Log.getStackTraceString(e));
+                            }
                             exitActivity();
                         }
                     })
@@ -124,7 +131,11 @@ public class ChooseBestPictureActivity extends AppCompatActivity {
         else {
             for (int i=0; i<itemCount; i++) {
                 if (!checkStates.get(i, false)) {
-                    tool.deleteFile(new File(imgData.get(i)));
+                    try {
+                        tool.deleteFile(new File(imgData.get(i)));
+                    } catch (IOException e) {
+                        Log.e(TAG, Log.getStackTraceString(e));
+                    }
                 }
             }
             exitActivity();
