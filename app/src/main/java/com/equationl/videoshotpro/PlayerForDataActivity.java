@@ -56,6 +56,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
 
     String Do;
     String video_path;
+    boolean isVideoPathHaveSpace;
     int markTime[] = {0,0};
 
     private final MyHandler handler = new MyHandler(this);
@@ -92,6 +93,8 @@ public class PlayerForDataActivity extends AppCompatActivity {
 
     @SuppressLint("ClickableViewAccessibility")
     private void init() {
+        isVideoPathHaveSpace = false;
+
         btn_shot = findViewById(R.id.playerForData_btn_shot);
         btn_done = findViewById(R.id.playerForData_btn_done);
         videoPlayer =  findViewById(R.id.video_playerForData);
@@ -278,9 +281,8 @@ public class PlayerForDataActivity extends AppCompatActivity {
                 dirFirstFolder.mkdirs();
             }
         }
-        boolean isVideoPathHaveSpace = false;
         if (video_path.contains(" ")) {  //避免因为视频路径中包含空格而导致按照空格分割命令时出错
-            video_path = video_path.replaceAll(" ", "_");
+            video_path = video_path.replaceAll(" ", "_eltemp_");
             isVideoPathHaveSpace = true;
         }
         String text_last = settings.getBoolean("isShotToJpg",true)?"jpg -vcodec mjpeg":"png";
@@ -310,7 +312,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
         if (!ffmpeg.isFFmpegCommandRunning()) {
             String cmd[] = text.split(" ");
             if (isVideoPathHaveSpace) {   //FIXME 现在的索引确定是5，小心以后变化啊
-                cmd[5] = cmd[5].replaceAll("_", " ");
+                cmd[5] = cmd[5].replaceAll("_eltemp_", " ");
             }
             try {
                 ffmpeg.execute(cmd, new ExecuteBinaryResponseHandler() {

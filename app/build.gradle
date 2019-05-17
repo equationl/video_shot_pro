@@ -68,7 +68,7 @@ dependencies {
     implementation 'com.squareup.okio:okio:1.13.0'
     implementation 'com.huxq17.handygridview:handygridview:1.1.0'
     implementation 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:+'
-    implementation 'me.solidev.library:auto-loadmore:1.0.1'
+    implementation 'me.solidev.library:auto-loadmore:1.0.3'
     implementation 'com.github.faruktoptas:FancyShowCaseView:1.0.1'
     implementation 'com.shuyu:gsyVideoPlayer-java:6.0.3'
     implementation 'com.rmtheis:tess-two:9.0.0'

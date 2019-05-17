@@ -30,6 +30,11 @@
     </string>
     
     <string name="about_updateHistory_text" translatable="false">
+        1.5 léger Fix02:\n
+        \t*优化删除文件\n
+        \t*修复因为去除黑边失败导致闪退的问题\n
+        \t*修复无法连续使用逐帧选优的问题\n
+        \t*修复获取预览图片失败导致闪退的问题\n
         1.5 léger Fix01:\n
         \t*新增截取高质量GIF功能\n
         \t*修复关闭截取为JPG时的除黑边错误\n
@@ -279,6 +284,8 @@
     <string name="main_toast_confirmExit">再按一次退出程序</string>
     <string name="main_toast_copyFileFail">获取图片失败！</string>
     <string name="main_toast_unSelectedPic">你还没有选择任何图片哦</string>
+    <string name="main_toast_deleteDirectory_fail">删除文件夹出错</string>
+    <string name="main_toast_deleteFile_fail">删除文件出错</string>
 
     <string name="main_nav_text_autoBuild">智能合成（Alpha）</string>
     <string name="main_nav_text_ffmpeg">FFmpeg命令行</string>

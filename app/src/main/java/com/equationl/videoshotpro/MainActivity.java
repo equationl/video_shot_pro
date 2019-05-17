@@ -1562,22 +1562,38 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 try {
                     tool.copyDir(f.toString(),
                             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()+"/"+f.getName());
-                } catch (IOException E) {}
+                } catch (IOException e) {
+                    Log.e(TAG, Log.getStackTraceString(e));
+                }
             }
             else {
                 String saveTo = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()+"/"+f.getName();
                 try {
                     tool.copyFile(f,
                             new File(saveTo));
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                    Log.e(TAG, Log.getStackTraceString(e));
+                }
                 MediaScannerConnection.scanFile(MainActivity.this, new String[]{saveTo}, null, null);
             }
         }
 
-        if (f.isDirectory())
-            tool.deleteDirectory(f);
-        else
-            tool.deleteFile(f);
+        if (f.isDirectory()) {
+            try {
+                tool.deleteDirectory(f);
+            } catch (IOException e) {
+                Toast.makeText(this, R.string.main_toast_deleteDirectory_fail, Toast.LENGTH_SHORT).show();
+                Log.e(TAG, Log.getStackTraceString(e));
+            }
+        }
+        else {
+            try {
+                tool.deleteFile(f);
+            } catch (IOException e) {
+                Toast.makeText(this, R.string.main_toast_deleteFile_fail, Toast.LENGTH_SHORT).show();
+                Log.e(TAG, Log.getStackTraceString(e));
+            }
+        }
     }
 
     private void clickDeletePic(File f, int pos, boolean fromDir) {
