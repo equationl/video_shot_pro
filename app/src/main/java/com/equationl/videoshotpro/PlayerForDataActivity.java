@@ -2,6 +2,7 @@ package com.equationl.videoshotpro;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -12,21 +13,33 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDelegate;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.equationl.videoshotpro.Image.CheckPictureText;
 import com.equationl.videoshotpro.Image.Tools;
 import com.equationl.videoshotpro.utils.Utils;
+import com.gastudio.downloadloadding.library.GADownloadingView;
 import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
+import com.liulishuo.okdownload.DownloadTask;
+import com.liulishuo.okdownload.SpeedCalculator;
+import com.liulishuo.okdownload.core.breakpoint.BlockInfo;
+import com.liulishuo.okdownload.core.breakpoint.BreakpointInfo;
+import com.liulishuo.okdownload.core.cause.EndCause;
+import com.liulishuo.okdownload.core.listener.DownloadListener4WithSpeed;
+import com.liulishuo.okdownload.core.listener.assist.Listener4SpeedAssistExtend;
 import com.shuyu.gsyvideoplayer.GSYVideoManager;
 import com.shuyu.gsyvideoplayer.player.PlayerFactory;
 import com.shuyu.gsyvideoplayer.player.SystemPlayerManager;
@@ -37,7 +50,9 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class PlayerForDataActivity extends AppCompatActivity {
     SharedPreferences settings;
@@ -51,12 +66,14 @@ public class PlayerForDataActivity extends AppCompatActivity {
     Uri video_uri;
     File externalCacheDir;
     CheckPictureText cpt;
-
+    AlertDialog downloadDialog;
+    GADownloadingView gaDownloadingView;
     ImageView btn_shot, btn_done;
 
     String Do;
     String video_path;
     boolean isVideoPathHaveSpace;
+    long dataTotalLength;
     int markTime[] = {0,0};
 
     private final MyHandler handler = new MyHandler(this);
@@ -70,10 +87,14 @@ public class PlayerForDataActivity extends AppCompatActivity {
     private static final int HandlerFBFonFail = 10002;
     private static final int HandlerFBFRunningFail = 10003;
     private static final int HandlerFBFRunningFinish = 10004;
-    private static final int HandlerABonProgress= 20001;
-    private static final int HandlerABonSuccess= 20002;
-    private static final int HandlerABonFail= 20003;
-    private static final int HandlerABonInitFail= 20004;
+    private static final int HandlerABonProgress = 20001;
+    private static final int HandlerABonSuccess = 20002;
+    private static final int HandlerABonFail = 20003;
+    private static final int HandlerABonInitFail = 20004;
+    private static final int HandlerDownLoadStatusOnTaskStart = 30001;
+    private static final int HandlerDownLoadStatusOnProgress = 30002;
+    private static final int HandlerDownLoadStatusOnCompleted = 30003;
+    private static final int HandlerDownLoadStatusOnError = 30004;
 
 
     static {
@@ -182,6 +203,8 @@ public class PlayerForDataActivity extends AppCompatActivity {
                 btn_done.setVisibility(View.INVISIBLE);
                 btn_shot.setImageResource(R.drawable.marked);
                 externalCacheDir = getExternalCacheDir();
+                cpt = new CheckPictureText();
+                checkTessData();
                 break;
         }
     }
@@ -205,11 +228,6 @@ public class PlayerForDataActivity extends AppCompatActivity {
     }
 
     private void startAutoBuild() {
-        File data = new File(getExternalFilesDir("tessdata"), "chi_sim.traineddata");
-        if (!data.exists()) {
-            //TODO 下载文件
-            Log.i(TAG, "need download tessdata");
-        }
         shotFrameOnclickButton();
     }
 
@@ -423,6 +441,26 @@ public class PlayerForDataActivity extends AppCompatActivity {
                                 activity.res.getString(R.string.player_toast_AB_init_fail)+msg.obj.toString(),
                                 Toast.LENGTH_SHORT).show();
                         break;
+                    case HandlerDownLoadStatusOnTaskStart:
+
+                        break;
+                    case HandlerDownLoadStatusOnProgress:
+                        int progress = (int)((double)msg.obj * 100);
+                        activity.gaDownloadingView.updateProgress(progress);
+                        Log.i(TAG, "progress="+progress);
+                        break;
+                    case HandlerDownLoadStatusOnCompleted:
+                        activity.gaDownloadingView.updateProgress(100);
+                        activity.downloadDialog.dismiss();
+                        activity.videoPlayer.onVideoResume();
+                        break;
+                    case HandlerDownLoadStatusOnError:
+                        activity.gaDownloadingView.onFail();
+                        activity.downloadDialog.setCancelable(true);
+                        Log.e(TAG, "download fail!" );
+                        Toast.makeText(activity, R.string.player_toast_downloadData_fileImperfect, Toast.LENGTH_LONG).show();
+                        activity.finish();
+                        break;
                 }
             }
         }
@@ -433,7 +471,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
         public void run(){
             boolean isInit = false;
             try {
-                cpt = new CheckPictureText(PlayerForDataActivity.this);
+                cpt.initTess(getApplicationContext());
                 isInit = true;
             } catch (Exception e) {
                 Log.e(TAG, Log.getStackTraceString(e));
@@ -550,4 +588,122 @@ public class PlayerForDataActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 
+    private void downloadFile(File file) {
+        DownloadListener4WithSpeed listener = new DownloadListener4WithSpeed() {
+            @Override
+            public void taskStart(@NonNull DownloadTask task) {
+                handler.sendEmptyMessage(HandlerDownLoadStatusOnTaskStart);
+            }
+
+            @Override
+            public void connectStart(@NonNull DownloadTask task, int blockIndex, @NonNull Map<String, List<String>> requestHeaderFields) {
+
+            }
+
+            @Override
+            public void connectEnd(@NonNull DownloadTask task, int blockIndex, int responseCode, @NonNull Map<String, List<String>> responseHeaderFields) {
+
+            }
+
+            @Override
+            public void infoReady(@NonNull DownloadTask task, @NonNull BreakpointInfo info, boolean fromBreakpoint, @NonNull Listener4SpeedAssistExtend.Listener4SpeedModel model) {
+                dataTotalLength = info.getTotalLength();
+            }
+
+            @Override
+            public void progressBlock(@NonNull DownloadTask task, int blockIndex, long currentBlockOffset, @NonNull SpeedCalculator blockSpeed) {
+
+            }
+
+            @Override
+            public void progress(@NonNull DownloadTask task, long currentOffset, @NonNull SpeedCalculator taskSpeed) {
+                Log.i(TAG, "total="+dataTotalLength+" current="+currentOffset);
+                Message msg = Message.obtain();
+                msg.what = HandlerDownLoadStatusOnProgress;
+                msg.obj = (double)currentOffset/dataTotalLength;
+                handler.sendMessage(msg);
+            }
+
+            @Override
+            public void blockEnd(@NonNull DownloadTask task, int blockIndex, BlockInfo info, @NonNull SpeedCalculator blockSpeed) {
+
+            }
+
+            @Override
+            public void taskEnd(@NonNull DownloadTask task, @NonNull EndCause cause, @Nullable Exception realCause, @NonNull SpeedCalculator taskSpeed) {
+                File data = new File(getExternalFilesDir("tessdata"), "chi_sim.traineddata");
+                if (!utils.fileToMD5(data.getPath()).equals(cpt.TessDataMD5)) {
+                    handler.sendEmptyMessage(HandlerDownLoadStatusOnError);
+                }
+                else {
+                    handler.sendEmptyMessage(HandlerDownLoadStatusOnCompleted);
+                }
+            }
+        };
+
+
+        DownloadTask task = new DownloadTask.Builder(cpt.DownloadTessdataUrl, file.getParentFile())
+                .setFilename(file.getName())
+                // the minimal interval millisecond for callback progress
+                .setMinIntervalMillisCallbackProcess(30)
+                // do re-download even if the task has already been completed in the past.
+                .setPassIfAlreadyCompleted(false)
+                .build();
+        task.enqueue(listener);
+    }
+
+
+    private void initDownloadView() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.player_dialog_downloadData_title)
+                .setMessage(R.string.player_dialog_downloadData_message)
+                .setCancelable(false)
+                .setNegativeButton(R.string.player_dialog_downloadData_btn_cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        finish();
+                    }
+                })
+                .setPositiveButton(R.string.player_dialog_downloadData_btn_ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        videoPlayer.onVideoPause();
+                        showDownloadDialog();
+                        File data = new File(getExternalFilesDir("tessdata"), "chi_sim.traineddata");
+                        downloadFile(data);
+                    }
+                })
+                .show();
+    }
+
+    private void showDownloadDialog() {
+        View view = View.inflate(this, R.layout.dialog_play_for_data_download, null);
+        gaDownloadingView = view.findViewById(R.id.player_progress_download);
+        gaDownloadingView.performAnimation();
+        downloadDialog = new AlertDialog.Builder(this)
+                .setView(view)
+                .setCancelable(false)
+                .show();
+        Window window = downloadDialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawableResource(android.R.color.transparent);
+        }
+    }
+
+    private void checkTessData() {
+        File data = new File(getExternalFilesDir("tessdata"), "chi_sim.traineddata");
+        if (!data.exists()) {
+            Log.i(TAG, "need download tessdata");
+            initDownloadView();
+        }
+        else if (!utils.fileToMD5(data.getPath()).equals(cpt.TessDataMD5)) {
+            Log.i(TAG, "checkTessData: file imperfect");
+            try {
+                tool.deleteFile(data);
+            } catch (IOException e) {
+                Log.e(TAG, "checkTessData: ", e);
+            }
+            initDownloadView();
+        }
+    }
 }

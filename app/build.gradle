@@ -73,5 +73,7 @@ dependencies {
     implementation 'com.shuyu:gsyVideoPlayer-java:6.0.3'
     implementation 'com.rmtheis:tess-two:9.0.0'
     //implementation 'com.shuyu:gsyVideoPlayer-armv7a:6.0.3'
+    implementation 'com.github.Ajian-studio:GADownloading:v1.0.2'
+    implementation 'com.liulishuo.okdownload:okdownload:1.0.5'
     testImplementation 'junit:junit:4.12'
 }

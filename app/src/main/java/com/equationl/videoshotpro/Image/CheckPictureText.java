@@ -13,6 +13,9 @@ import java.io.File;
 import java.util.ArrayList;
 
 public class CheckPictureText {
+    public final String DownloadTessdataUrl = "https://raw.githubusercontent.com/" +
+            "tesseract-ocr/tessdata/master/chi_sim.traineddata";
+    public final String TessDataMD5 = "6965CB3213EDD961CB16264E2EA45F5C";
     public final int StateCutPicture = 1000;
     public final int StateDelPicture = 1001;
 
@@ -40,12 +43,7 @@ public class CheckPictureText {
 
     Tools tool = new Tools();
     int i = 0;
-    Context context2;
 
-    public CheckPictureText(Context context) throws Exception{
-        initTess(context);
-        context2 = context;
-    }
 
     /**
     * 获取最终的字幕高度
@@ -73,12 +71,12 @@ public class CheckPictureText {
         bitmap = getBinaryzationPicture(bitmap);
 
         //**************DEBUG*******************************************************************
-        try{
+        /*try{
             tool.saveBitmap2File(bitmap, i+"", context2.getExternalFilesDir("test"), false, 100);
             i++;
         } catch (Exception e) {
             Log.e(TAG, Log.getStackTraceString(e));
-        }
+        }   */
         //**************END DEBUG***************************************************************
 
         Log.i(TAG, "origin bitmap width="+bitmap.getWidth()+", height="+bitmap.getHeight());
@@ -140,7 +138,7 @@ public class CheckPictureText {
         return text;
     }
 
-    private void initTess(Context context) throws Exception {
+    public void initTess(Context context) throws Exception {
         String PATH;
         //noinspection ConstantConditions
         PATH = context.getExternalFilesDir(null).getPath();
