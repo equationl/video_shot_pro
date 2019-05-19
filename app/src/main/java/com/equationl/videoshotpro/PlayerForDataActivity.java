@@ -73,6 +73,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
     String Do;
     String video_path;
     boolean isVideoPathHaveSpace;
+    boolean isABUseCloudCore;
     long dataTotalLength;
     int markTime[] = {0,0};
 
@@ -204,7 +205,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
                 btn_shot.setImageResource(R.drawable.marked);
                 externalCacheDir = getExternalCacheDir();
                 cpt = new CheckPictureText();
-                checkTessData();
+                initAutoBuild();
                 break;
         }
     }
@@ -453,6 +454,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
                         activity.gaDownloadingView.updateProgress(100);
                         activity.downloadDialog.dismiss();
                         activity.videoPlayer.onVideoResume();
+                        Toast.makeText(activity, R.string.player_toast_downloadData_download_success, Toast.LENGTH_SHORT).show();
                         break;
                     case HandlerDownLoadStatusOnError:
                         activity.gaDownloadingView.onFail();
@@ -470,15 +472,28 @@ public class PlayerForDataActivity extends AppCompatActivity {
         @Override
         public void run(){
             boolean isInit = false;
-            try {
-                cpt.initTess(getApplicationContext());
-                isInit = true;
-            } catch (Exception e) {
-                Log.e(TAG, Log.getStackTraceString(e));
-                Message msg = Message.obtain();
-                msg.obj = e;
-                msg.what = HandlerABonInitFail;
-                handler.sendMessage(msg);
+            if (isABUseCloudCore) {
+                if (cpt.initBaiduOcr(getApplicationContext())) {
+                    isInit = true;
+                }
+                else {
+                    Message msg = Message.obtain();
+                    msg.obj = "cloud core init fail!";
+                    msg.what = HandlerABonInitFail;
+                    handler.sendMessage(msg);
+                }
+            }
+            else {
+                try {
+                    cpt.initTess(getApplicationContext());
+                    isInit = true;
+                } catch (Exception e) {
+                    Log.e(TAG, Log.getStackTraceString(e));
+                    Message msg = Message.obtain();
+                    msg.obj = e;
+                    msg.what = HandlerABonInitFail;
+                    handler.sendMessage(msg);
+                }
             }
 
             if (!isInit) {
@@ -507,7 +522,14 @@ public class PlayerForDataActivity extends AppCompatActivity {
                     msg.what = HandlerABonProgress;
                     handler.sendMessage(msg);
                     Bitmap bitmap = tool.getBitmapFromFile(externalCacheDir.toString()+"/"+fileList[i]);
-                    int pictureState = cpt.isSingleSubtitlePicture(bitmap);
+                    int pictureState;
+                    if (isABUseCloudCore) {
+                        pictureState = cpt.isSingleSubtitlePicture(bitmap, getApplicationContext());
+                    }
+                    else {
+                        pictureState = cpt.isSingleSubtitlePicture(bitmap);
+                    }
+
                     if (pictureState == cpt.StateCutPicture) {
                         Log.i(TAG, fileList[i]+" is cut");
                         if (isFirst) {
@@ -704,6 +726,32 @@ public class PlayerForDataActivity extends AppCompatActivity {
                 Log.e(TAG, "checkTessData: ", e);
             }
             initDownloadView();
+        }
+    }
+
+    private void initAutoBuild() {
+        isABUseCloudCore = settings.getBoolean("isABUseCloudCore", false);
+        if (isABUseCloudCore) {
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.player_dialog_ABUseCloud_title)
+                    .setMessage(R.string.player_dialog_ABUseCloud_message)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.player_dialog_ABUseCloud_btn_ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                        }
+                    })
+                    .setNegativeButton(R.string.player_dialog_ABUseCloud_btn_cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            finish();
+                        }
+                    })
+                    .show();
+        }
+        else {
+            checkTessData();
         }
     }
 }

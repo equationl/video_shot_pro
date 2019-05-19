@@ -1,12 +1,22 @@
 package com.equationl.videoshotpro.Image;
 
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.baidu.ocr.sdk.OCR;
+import com.baidu.ocr.sdk.OnResultListener;
+import com.baidu.ocr.sdk.exception.OCRError;
+import com.baidu.ocr.sdk.model.AccessToken;
+import com.baidu.ocr.sdk.model.GeneralBasicParams;
+import com.baidu.ocr.sdk.model.GeneralParams;
+import com.baidu.ocr.sdk.model.GeneralResult;
+import com.baidu.ocr.sdk.model.Location;
+import com.baidu.ocr.sdk.model.Word;
+import com.baidu.ocr.sdk.model.WordSimple;
 import com.googlecode.tesseract.android.TessBaseAPI;
 
 import java.io.File;
@@ -35,14 +45,13 @@ public class CheckPictureText {
     * */
     private int subtitleHeight = 0;
 
-    private String lastText = null;
 
     private TessBaseAPI tessBaseAPI;
+    private Tools tool = new Tools();
+    private String lastText = null;
+    private boolean isFirstGetString = true;
 
     private final static  String TAG = "el, in CPT";
-
-    Tools tool = new Tools();
-    int i = 0;
 
 
     /**
@@ -69,15 +78,6 @@ public class CheckPictureText {
         //bitmap = Bitmap.createBitmap(bitmap, (int)(width*0.35), subtitleHeight, width-(int)(width*0.35)*2, height-subtitleHeight);
         bitmap = Bitmap.createBitmap(bitmap, 0, subtitleHeight, width, height-subtitleHeight);
         bitmap = getBinaryzationPicture(bitmap);
-
-        //**************DEBUG*******************************************************************
-        /*try{
-            tool.saveBitmap2File(bitmap, i+"", context2.getExternalFilesDir("test"), false, 100);
-            i++;
-        } catch (Exception e) {
-            Log.e(TAG, Log.getStackTraceString(e));
-        }   */
-        //**************END DEBUG***************************************************************
 
         Log.i(TAG, "origin bitmap width="+bitmap.getWidth()+", height="+bitmap.getHeight());
 
@@ -148,6 +148,154 @@ public class CheckPictureText {
             Log.e(TAG, "init tess fail");
             throw new Exception("init tess fail");
         }
+    }
+
+    public boolean initBaiduOcr(final Context context){
+        final boolean[] isSuccess = new boolean[1];
+        final boolean[] isFinish = {false};
+        OCR.getInstance(context).initAccessToken(new OnResultListener<AccessToken>() {
+            @Override
+            public void onResult(AccessToken result) {
+                // 调用成功，返回AccessToken对象
+                //String token = result.getAccessToken();
+                isSuccess[0] = true;
+                isFinish[0] = true;
+            }
+            @Override
+            public void onError(OCRError error) {
+                // 调用失败，返回OCRError子类SDKError对象
+                isSuccess[0] = false;
+                isFinish[0] = true;
+                Log.e(TAG, Log.getStackTraceString(error));
+            }
+        }, context);
+
+        while (!isFinish[0]) {
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                Log.e(TAG, "initBaiduOcr: ", e);
+            }
+        }
+
+        return isSuccess[0];
+    }
+
+    public int isSingleSubtitlePicture(Bitmap bitmap, Context context) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        if (subtitleHeight == 0) {
+            subtitleHeight = (int)(bitmap.getHeight() * 0.7);
+        }
+        bitmap = Bitmap.createBitmap(bitmap, 0, subtitleHeight, width, height-subtitleHeight);
+        File file=null;
+        try {
+            file = tool.saveBitmap2File(bitmap, "ocrCropCache", context.getExternalCacheDir());
+        } catch (Exception e) {
+            Log.e(TAG, "isSingleSubtitlePicture: ", e);
+        }
+        String text = getOCRStringByBaidu(context, file);
+
+        Log.i(TAG, "识别到文字："+text);
+
+        if (text==null || text.equals("")) {
+            Log.i(TAG, "不是字幕因为没有文字");
+            lastText = text;
+            return StateDelPicture;
+        }
+        else if (lastText != null) {
+            float similarity = levenshtein(text, lastText);
+            Log.i(TAG, "similarity="+similarity);
+            if (similarity > isSameSubtitleTolerance) {
+                Log.i(TAG, "不是字幕因为两张图片一样！");
+                lastText = text;
+                return StateDelPicture;
+            }
+        }
+
+        //使用带位置api再测一次（为了获取字幕位置）
+        if (isFirstGetString) {
+            getOCRStringByBaiduWithPosition(context, file);
+            isFirstGetString = false;
+        }
+
+        Log.i(TAG, "是非重复的字幕");
+        lastText = text;
+        return StateCutPicture;
+    }
+
+    private String getOCRStringByBaidu(final Context context, File file) {
+        final String[] text = new String[1];
+        final boolean[] isFinsh = {false};
+        GeneralBasicParams param = new GeneralBasicParams();
+        param.setDetectDirection(true);
+        param.setImageFile(file);
+
+        OCR.getInstance(context).recognizeGeneralBasic(param, new OnResultListener<GeneralResult>() {
+            StringBuffer sb = new StringBuffer();
+            @Override
+            public void onResult(GeneralResult result) {
+                for (WordSimple wordSimple : result.getWordList()) {
+                    sb.append(wordSimple.getWords());
+                }
+                text[0] = new String(sb);
+                isFinsh[0] = true;
+            }
+            @Override
+            public void onError(OCRError error) {
+                Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "getOCRStringByBaidu onError: ", error);
+            }
+        });
+
+        //傻逼吧，又把异步当同步用
+        //你才傻逼，老子强行同步不行？
+        while (!isFinsh[0]) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                Log.e(TAG, "getOCRStringByBaidu: ", e);
+            }
+        }
+        return text[0];
+    }
+
+    @SuppressWarnings("UnusedReturnValue")
+    private String getOCRStringByBaiduWithPosition(final Context context, File file) {
+        final String[] text = new String[1];
+        final boolean[] isFinsh = {false};
+        GeneralParams param = new GeneralParams();
+        param.setDetectDirection(true);
+        param.setImageFile(file);
+
+        OCR.getInstance(context).recognizeGeneral(param, new OnResultListener<GeneralResult>() {
+            StringBuffer sb = new StringBuffer();
+            @Override
+            public void onResult(GeneralResult result) {
+                for (WordSimple wordSimple : result.getWordList()) {
+                    Word word = (Word) wordSimple;
+                    Location location = word.getLocation();
+                    subtitleHeight = subtitleHeight+location.getTop()-5;
+                    sb.append(word.getWords());
+                }
+                text[0] = new String(sb);
+                isFinsh[0] = true;
+            }
+            @Override
+            public void onError(OCRError error) {
+                Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "getOCRStringByBaidu onError: ", error);
+            }
+        });
+
+        while (!isFinsh[0]) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                Log.e(TAG, "getOCRStringByBaidu: ", e);
+            }
+        }
+        return text[0];
     }
 
     /**

@@ -287,7 +287,7 @@
     <string name="main_toast_deleteDirectory_fail">删除文件夹出错</string>
     <string name="main_toast_deleteFile_fail">删除文件出错</string>
 
-    <string name="main_nav_text_autoBuild">智能合成（Alpha）</string>
+    <string name="main_nav_text_autoBuild">智能合成（测试）</string>
     <string name="main_nav_text_ffmpeg">FFmpeg命令行</string>
     <string name="main_nav_text_setting">设置</string>
     <string name="main_nav_text_help">使用说明</string>
@@ -344,6 +344,7 @@
     <string name="player_toast_shotGif_fail">截取动图失败！</string>
     <string name="player_toast_shotGif_success">动图已保存</string>
     <string name="player_toast_shotGif_start">正在截取动图：开始生成</string>
+    <string name="player_toast_shotGif_start_getPalettegen">正在截取动图：开始扫描视频</string>
     <string name="player_toast_mark_timeError">结束时间必须大于开始时间</string>
     <string name="player_toast_getVideoPath_fail">获取视频失败！请勿使用第三方程序选择视频！请尝试从系统文件选择视频！</string>
     <string name="player_toast_loadUriFail_invalid">抱歉，加载文件失败：文件失效，请重试！</string>
@@ -352,6 +353,7 @@
     <string name="player_toast_getWhatToDo_fail">未指定启动模式！</string>
     <string name="player_toast_AB_init_fail">初始化识别库失败：</string>
     <string name="player_toast_downloadData_fileImperfect">文件校验失败！</string>
+    <string name="player_toast_downloadData_download_success">下载成功！</string>
 
     <string name="player_text_shotStatus">%1$d/%2$d</string>
     <string name="player_text_savePicture_fail">保存截图失败</string>
@@ -363,9 +365,14 @@
     <string name="player_dialog_FBF_content_shot_success">截取成功！</string>
 
     <string name="player_dialog_downloadData_title">下载数据</string>
-    <string name="player_dialog_downloadData_message">使用该功能需要下载大约40MB的数据包，是否立即下载？</string>
+    <string name="player_dialog_downloadData_message">使用该功能需要下载大约40MB的离线数据包，是否立即下载？</string>
     <string name="player_dialog_downloadData_btn_ok">下载</string>
     <string name="player_dialog_downloadData_btn_cancel">取消</string>
+
+    <string name="player_dialog_ABUseCloud_title">使用云端引擎</string>
+    <string name="player_dialog_ABUseCloud_message">使用云端引擎进行识别时会上传您的每张截图以用于分析，我们保证不会保存您的数据，如您依然介意，请切换至离线引擎使用。     注意：因为云端引擎API有每日调用次数限制，所以可能会出现无法使用的问题。</string>
+    <string name="player_dialog_ABUseCloud_btn_ok">继续</string>
+    <string name="player_dialog_ABUseCloud_btn_cancel">取消</string>
 
 
     <string name="player_dialog_AB_title">正在识别图片……</string>
@@ -476,6 +483,11 @@
     <string name="pref_edit_AllowCheckBlackLines_title">最少连续黑边数</string>
     <string name="pref_edit_AllowNotBlackNums_default">20</string>
     <string name="pref_edit_AllowCheckBlackLines_default">10</string>
+
+    <string name="pref_category_title_AutoBuild">智能合成设置</string>
+    <string name="pref_description_ABUseCloudCore">是否使用云端引擎代替本地离线识别库，开启后将会大幅提高识别正确率，但会上传截取的图片至云端进行分析</string>
+    <string name="pref_title_ABUseCloudCore">启用云端引擎</string>
+
 
     <string name="pref_category_title_PlayVideo">视频播放相关设置</string>
     <string name="pref_edit_gestureSensibility_title">手势灵敏度</string>
@@ -645,5 +657,4 @@
     <string name="chooseBest_dialog_deleteAll_content">您确定一张都不保存吗？</string>
     <string name="chooseBest_dialog_deleteAll_btn_ok">是的</string>
     <string name="chooseBest_dialog_deleteAll_btn_cancel">不是</string>
-    <string name="player_toast_shotGif_start_getPalettegen">正在截取动图：开始扫描视频</string>
 </resources>

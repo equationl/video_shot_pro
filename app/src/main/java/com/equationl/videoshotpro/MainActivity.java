@@ -197,42 +197,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             //showGuide();
         }
 
-        else {
-            //FIXME 仅在该版本做统计
-            if (sp_init.getBoolean("YWRkJTIwYWQ2", true)) {
-                new AlertDialog.Builder(this)
-                        .setTitle("邀请参加调查")
-                        .setMessage("亲爱的用户您好，为了能给您带来更好的使用体验，我们希望能占用您1分钟的时间完成一个问卷调查。")
-                        .setPositiveButton("好的", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                SharedPreferences.Editor editor = sp_init.edit();
-                                editor.putBoolean("YWRkJTIwYWQ2", false);
-                                editor.apply();
-                                Intent intent = new Intent();
-                                //Intent intent = new Intent(Intent.ACTION_VIEW,uri);
-                                intent.setAction("android.intent.action.VIEW");
-                                Uri content_url = Uri.parse("https://www.wjx.cn/jq/37542400.aspx");
-                                intent.setData(content_url);
-                                startActivity(intent);
-                            }
-                        })
-                        .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) { }
-                        })
-                        .setNeutralButton("不再提示", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                SharedPreferences.Editor editor = sp_init.edit();
-                                editor.putBoolean("YWRkJTIwYWQ2", false);
-                                editor.apply();
-                            }
-                        }).setCancelable(false).show();
-            }
-        }
-
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     != PackageManager.PERMISSION_GRANTED) {

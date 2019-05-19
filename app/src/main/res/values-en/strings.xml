@@ -457,4 +457,21 @@
     <string name="pref_title_isShotHighQualityGif">Shot to high quality gif</string>
     <string name="main_toast_deleteDirectory_fail">Delete directory fail</string>
     <string name="main_toast_deleteFile_fail">Delete file fail</string>
+    <string name="main_nav_text_autoBuild">Smart Build (Beta)</string>
+    <string name="player_toast_AB_init_fail">Initialization of the recognition library failed:</string>
+    <string name="player_toast_downloadData_fileImperfect">File verification failed!</string>
+    <string name="player_toast_downloadData_download_success">Download success!</string>
+    <string name="player_dialog_downloadData_title">Download Data</string>
+    <string name="player_dialog_downloadData_message">To use this feature, you need to download about 40MB of offline data packets. Do you want to download them now?</string>
+    <string name="player_dialog_downloadData_btn_ok">Download</string>
+    <string name="player_dialog_downloadData_btn_cancel">Cancel</string>
+    <string name="player_dialog_ABUseCloud_title">Use the cloud engine</string>
+    <string name="player_dialog_ABUseCloud_message">When using the cloud engine for recognition, each of your screenshots will be uploaded for analysis. We guarantee that your data will not be saved. If you still mind, please switch to the offline engine. Note: Because the Cloud Engine API has a daily call limit, there may be issues that are not available.</string>
+    <string name="player_dialog_ABUseCloud_btn_ok">Continue</string>
+    <string name="player_dialog_ABUseCloud_btn_cancel">Cancel</string>
+    <string name="player_dialog_AB_title">Identifying images...</string>
+    <string name="player_dialog_AB_content_shot_progress">Processing %1$d image...</string>
+    <string name="pref_category_title_AutoBuild">Smart Build Setting</string>
+    <string name="pref_title_ABUseCloudCore">Enable cloud engine</string>
+    <string name="pref_description_ABUseCloudCore">Whether to use the cloud engine instead of the local offline recognition library, when opened, it will greatly improve the recognition accuracy rate, but will upload the captured image to the cloud for analysis.</string>
 </resources>
