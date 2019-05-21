@@ -12,23 +12,21 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 
 import com.equationl.videoshotpro.Adapter.ChooseBestAdapter;
 import com.equationl.videoshotpro.Image.Tools;
-import com.equationl.videoshotpro.utils.GlideSimpleLoader;
-import com.github.ielse.imagewatcher.ImageWatcherHelper;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import cc.shinichi.library.ImagePreview;
 
 public class ChooseBestPictureActivity extends AppCompatActivity {
     String filePath;
@@ -38,7 +36,6 @@ public class ChooseBestPictureActivity extends AppCompatActivity {
     RecyclerView mRecyclerView;
     RecyclerView.LayoutManager mLayoutManager;
     private ChooseBestAdapter mAdapter;
-    ImageWatcherHelper vImageWatcher;
 
     private static final String TAG = "EL,In CBPA";
 
@@ -49,7 +46,6 @@ public class ChooseBestPictureActivity extends AppCompatActivity {
 
         initLayout();
         initRecyclerView();
-        initImageWatcher();
     }
 
     private void initLayout() {
@@ -66,10 +62,13 @@ public class ChooseBestPictureActivity extends AppCompatActivity {
         Intent intent = getIntent();
         filePath = intent.getStringExtra("filePath");
 
+        final List<String> imageList = new ArrayList<>();
+
         String fileNames[] = tool.getFileOrderByName(filePath, 1);
         for (String name : fileNames) {
             imgData.add(filePath+name);
             imgDataUri.add(Uri.parse(filePath+name));
+            imageList.add(filePath+name);
         }
 
         mRecyclerView = findViewById(R.id.chooseBest_rv);
@@ -86,10 +85,17 @@ public class ChooseBestPictureActivity extends AppCompatActivity {
         mAdapter.setOnItemClickListener(new ChooseBestAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                ImageView imageView = view.findViewById(R.id.chooseBest_item_imageView);
+                /*ImageView imageView = view.findViewById(R.id.chooseBest_item_imageView);
                 SparseArray<ImageView> imageGroupList = new SparseArray<>();
                 imageGroupList.put(position, imageView);
-                vImageWatcher.show(imageView, imageGroupList, imgDataUri);
+                vImageWatcher.show(imageView, imageGroupList, imgDataUri);   */
+                ImagePreview.getInstance()
+                        .setContext(ChooseBestPictureActivity.this)
+                        .setEnableDragClose(true)
+                        .setShowDownButton(false)
+                        .setIndex(position)
+                        .setImageList(imageList)
+                        .start();
             }
 
             @Override
@@ -97,12 +103,6 @@ public class ChooseBestPictureActivity extends AppCompatActivity {
         });
 
         mRecyclerView.setAdapter(mAdapter);
-    }
-
-    private void initImageWatcher() {
-        vImageWatcher = ImageWatcherHelper.with(this, new GlideSimpleLoader())
-                .setTranslucentStatus(0)
-                .setErrorImageRes(R.mipmap.error_picture);
     }
 
     private void clickSaveMenu() {
@@ -172,11 +172,8 @@ public class ChooseBestPictureActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (!vImageWatcher.handleBackPressed()) {    //没有打开预览图片
-                finish();
-                return true;
-            }
-            return false;
+            finish();
+            return true;
         }
         return super.onKeyDown(keyCode, event);
     }

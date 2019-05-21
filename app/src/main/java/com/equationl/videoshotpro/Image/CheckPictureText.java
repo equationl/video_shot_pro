@@ -188,6 +188,7 @@ public class CheckPictureText {
             subtitleHeight = (int)(bitmap.getHeight() * 0.7);
         }
         bitmap = Bitmap.createBitmap(bitmap, 0, subtitleHeight, width, height-subtitleHeight);
+        bitmap = getBinaryzationPicture(bitmap);
         File file=null;
         try {
             file = tool.saveBitmap2File(bitmap, "ocrCropCache", context.getExternalCacheDir());
@@ -235,10 +236,15 @@ public class CheckPictureText {
             StringBuffer sb = new StringBuffer();
             @Override
             public void onResult(GeneralResult result) {
-                for (WordSimple wordSimple : result.getWordList()) {
+                /*for (WordSimple wordSimple : result.getWordList()) {
                     sb.append(wordSimple.getWords());
+                }*/
+                //text[0] = new String(sb);
+                try {
+                    text[0] = result.getWordList().get(0).getWords();   //FIXME 只获取第一行字幕，避免多行字幕干扰结果
+                } catch (IndexOutOfBoundsException e) {
+                    Log.e(TAG, "onResult: ", e);
                 }
-                text[0] = new String(sb);
                 isFinsh[0] = true;
             }
             @Override
@@ -272,10 +278,16 @@ public class CheckPictureText {
             StringBuffer sb = new StringBuffer();
             @Override
             public void onResult(GeneralResult result) {
+                boolean isFirst = true;
                 for (WordSimple wordSimple : result.getWordList()) {
                     Word word = (Word) wordSimple;
-                    Location location = word.getLocation();
-                    subtitleHeight = subtitleHeight+location.getTop()-5;
+                    if (isFirst) {  //避免出现双语字幕时将高度调整到第二行字幕位置
+                        Location location = word.getLocation();
+                        subtitleHeight = subtitleHeight+location.getTop()-5;
+                        Log.i(TAG, "onResult: location.top="+ location.getTop());
+                        Log.i(TAG, "onResult: 改变字幕高度为 "+subtitleHeight);
+                        isFirst = false;
+                    }
                     sb.append(word.getWords());
                 }
                 text[0] = new String(sb);

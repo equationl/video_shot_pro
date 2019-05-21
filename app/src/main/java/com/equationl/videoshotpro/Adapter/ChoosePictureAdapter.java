@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,20 +28,17 @@ public class ChoosePictureAdapter extends BaseAdapter  implements OnItemMovedLis
 
     private List<Bitmap> pictures;   //用于更新UI
     private List<String> imagePaths;   //用于将正确的顺序返回给Activity
-    private List<Uri> imagesUri;     //用于预览图片
 
     private GridView mGridView;
     public boolean inEditMode = false;
 
 
-    public ChoosePictureAdapter( List<Bitmap> images, String[] files, List <Uri> imagesUri, Context context) {
+    public ChoosePictureAdapter( List<Bitmap> images, List<String> files, Context context) {
         super();
         this.context = context;
 
-        List list = Arrays.asList(files);
-        imagePaths = new ArrayList(list);
+        imagePaths = files;
         pictures = images;
-        this.imagesUri = imagesUri;
     }
 
     public void setInEditMode(boolean inEditMode) {
@@ -52,10 +48,6 @@ public class ChoosePictureAdapter extends BaseAdapter  implements OnItemMovedLis
 
     public List<String> getImagePaths() {
         return imagePaths;
-    }
-
-    public List<Uri> getImagesUri() {
-        return imagesUri;
     }
 
     @Override
@@ -146,8 +138,6 @@ public class ChoosePictureAdapter extends BaseAdapter  implements OnItemMovedLis
         imagePaths.add(to, s);
         Bitmap b =  pictures.remove(from);
         pictures.add(to, b);
-        Uri u = imagesUri.remove(from);
-        imagesUri.add(to, u);
     }
 
     @Override
@@ -176,13 +166,12 @@ public class ChoosePictureAdapter extends BaseAdapter  implements OnItemMovedLis
         int position = index + mGridView.getFirstVisiblePosition();
         Tools tool = new Tools();
         try {
-            tool.deleteFile(new File(ChooseActivity.instance.getExternalCacheDir().toString()+"/"+imagePaths.get(position)));
+            tool.deleteFile(new File(imagePaths.get(position)));
         } catch (IOException e) {
             Log.e(TAG, Log.getStackTraceString(e));
         }
         imagePaths.remove(position);
         pictures.remove(position);
-        imagesUri.remove(position);
         notifyDataSetChanged();
         mPictureDeleteListener.onDelete(position);
     }

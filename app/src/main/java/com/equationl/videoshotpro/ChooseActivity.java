@@ -1,5 +1,6 @@
 package com.equationl.videoshotpro;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -8,7 +9,6 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.media.MediaScannerConnection;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AlertDialog;
@@ -27,9 +27,6 @@ import android.widget.Toast;
 
 import com.equationl.videoshotpro.Adapter.ChoosePictureAdapter;
 import com.equationl.videoshotpro.Image.Tools;
-import com.equationl.videoshotpro.utils.GlideSimpleLoader;
-import com.github.ielse.imagewatcher.ImageWatcher;
-import com.github.ielse.imagewatcher.ImageWatcherHelper;
 import com.huxq17.handygridview.HandyGridView;
 import com.huxq17.handygridview.listener.OnItemCapturedListener;
 import com.tencent.bugly.crashreport.CrashReport;
@@ -40,7 +37,10 @@ import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
+import cc.shinichi.library.ImagePreview;
+import cc.shinichi.library.view.listener.OnBigImageLongClickListener;
 import me.toptas.fancyshowcase.FancyShowCaseQueue;
 import me.toptas.fancyshowcase.FancyShowCaseView;
 
@@ -49,20 +49,16 @@ public class ChooseActivity extends AppCompatActivity implements ChoosePictureAd
     HandyGridView gridView;
     List<Bitmap> images = new ArrayList<>();
     List<String> imagePaths = new ArrayList<>();
-    List<Uri> fullFiles = new ArrayList<>();
     String[] files;
     ProgressDialog dialog;
     Resources res;
     Tools tool = new Tools();
     View view;
+    File cacheDir;
     ChoosePictureAdapter pictureAdapter;
     SharedPreferences sp_init;
     Boolean isFromExtra;
     boolean isEditMode = false;
-
-    ImageWatcherHelper vImageWatcher;
-    ImageWatcher.OnPictureLongPressListener mOnPictureLongPressListener;
-
 
     private final MyHandler handler = new MyHandler(this);
 
@@ -71,6 +67,7 @@ public class ChooseActivity extends AppCompatActivity implements ChoosePictureAd
     private final static int HandlerStatusLoadImageNext = 1000;
     private final static int HandlerStatusLoadImageDone = 1001;
 
+    @SuppressLint("StaticFieldLeak")
     public static ChooseActivity instance = null;   //FIXME  暂时这样吧，实在找不到更好的办法了
 
     @Override
@@ -78,7 +75,7 @@ public class ChooseActivity extends AppCompatActivity implements ChoosePictureAd
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose);
 
-        gridView=(HandyGridView) findViewById(R.id.choosePicture_handyGridView);
+        gridView = findViewById(R.id.choosePicture_handyGridView);
 
         res = getResources();
 
@@ -93,7 +90,16 @@ public class ChooseActivity extends AppCompatActivity implements ChoosePictureAd
         }
 
 
-        String filepath = getExternalCacheDir().toString();
+        String filepath = null;
+        cacheDir = getExternalCacheDir();
+        if (cacheDir != null) {
+            filepath = cacheDir.toString();
+        }
+        else {
+            Toast.makeText(this, R.string.chooseActivity_toast_getCacheDir_fail, Toast.LENGTH_SHORT).show();
+            finish();
+        }
+
         files = tool.getFileOrderByName(filepath, 1);
 
         dialog = new ProgressDialog(this);
@@ -106,8 +112,6 @@ public class ChooseActivity extends AppCompatActivity implements ChoosePictureAd
         dialog.show();
         dialog.setProgress(0);
         new Thread(new LoadImageThread()).start();
-
-        initPictureWatcher();
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -126,8 +130,7 @@ public class ChooseActivity extends AppCompatActivity implements ChoosePictureAd
                         .titleStyle(R.style.GuideViewTextBlank, Gravity.CENTER)
                         .build()
                         .show();
-                fullFiles = pictureAdapter.getImagesUri();
-                vImageWatcher.show(imageview, imageGroupList, fullFiles);
+                showPicture(imagePaths, position);
             }
         });
 
@@ -158,7 +161,7 @@ public class ChooseActivity extends AppCompatActivity implements ChoosePictureAd
     private class LoadImageThread implements Runnable {
         @Override
         public void run() {
-            String path = getExternalCacheDir().toString();
+            String path = cacheDir.toString();
             for (int i = 0; i < files.length; i++) {
                 String file = path+"/"+files[i];
                 Bitmap bitmap = tool.getBitmapThumbnailFromFile(file, 128, 160);
@@ -166,7 +169,7 @@ public class ChooseActivity extends AppCompatActivity implements ChoosePictureAd
                     bitmap = tool.drawableToBitmap(R.mipmap.error_picture, ChooseActivity.this);
                 }
                 images.add(bitmap);
-                fullFiles.add(Uri.parse(file));
+                imagePaths.add(file);
                 handler.sendEmptyMessage(HandlerStatusLoadImageNext);
             }
             handler.sendEmptyMessage(HandlerStatusLoadImageDone);
@@ -177,7 +180,7 @@ public class ChooseActivity extends AppCompatActivity implements ChoosePictureAd
         private final WeakReference<ChooseActivity> mActivity;
 
         private MyHandler(ChooseActivity activity) {
-            mActivity = new WeakReference<ChooseActivity>(activity);
+            mActivity = new WeakReference<>(activity);
         }
 
         @Override
@@ -189,7 +192,7 @@ public class ChooseActivity extends AppCompatActivity implements ChoosePictureAd
                         activity.dialog.setProgress(activity.dialog.getProgress()+1);
                         break;
                     case HandlerStatusLoadImageDone:
-                        activity.pictureAdapter = new ChoosePictureAdapter(activity.images, activity.files, activity.fullFiles, activity);
+                        activity.pictureAdapter = new ChoosePictureAdapter(activity.images, activity.imagePaths, activity);
                         activity.pictureAdapter.setOnPictureDeleteListener(activity);
                         activity.gridView.setAdapter(activity.pictureAdapter);
                         activity.gridView.setMode(HandyGridView.MODE.LONG_PRESS);
@@ -283,54 +286,54 @@ public class ChooseActivity extends AppCompatActivity implements ChoosePictureAd
         return super.onOptionsItemSelected(item);
     }
 
-    private void initPictureWatcher() {
-        mOnPictureLongPressListener = new ImageWatcher.OnPictureLongPressListener() {
-            @Override
-            public void onPictureLongPress(ImageView v, final Uri url, final int pos) {
-                //Toast.makeText(MainActivity.this, "call long press:"+url, Toast.LENGTH_SHORT).show();
-                String[] items;
-                //Log.i(TAG, "in longPress path= "+new File(url.toString()).getParent()+" RootPath= "+tool.getSaveRootPath());
-                items = new String[] {"保存"};
-                AlertDialog.Builder builder = new AlertDialog.Builder(ChooseActivity.this);
-                builder.setItems(items, new DialogInterface.OnClickListener() {
+    private void showPicture(final List<String> files, int position) {
+        ImagePreview.getInstance()
+                .setContext(ChooseActivity.this)
+                .setEnableDragClose(true)
+                .setShowDownButton(false)
+                .setIndex(position)
+                .setImageList(files)
+                .setBigImageLongClickListener(new OnBigImageLongClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        switch (i) {
-                            case 0:
-                                SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
-                                String date    =    sDateFormat.format(new    java.util.Date());
-                                date += "-by_EL."+url.toString().substring(url.toString().lastIndexOf(".") + 1);
-                                String savePath =  tool.getSaveRootPath() + "/" + date;
-                                try {
-                                    tool.copyFile(new File(url.toString()), new File(savePath));
-                                    MediaScannerConnection.scanFile(ChooseActivity.this, new String[]{savePath}, null, null);
-                                    Toast.makeText(ChooseActivity.this, R.string.choosePicture_toast_saveSuccess, Toast.LENGTH_SHORT).show();
-                                } catch (IOException e) {
-                                    Toast.makeText(ChooseActivity.this, R.string.choosePicture_toast_saveFail, Toast.LENGTH_SHORT).show();
-                                }
-                                break;
-                        }
-                    }
-                });
-                builder.create();
-                builder.show();
-            }
-        };
+                    public boolean onLongClick(final View view, final int pos) {
+                        final String file = files.get(pos);
+                        String[] items;
+                        items = new String[] {"保存"};
+                        AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+                        builder.setItems(items, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                            switch (i) {
+                                case 0:
+                                    SimpleDateFormat sDateFormat    =   new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss", Locale.CHINA);
+                                    String date    =    sDateFormat.format(new    java.util.Date());
+                                    date += "-by_EL."+file.substring(file.lastIndexOf(".") + 1);
+                                    String savePath =  tool.getSaveRootPath() + "/" + date;
+                                    try {
+                                        tool.copyFile(new File(file), new File(savePath));
+                                        MediaScannerConnection.scanFile(ChooseActivity.this, new String[]{savePath}, null, null);
+                                        Toast.makeText(ChooseActivity.this, R.string.choosePicture_toast_saveSuccess, Toast.LENGTH_SHORT).show();
+                                    } catch (IOException e) {
+                                        Toast.makeText(ChooseActivity.this, R.string.choosePicture_toast_saveFail, Toast.LENGTH_SHORT).show();
+                                    }
+                                    break;
+                            }
+                            }
+                        });
+                        builder.create();
+                        builder.show();
 
-        vImageWatcher = ImageWatcherHelper.with(this, new GlideSimpleLoader())
-                .setTranslucentStatus(0)
-                .setErrorImageRes(R.mipmap.error_picture)
-                .setOnPictureLongPressListener(mOnPictureLongPressListener);
+                        return false;
+                    }
+                })
+                .start();
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (!vImageWatcher.handleBackPressed()) {    //没有打开预览图片
-                finish();
-                return true;
-            }
-            return false;
+            finish();
+            return true;
         }
         return super.onKeyDown(keyCode, event);
     }

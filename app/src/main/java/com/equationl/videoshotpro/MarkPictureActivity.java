@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
@@ -27,21 +26,18 @@ import android.widget.Toast;
 
 import com.equationl.videoshotpro.Adapter.markPictureAdapter;
 import com.equationl.videoshotpro.Image.Tools;
-import com.equationl.videoshotpro.utils.GlideSimpleLoader;
 import com.equationl.videoshotpro.utils.Utils;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
-import com.github.ielse.imagewatcher.ImageWatcher;
-import com.github.ielse.imagewatcher.ImageWatcherHelper;
 import com.huxq17.swipecardsview.SwipeCardsView;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
+import cc.shinichi.library.ImagePreview;
 import me.toptas.fancyshowcase.DismissListener;
 import me.toptas.fancyshowcase.FancyShowCaseQueue;
 import me.toptas.fancyshowcase.FancyShowCaseView;
@@ -66,9 +62,6 @@ public class MarkPictureActivity extends AppCompatActivity {
 
     FloatingActionButton fab_undo, fab_delete, fab_addText;
     FloatingActionsMenu fab_menu;
-
-    ImageWatcherHelper vImageWatcher;
-    ImageWatcher.OnPictureLongPressListener mOnPictureLongPressListener;
 
     private final MyHandler handler = new MyHandler(this);
 
@@ -280,7 +273,7 @@ public class MarkPictureActivity extends AppCompatActivity {
                 String extension = settings.getBoolean("isShotToJpg", true) ? "jpg" : "png";
                 String file = path + "/" + index + "." + extension;
                 Log.i(TAG, file);
-                vImageWatcher.show(imageview, imageGroupList, Collections.singletonList(Uri.parse(file)));
+                showPicture(file);
             }
         });
     }
@@ -308,19 +301,9 @@ public class MarkPictureActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-            if (vImageWatcher != null) {
-                if (!vImageWatcher.handleBackPressed()) {    //没有打开预览图片
-                    utils.finishActivity(ChooseActivity.instance);
-                    finish();
-                    return true;
-                }
-            }
-            else {
-                utils.finishActivity(ChooseActivity.instance);
-                finish();
-                return true;
-            }
-            return false;
+            utils.finishActivity(ChooseActivity.instance);
+            finish();
+            return true;
         }
         return super.onKeyDown(keyCode, event);
     }
@@ -565,26 +548,20 @@ public class MarkPictureActivity extends AppCompatActivity {
         mQueue.show();
     }
 
-    private void initPictureWathcher() {
-        Log.i(TAG, "call initPictureWathcher()");
-        mOnPictureLongPressListener = new ImageWatcher.OnPictureLongPressListener() {
-            @Override
-            public void onPictureLongPress(ImageView v, final Uri url, final int pos) {
-            }
-        };
-
-        vImageWatcher = ImageWatcherHelper.with(this, new GlideSimpleLoader())
-                .setTranslucentStatus(0)
-                .setErrorImageRes(R.mipmap.error_picture)
-                .setOnPictureLongPressListener(mOnPictureLongPressListener);
-    }
-
     private void init() {
         initCardView();
         showCardView();
-        initPictureWathcher();
     }
 
+    private void showPicture(String file) {
+        ImagePreview.getInstance()
+                .setContext(MarkPictureActivity.this)
+                .setEnableDragClose(true)
+                .setShowDownButton(false)
+                .setIndex(0)
+                .setImage(file)
+                .start();
+    }
 
     @Override
     protected void onDestroy() {

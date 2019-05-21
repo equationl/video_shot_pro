@@ -438,6 +438,8 @@
     <string name="title_activity_choose">确定图片顺序</string>
     <string name="chooseActivity_ProgressDialog_loadImage_title">请稍候&#8230;</string>
     <string name="chooseActivity_ProgressDialog_loadImage_content">正在生成缩略图&#8230;</string>
+    <string name="chooseActivity_toast_getCacheDir_fail">获取缓存文件目录失败！</string>
+
     <string name="choosePicture_toast_saveFail">保存失败</string>
     <string name="choosePicture_toast_saveSuccess">保存成功</string>
     <string name="choosePicture_toast_deletePictureFail">删除图片失败，请重试！</string>

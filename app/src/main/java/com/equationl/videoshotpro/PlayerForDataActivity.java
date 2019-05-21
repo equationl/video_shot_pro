@@ -732,7 +732,8 @@ public class PlayerForDataActivity extends AppCompatActivity {
     private void initAutoBuild() {
         isABUseCloudCore = settings.getBoolean("isABUseCloudCore", false);
         if (isABUseCloudCore) {
-            new AlertDialog.Builder(this)
+            //FIXME
+            /*new AlertDialog.Builder(this)
                     .setTitle(R.string.player_dialog_ABUseCloud_title)
                     .setMessage(R.string.player_dialog_ABUseCloud_message)
                     .setCancelable(false)
@@ -748,7 +749,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
                             finish();
                         }
                     })
-                    .show();
+                    .show();   */
         }
         else {
             checkTessData();
