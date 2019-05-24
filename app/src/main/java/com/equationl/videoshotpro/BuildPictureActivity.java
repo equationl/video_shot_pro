@@ -142,6 +142,7 @@ public class BuildPictureActivity extends AppCompatActivity {
             finish();
         }
         if (bm_test == null) {
+            Log.e(TAG, "onCreate: bm is null!");
             Toast.makeText(this, R.string.buildPicture_toast_copyPreview_fail, Toast.LENGTH_SHORT).show();
             finish();
         }

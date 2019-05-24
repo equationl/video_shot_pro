@@ -847,16 +847,20 @@ public class Tools{
     /**
      * 将缓存的图片顺序重置为用户自定义顺序
      *
-     * @param newFileName 新的图片图片顺序
+     * @param newFile 新的图片图片顺序（包含完整的文件路径以及文件名）
      * @param context Context
      * */
-    public void sortCachePicture(List <String> newFileName, Context context) {
-        rename(newFileName, context);
+    public void sortCachePicture(List <String> newFile, Context context) {
         String path = context.getExternalCacheDir().toString();
-        for (int i=0; i<newFileName.size(); i++) {
-            String newFile = path+"/"+newFileName.get(i);
-            renameFile(newFile+"_c",
-                    path+"/"+i+"."+newFileName.get(i).split("\\.")[1]);
+        int newFileCount = newFile.size();
+
+        rename(newFileCount, context);
+        for (int i=0; i<newFileCount; i++) {
+            String file = newFile.get(i);
+            String suffix = new File(file).getName().split("\\.")[1];
+            String newFilePath = path + "/" + i + "." + suffix;
+            renameFile(file+"_c",
+                    newFilePath);
         }
     }
 
@@ -864,19 +868,19 @@ public class Tools{
     * 避免重名
      *
     * */
-    private void rename(List <String> newFileName, Context context) {
+    private void rename(int newFileCount, Context context) {
         String[] files;
         String path = context.getExternalCacheDir().toString();
         files = getFileOrderByName(path, 1);
-        if (files.length != newFileName.size()) {
+        if (files.length != newFileCount) {
             Toast.makeText(context, "重命名文件错误：新旧文件数量不一致!", Toast.LENGTH_SHORT).show();
             Log.e(TAG, "重命名文件错误：新旧文件数量不一致");
             return;
         }
-        for (int i=0; i<newFileName.size(); i++) {
-            String oldFile = path+"/"+files[i]+"_c";
-            renameFile(path+"/"+files[i], oldFile);
-            Log.i(TAG, "t old:"+path+"/"+files[i]+" new"+oldFile);
+        for (int i=0; i<newFileCount; i++) {
+            String newFile = path+"/"+files[i]+"_c";
+            renameFile(path+"/"+files[i], newFile);
+            Log.i(TAG, "t old:"+path+"/"+files[i]+" new"+newFile);
         }
     }
 

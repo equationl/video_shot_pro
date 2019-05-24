@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cc.shinichi.library.ImagePreview;
+import cc.shinichi.library.glide.ImageLoader;
 
 public class ChooseBestPictureActivity extends AppCompatActivity {
     String filePath;
@@ -89,6 +90,7 @@ public class ChooseBestPictureActivity extends AppCompatActivity {
                 SparseArray<ImageView> imageGroupList = new SparseArray<>();
                 imageGroupList.put(position, imageView);
                 vImageWatcher.show(imageView, imageGroupList, imgDataUri);   */
+                ImageLoader.cleanDiskCache(getApplicationContext());
                 ImagePreview.getInstance()
                         .setContext(ChooseBestPictureActivity.this)
                         .setEnableDragClose(true)

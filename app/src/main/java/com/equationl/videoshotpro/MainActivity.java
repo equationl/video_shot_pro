@@ -80,6 +80,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cc.shinichi.library.ImagePreview;
+import cc.shinichi.library.glide.ImageLoader;
 import cc.shinichi.library.view.listener.OnBigImageLongClickListener;
 import me.solidev.loadmore.AutoLoadMoreAdapter;
 import me.toptas.fancyshowcase.FancyShowCaseQueue;
@@ -1147,6 +1148,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         RecyclerView.LayoutManager mLayoutManager;
         MainWaterFallAdapter mAdapter;
 
+        mLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        mAdapter = new MainWaterFallAdapter(this, waterFallList);
+        mAutoLoadMoreAdapter = new AutoLoadMoreAdapter(this, mAdapter);
+
         if (!isFirstBoot) {    //如果是第一次启动可能会因为初始化时缺少储存权限而闪退
             initWaterFallList();
         }
@@ -1159,8 +1164,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             data.isSelected = false;
             waterFallList.add(data);
         }
-        mLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
-        mAdapter = new MainWaterFallAdapter(this, waterFallList);
 
         mRecyclerView.setLayoutManager(mLayoutManager);
         //mRecyclerView.setAdapter(mAdapter);
@@ -1208,7 +1211,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        mAutoLoadMoreAdapter = new AutoLoadMoreAdapter(this, mAdapter);
         mAutoLoadMoreAdapter.setOnLoadListener(new AutoLoadMoreAdapter.OnLoadListener() {
             @Override
             public void onRetry() {
@@ -1317,6 +1319,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             data.isDirectory = false;
             data.isSelected = false;
             waterFallList.add(data);
+        }
+
+        if (files.length <= 10) {
+            mAutoLoadMoreAdapter.showLoadComplete();
         }
 
         int j = 10;
@@ -1536,6 +1542,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void showPicture(final String image) {
+        ImageLoader.cleanDiskCache(getApplicationContext());
         ImagePreview.getInstance()
                 .setContext(MainActivity.this)
                 .setEnableDragClose(true)
@@ -1569,6 +1576,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void showPicture(final List<String> fileList) {
+        ImageLoader.cleanDiskCache(getApplicationContext());
         ImagePreview.getInstance()
                 .setContext(MainActivity.this)
                 .setEnableDragClose(true)

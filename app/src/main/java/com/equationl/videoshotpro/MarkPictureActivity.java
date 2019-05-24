@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cc.shinichi.library.ImagePreview;
+import cc.shinichi.library.glide.ImageLoader;
 import me.toptas.fancyshowcase.DismissListener;
 import me.toptas.fancyshowcase.FancyShowCaseQueue;
 import me.toptas.fancyshowcase.FancyShowCaseView;
@@ -554,6 +555,7 @@ public class MarkPictureActivity extends AppCompatActivity {
     }
 
     private void showPicture(String file) {
+        ImageLoader.cleanDiskCache(getApplicationContext());
         ImagePreview.getInstance()
                 .setContext(MarkPictureActivity.this)
                 .setEnableDragClose(true)

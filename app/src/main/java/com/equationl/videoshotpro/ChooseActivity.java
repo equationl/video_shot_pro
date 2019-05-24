@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Locale;
 
 import cc.shinichi.library.ImagePreview;
+import cc.shinichi.library.glide.ImageLoader;
 import cc.shinichi.library.view.listener.OnBigImageLongClickListener;
 import me.toptas.fancyshowcase.FancyShowCaseQueue;
 import me.toptas.fancyshowcase.FancyShowCaseView;
@@ -162,8 +163,8 @@ public class ChooseActivity extends AppCompatActivity implements ChoosePictureAd
         @Override
         public void run() {
             String path = cacheDir.toString();
-            for (int i = 0; i < files.length; i++) {
-                String file = path+"/"+files[i];
+            for (String file1 : files) {
+                String file = path + "/" + file1;
                 Bitmap bitmap = tool.getBitmapThumbnailFromFile(file, 128, 160);
                 if (bitmap == null) {
                     bitmap = tool.drawableToBitmap(R.mipmap.error_picture, ChooseActivity.this);
@@ -287,6 +288,7 @@ public class ChooseActivity extends AppCompatActivity implements ChoosePictureAd
     }
 
     private void showPicture(final List<String> files, int position) {
+        ImageLoader.cleanDiskCache(this);
         ImagePreview.getInstance()
                 .setContext(ChooseActivity.this)
                 .setEnableDragClose(true)
