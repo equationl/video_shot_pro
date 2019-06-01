@@ -358,6 +358,7 @@
     <string name="player_text_shotStatus">%1$d/%2$d</string>
     <string name="player_text_savePicture_fail">保存截图失败</string>
     <string name="player_text_getCachePath_fail">获取缓存目录出错！</string>
+    <string name="player_text_download_progress">%1$s/%2$s</string>
 
     <string name="player_dialog_FBF_title">正在截取中……</string>
     <string name="player_dialog_FBF_content">截取已开始</string>

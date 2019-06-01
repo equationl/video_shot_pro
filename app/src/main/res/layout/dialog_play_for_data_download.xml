@@ -7,8 +7,8 @@
 
     <com.gastudio.downloadloadding.library.GADownloadingView
         android:id="@+id/player_progress_download"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
@@ -17,5 +17,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/player_progress_download_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/player_text_download_progress"
+        android:textColor="@color/white"
+        app:layout_constraintEnd_toEndOf="@+id/player_progress_download"
+        app:layout_constraintStart_toStartOf="@+id/player_progress_download"
+        app:layout_constraintTop_toBottomOf="@+id/player_progress_download" />
 
 </android.support.constraint.ConstraintLayout>

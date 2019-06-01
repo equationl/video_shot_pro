@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 
 public class Utils {
@@ -219,6 +220,19 @@ public class Utils {
                 }
             }
         }
+    }
+
+    public String bytesBeHuman(Long bytes) {
+        if (bytes <= 1024) {
+            return bytes+"BB";
+        }
+        if (bytes <= 1048576) {
+            return String.format(Locale.CHINA,"%.2fKB", bytes/1024.0);
+        }
+        if (bytes <= 1073741824) {
+            return String.format(Locale.CHINA,"%.2fMB", bytes/1048576.0);
+        }
+        return String.format(Locale.CHINA,"%.2fGB", bytes/1073741824.0);
     }
 
     private static String convertHashToString(byte[] md5Bytes) {

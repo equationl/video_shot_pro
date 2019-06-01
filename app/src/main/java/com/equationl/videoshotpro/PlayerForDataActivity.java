@@ -24,6 +24,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.equationl.videoshotpro.Image.CheckPictureText;
@@ -68,6 +69,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
     CheckPictureText cpt;
     AlertDialog downloadDialog;
     GADownloadingView gaDownloadingView;
+    TextView downloadViewText;
     ImageView btn_shot, btn_done;
 
     String Do;
@@ -446,8 +448,16 @@ public class PlayerForDataActivity extends AppCompatActivity {
 
                         break;
                     case HandlerDownLoadStatusOnProgress:
-                        int progress = (int)((double)msg.obj * 100);
+                        Bundle bundle1 = (Bundle) msg.obj;
+                        long dataTotalLength = bundle1.getLong("dataTotalLength", 0);
+                        long currentOffset = bundle1.getLong("currentOffset", 0);
+                        int progress = (int)(currentOffset*100.0/dataTotalLength);
+                        String progressText = String.format(
+                                activity.res.getString(R.string.player_text_download_progress),
+                                activity.utils.bytesBeHuman(currentOffset),
+                                activity.utils.bytesBeHuman(dataTotalLength));
                         activity.gaDownloadingView.updateProgress(progress);
+                        activity.downloadViewText.setText(progressText);
                         Log.i(TAG, "progress="+progress);
                         break;
                     case HandlerDownLoadStatusOnCompleted:
@@ -611,6 +621,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
     }
 
     private void downloadFile(File file) {
+        //TODO 把下载实时进度（xx/45mb）也加上
         DownloadListener4WithSpeed listener = new DownloadListener4WithSpeed() {
             @Override
             public void taskStart(@NonNull DownloadTask task) {
@@ -640,9 +651,12 @@ public class PlayerForDataActivity extends AppCompatActivity {
             @Override
             public void progress(@NonNull DownloadTask task, long currentOffset, @NonNull SpeedCalculator taskSpeed) {
                 Log.i(TAG, "total="+dataTotalLength+" current="+currentOffset);
+                Bundle bundle = new Bundle();
+                bundle.putLong("dataTotalLength", dataTotalLength);
+                bundle.putLong("currentOffset", currentOffset);
                 Message msg = Message.obtain();
                 msg.what = HandlerDownLoadStatusOnProgress;
-                msg.obj = (double)currentOffset/dataTotalLength;
+                msg.obj = bundle;
                 handler.sendMessage(msg);
             }
 
@@ -700,6 +714,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
 
     private void showDownloadDialog() {
         View view = View.inflate(this, R.layout.dialog_play_for_data_download, null);
+        downloadViewText = view.findViewById(R.id.player_progress_download_text);
         gaDownloadingView = view.findViewById(R.id.player_progress_download);
         gaDownloadingView.performAnimation();
         downloadDialog = new AlertDialog.Builder(this)
