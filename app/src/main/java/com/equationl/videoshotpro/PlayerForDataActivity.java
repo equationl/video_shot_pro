@@ -2,6 +2,7 @@ package com.equationl.videoshotpro;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -56,7 +57,7 @@ import java.util.Locale;
 import java.util.Map;
 
 public class PlayerForDataActivity extends AppCompatActivity {
-    SharedPreferences settings;
+    SharedPreferences settings, sp_init;
     StandardGSYVideoPlayer videoPlayer;
     OrientationUtils orientationUtils;
     ProgressDialog dialog;
@@ -77,7 +78,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
     boolean isVideoPathHaveSpace;
     boolean isABUseCloudCore;
     long dataTotalLength;
-    int markTime[] = {0,0};
+    int[] markTime = {0, 0};
 
     private final MyHandler handler = new MyHandler(this);
 
@@ -135,6 +136,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
         tool = new Tools();
         ffmpeg = FFmpeg.getInstance(this);
         settings = PreferenceManager.getDefaultSharedPreferences(this);
+        sp_init = getSharedPreferences("init", Context.MODE_PRIVATE);
         res = getResources();
 
         video_uri = getIntent().getData();
@@ -206,7 +208,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
                 btn_done.setVisibility(View.INVISIBLE);
                 btn_shot.setImageResource(R.drawable.marked);
                 externalCacheDir = getExternalCacheDir();
-                cpt = new CheckPictureText();
+                cpt = new CheckPictureText(this);
                 initAutoBuild();
                 break;
         }
@@ -331,7 +333,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
         Log.i(TAG, "cmd="+text);
         FFmpeg ffmpeg = FFmpeg.getInstance(getApplicationContext());
         if (!ffmpeg.isFFmpegCommandRunning()) {
-            String cmd[] = text.split(" ");
+            String[] cmd = text.split(" ");
             if (isVideoPathHaveSpace) {   //FIXME 现在的索引确定是5，小心以后变化啊
                 cmd[5] = cmd[5].replaceAll("_eltemp_", " ");
             }
@@ -422,13 +424,14 @@ public class PlayerForDataActivity extends AppCompatActivity {
                         activity.dialog.setCancelable(true);
                         break;
                     case HandlerABonSuccess:
-                        String fileList[] = (String[]) msg.obj;
+                        String[] fileList = (String[]) msg.obj;
                         Intent intent = new Intent(activity, BuildPictureActivity.class);
                         Bundle bundle = new Bundle();
                         bundle.putStringArray("fileList", fileList);
                         bundle.putBoolean("isFromExtra", true);
                         bundle.putBoolean("isAutoBuild", true);
-                        bundle.putInt("SubtitleHeight", activity.cpt.getSubtitleHeight());
+                        bundle.putInt("SubtitleTop", activity.cpt.getSubtitleTop());
+                        bundle.putInt("SubtitleBottom", activity.cpt.getSubtitleBottom());
                         intent.putExtras(bundle);
                         activity.startActivity(intent);
 
@@ -534,7 +537,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
                     Bitmap bitmap = tool.getBitmapFromFile(externalCacheDir.toString()+"/"+fileList[i]);
                     int pictureState;
                     if (isABUseCloudCore) {
-                        pictureState = cpt.isSingleSubtitlePicture(bitmap, getApplicationContext());
+                        pictureState = cpt.isSingleSubtitlePictureByBaidu(bitmap);
                     }
                     else {
                         pictureState = cpt.isSingleSubtitlePicture(bitmap);
@@ -747,8 +750,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
     private void initAutoBuild() {
         isABUseCloudCore = settings.getBoolean("isABUseCloudCore", false);
         if (isABUseCloudCore) {
-            //FIXME
-            /*new AlertDialog.Builder(this)
+            AlertDialog dialog = new AlertDialog.Builder(this)
                     .setTitle(R.string.player_dialog_ABUseCloud_title)
                     .setMessage(R.string.player_dialog_ABUseCloud_message)
                     .setCancelable(false)
@@ -764,7 +766,18 @@ public class PlayerForDataActivity extends AppCompatActivity {
                             finish();
                         }
                     })
-                    .show();   */
+                    .setNeutralButton(R.string.player_dialog_ABUseCloud_btn_unShow, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            SharedPreferences.Editor editor = sp_init.edit();
+                            editor.putBoolean("isABShowUseCloudTip", false);
+                            editor.apply();
+                        }
+                    })
+                    .create();
+            if (sp_init.getBoolean("isABShowUseCloudTip", true)) {
+                dialog.show();
+            }
         }
         else {
             checkTessData();

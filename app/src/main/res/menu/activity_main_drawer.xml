@@ -5,14 +5,15 @@
         <menu>
             <item
                 android:id="@+id/main_nav_autoBuild"
+                android:icon="@drawable/ic_ai"
                 android:title="@string/main_nav_text_autoBuild" />
             <item
                 android:id="@+id/main_nav_ffmpeg"
-                android:icon="@android:drawable/ic_menu_sort_by_size"
+                android:icon="@drawable/ic_command"
                 android:title="@string/main_nav_text_ffmpeg" />
             <item
                 android:id="@+id/main_nav_setting"
-                android:icon="@drawable/ic_menu_manage"
+                android:icon="@drawable/ic_setting"
                 android:title="@string/main_nav_text_setting" />
         </menu>
     </item>
@@ -21,23 +22,19 @@
         <menu>
             <item
                 android:id="@+id/nav_help"
-                android:icon="@android:drawable/ic_menu_help"
+                android:icon="@drawable/ic_help"
                 android:title="@string/main_nav_text_help" />
             <item
                 android:id="@+id/nav_feedback"
-                android:icon="@android:drawable/sym_action_email"
+                android:icon="@drawable/ic_feed_back"
                 android:title="@string/main_nav_text_feedback" />
-           <!-- <item
-                android:id="@+id/nav_support"
-                android:icon="@android:drawable/star_big_on"
-                android:title="@string/main_nav_text_support" />   -->
             <item
                 android:id="@+id/nav_about"
-                android:icon="@android:drawable/ic_dialog_info"
+                android:icon="@drawable/ic_about"
                 android:title="@string/main_nav_text_about" />
             <item
                 android:id="@+id/nav_share"
-                android:icon="@android:drawable/ic_menu_share"
+                android:icon="@drawable/ic_share"
                 android:title="@string/main_nav_title_share" />
         </menu>
     </item>

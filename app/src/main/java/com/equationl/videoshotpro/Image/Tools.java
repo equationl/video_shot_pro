@@ -22,6 +22,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.support.annotation.Nullable;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.widget.ImageView;
@@ -264,6 +265,26 @@ public class Tools{
             width = bm.getWidth();
         }
         return Bitmap.createBitmap(bm, 0, startY, width, height);
+    }
+
+    @Nullable
+    public Bitmap cutBitmap(Bitmap bitmap, int x, int y, int width, int height) {
+        if (bitmap == null) {
+            Log.e(TAG, "cutBitmap: bitmap is null!");
+            return null;
+        }
+        if (width <= 0 || height <= 0) {
+            Log.e(TAG, "cutBitmap: width or height <= 0!");
+            return null;
+        }
+        Bitmap result;
+        try {
+            result = Bitmap.createBitmap(bitmap, x, y, width, height);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "cutBitmap: create bitmap fail!", e);
+            return null;
+        }
+        return result;
     }
 
 

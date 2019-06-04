@@ -187,8 +187,6 @@
          -------------\n
         GalleryPick：https://github.com/YancyYe/GalleryPick \n
          -------------\n
-        Ucrop：https://github.com/jdamcd/android-crop \n
-         -------------\n
         glide：https://github.com/bumptech/glide  \n
         --------------\n
         ColorPicker：https://github.com/DingMouRen/ColorPicker   \n
@@ -201,16 +199,24 @@
         --------------\n
         FancyShowCaseView: https://github.com/faruktoptas/FancyShowCaseView \n
         --------------\n
-        ImageWatcher: https://github.com/iielse/ImageWatcher \n
+        BigImageViewPager: https://github.com/SherlockGougou/BigImageViewPager \n
         --------------\n
         SwipeCardsView: https://github.com/huxq17/SwipeCardsView \n
         --------------\n
         AutoLoadmore: https://github.com/burgessjp/AutoLoadmore \n
         --------------\n
+        GADownloading：https://github.com/Ajian-studio/GADownloading  \n
+        --------------\n
+        okdownload：https://github.com/lingochamp/okdownload    \n
+        --------------\n
+        ImageCrop：https://github.com/guoyanqiu/ImageCrop   \n
+        --------------\n
         特别感谢：\n
         --------------\n
         Bugly：https://bugly.qq.com   \n
         Material Design Icons：https://materialdesignicons.com    \n
+        Iconfont：https://www.iconfont.cn   \n
+        Baidu AI：http://ai.baidu.com    \n
         以及 tyanboot.pw 对本app的支持
     </string>
 
@@ -262,6 +268,8 @@
     <string name="main_dialog_shotFrame_title">温馨提示</string>
     <string name="main_dialog_shotFrame_content">这个模式可以快速提取视频指定时间间隔的所有帧，方便用户从中选出满意的截图。\n
         使用方法：\n选择视频后点击按钮标记起始位置，再次点击按钮标记终止位置，这样app就会自动开始截取。 </string>
+    <string name="main_dialog_AB_title">温馨提示</string>
+    <string name="main_dialog_AB_content">这个模式可以全自动识别视频中的字幕并截图，裁切，合成。如果使用离线引擎进行识别需要下载额外的识别数据包。     若使用默认的离线引擎识别率不理想，则建议在 设置-高级设置 中，启用云端引擎。</string>
 
     <string name="main_floatBtn_menu_quick">快速开始</string>
     <string name="main_floatBtn_menu_splicing">合成截图</string>
@@ -374,12 +382,13 @@
     <string name="player_dialog_ABUseCloud_message">使用云端引擎进行识别时会上传您的每张截图以用于分析，我们保证不会保存您的数据，如您依然介意，请切换至离线引擎使用。     注意：因为云端引擎API有每日调用次数限制，所以可能会出现无法使用的问题。</string>
     <string name="player_dialog_ABUseCloud_btn_ok">继续</string>
     <string name="player_dialog_ABUseCloud_btn_cancel">取消</string>
-
+    <string name="player_dialog_ABUseCloud_btn_unShow">不再提示</string>
 
     <string name="player_dialog_AB_title">正在识别图片……</string>
     <string name="player_dialog_AB_content_shot_progress">正在处理第 %1$d 张图片&#8230;</string>
 
 
+    <string name="title_activity_markPicture">标记图片</string>
     <string name="markPicture_toast_readFile_fail">读取图片列表出错！</string>
     <string name="markPicture_ProgressDialog_msg">请稍候</string>
     <string name="markPicture_ProgressDialog_title">请稍候&#8230;</string>
@@ -410,6 +419,9 @@
     <string name="floatWindowsService_toast_saveVideo2Gif_success">GIF已保存！</string>
     <string name="floatWindowsService_toast_deleteCacheFile_fail">清除缓存失败！</string>
 
+    <string name="title_activity_buildPicture">开始生成</string>
+    <string name="title_activity_markSubtitle">调整字幕位置</string>
+    <string name="title_activity_buildDone">生成完成</string>
     <string name="buildPicture_btn_up">上调</string>
     <string name="buildPicture_btn_down">下调</string>
     <string name="buildPicture_btn_done">确定</string>
@@ -435,6 +447,8 @@
     <string name="buildPicture_toast_sharePicture_fail">分享失败，请尝试在 分享->更多 中选择 微信 进行分享</string>
     <string name="buildPicture_toast_buildPicture_done">导出成功！</string>
     <string name="buildPicture_toast_getBundle_fail">获取数据出错：非法访问！</string>
+
+    <string name="buildPicture_menu_next">下一步</string>
 
     <string name="title_activity_choose">确定图片顺序</string>
     <string name="chooseActivity_ProgressDialog_loadImage_title">请稍候&#8230;</string>
@@ -490,6 +504,8 @@
     <string name="pref_category_title_AutoBuild">智能合成设置</string>
     <string name="pref_description_ABUseCloudCore">是否使用云端引擎代替本地离线识别库，开启后将会大幅提高识别正确率，但会上传截取的图片至云端进行分析</string>
     <string name="pref_title_ABUseCloudCore">启用云端引擎</string>
+    <string name="pref_description_isABCutBottom">是否在合成时切除多余的底边，对于字幕较高的视频建议开启此项</string>
+    <string name="pref_title_isABCutBottom">切除底边</string>
 
 
     <string name="pref_category_title_PlayVideo">视频播放相关设置</string>

@@ -1,7 +1,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory xmlns:android="http://schemas.android.com/apk/res/android"
-        android:title="@string/pref_category_title_watermark" >
+    <PreferenceCategory android:title="@string/pref_category_title_watermark" >
 
         <SwitchPreference
             android:defaultValue="true"
@@ -30,8 +29,7 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory xmlns:android="http://schemas.android.com/apk/res/android"
-        android:title="@string/pref_category_title_quality" >
+    <PreferenceCategory android:title="@string/pref_category_title_quality" >
         <SwitchPreference
             android:defaultValue="false"
             android:key="isReduce_switch"
@@ -53,7 +51,7 @@
             android:summary="@string/pref_description_shot_jpg"
             android:title="@string/pref_title_shot_jpg" />
 
-        <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+        <PreferenceScreen
             android:summary="@string/pref_screen_description_quality"
             android:title="@string/pref_screen_title_quality" >
 
@@ -96,8 +94,7 @@
         </PreferenceScreen>
     </PreferenceCategory>
 
-    <PreferenceCategory xmlns:android="http://schemas.android.com/apk/res/android"
-        android:title="@string/pref_category_title_gif" >
+    <PreferenceCategory android:title="@string/pref_category_title_gif" >
 
         <SwitchPreference
             android:defaultValue="false"
@@ -144,8 +141,7 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory xmlns:android="http://schemas.android.com/apk/res/android"
-        android:title="@string/pref_category_title_other" >
+    <PreferenceCategory android:title="@string/pref_category_title_other" >
 
         <SwitchPreference
             android:defaultValue="true"
@@ -159,13 +155,12 @@
             android:summary="@string/pref_description_sort_picture"
             android:title="@string/pref_title_sort_picture" />
 
-        <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+        <PreferenceScreen
             android:summary="@string/pref_screen_description_professional"
             android:title="@string/pref_screen_title_professional" >
 
 
-            <PreferenceCategory xmlns:android="http://schemas.android.com/apk/res/android"
-                android:title="@string/pref_category_title_checkBlankLines" >
+            <PreferenceCategory android:title="@string/pref_category_title_checkBlankLines" >
                 <SwitchPreference
                     android:defaultValue="true"
                     android:key="isCheckBlankLines"
@@ -192,13 +187,17 @@
                     android:title="@string/pref_edit_AllowCheckBlackLines_title" />
             </PreferenceCategory>
 
-            <PreferenceCategory xmlns:android="http://schemas.android.com/apk/res/android"
-                android:title="@string/pref_category_title_AutoBuild" >
+            <PreferenceCategory android:title="@string/pref_category_title_AutoBuild" >
                 <SwitchPreference
                     android:defaultValue="false"
                     android:key="isABUseCloudCore"
                     android:summary="@string/pref_description_ABUseCloudCore"
                     android:title="@string/pref_title_ABUseCloudCore" />
+                <SwitchPreference
+                    android:defaultValue="true"
+                    android:key="isABCutSubtitleBottom"
+                    android:summary="@string/pref_description_isABCutBottom"
+                    android:title="@string/pref_title_isABCutBottom" />
 
             </PreferenceCategory>
 

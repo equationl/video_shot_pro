@@ -474,4 +474,16 @@
     <string name="pref_category_title_AutoBuild">Smart Build Setting</string>
     <string name="pref_title_ABUseCloudCore">Enable cloud engine</string>
     <string name="pref_description_ABUseCloudCore">Whether to use the cloud engine instead of the local offline recognition library, when opened, it will greatly improve the recognition accuracy rate, but will upload the captured image to the cloud for analysis.</string>
+    <string name="buildPicture_menu_next">Next</string>
+    <string name="chooseActivity_toast_getCacheDir_fail">Get cache directory fail!</string>
+    <string name="main_dialog_AB_content">This mode automatically recognizes subtitles in the video and captures, crops, and composites. If you use the offline engine for identification, you need to download additional identification packets. If the default offline engine recognition rate is not ideal, it is recommended to enable the cloud engine in Settings - Advanced Settings.</string>
+    <string name="main_dialog_AB_title">Tip</string>
+    <string name="player_dialog_ABUseCloud_btn_unShow">Never show again</string>
+    <string name="player_text_download_progress">%1$s/%2$s</string>
+    <string name="pref_description_isABCutBottom">Whether to cut off the extra bottom edge during the synthesis, it is recommended to open this item for videos with higher captions.</string>
+    <string name="pref_title_isABCutBottom">Cut off the bottom edge</string>
+    <string name="title_activity_buildDone">Build done</string>
+    <string name="title_activity_buildPicture">Begin build</string>
+    <string name="title_activity_markPicture">Mark Picture</string>
+    <string name="title_activity_markSubtitle">Adjust subtitle position</string>
 </resources>

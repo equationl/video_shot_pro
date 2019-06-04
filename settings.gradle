@@ -1,1 +1,1 @@
-include ':app', ':imageCrop'
+include ':app'

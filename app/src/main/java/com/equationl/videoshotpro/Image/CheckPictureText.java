@@ -2,8 +2,10 @@ package com.equationl.videoshotpro.Image;
 
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -41,24 +43,49 @@ public class CheckPictureText {
     private final static float isSameSubtitleTolerance = 0.6f;
 
     /**
-    * 字幕高度
+     * 字幕边界距离
+     * */
+    private int subtitlePadding = 5;
+
+    /**
+    * 字幕框高
     * */
-    private int subtitleHeight = 0;
+    private int subtitleTop = 0;
+
+    /**
+    * 字幕框底
+    * */
+    private int subtitleBottom = 0;
 
 
     private TessBaseAPI tessBaseAPI;
     private Tools tool = new Tools();
+    private Context context;
     private String lastText = null;
     private boolean isFirstGetString = true;
+    private boolean isCutSubtitleBottom = true;
 
     private final static  String TAG = "el, in CPT";
 
+    public CheckPictureText(Context context) {
+        this.context = context;
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        isCutSubtitleBottom = settings.getBoolean("isABCutSubtitleBottom", true);
+    }
+
 
     /**
-    * 获取最终的字幕高度
+    * 获取最终的字幕框高
     * */
-    public int getSubtitleHeight() {
-        return subtitleHeight;
+    public int getSubtitleTop() {
+        return subtitleTop;
+    }
+
+    /**
+     * 获取最终的字幕框底
+     * */
+    public int getSubtitleBottom() {
+        return subtitleBottom;
     }
 
     /**
@@ -68,15 +95,18 @@ public class CheckPictureText {
     public int isSingleSubtitlePicture(Bitmap bitmap) {
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
-        if (subtitleHeight == 0) {
-            subtitleHeight = (int)(bitmap.getHeight() * 0.7);
+        if (subtitleTop == 0) {
+            subtitleTop = (int)(height * 0.7);
+        }
+        if (subtitleBottom == 0) {
+            subtitleBottom = height;
         }
 
-        Log.i(TAG, "字幕高度为"+subtitleHeight);
+        Log.i(TAG, "字幕框高为"+subtitleTop+"字幕框底为："+subtitleBottom);
 
         //预裁剪，减少遍历数
-        //bitmap = Bitmap.createBitmap(bitmap, (int)(width*0.35), subtitleHeight, width-(int)(width*0.35)*2, height-subtitleHeight);
-        bitmap = Bitmap.createBitmap(bitmap, 0, subtitleHeight, width, height-subtitleHeight);
+        //bitmap = Bitmap.createBitmap(bitmap, (int)(width*0.35), subtitleTop, width-(int)(width*0.35)*2, height-subtitleTop);
+        bitmap = Bitmap.createBitmap(bitmap, 0, subtitleTop, width, subtitleBottom-subtitleTop);
         bitmap = getBinaryzationPicture(bitmap);
 
         Log.i(TAG, "origin bitmap width="+bitmap.getWidth()+", height="+bitmap.getHeight());
@@ -107,6 +137,7 @@ public class CheckPictureText {
         return StateCutPicture;
     }
 
+    //使用本地引擎
     private String getOCRString(Bitmap bitmap) {
         tessBaseAPI.setImage(bitmap);
         String text_o = tessBaseAPI.getUTF8Text();
@@ -129,8 +160,13 @@ public class CheckPictureText {
         int charNum = text_o.length() - text.length();
         if (charNum < 3 && !text.equals("")) {
             try {
-                subtitleHeight = subtitleHeight+wordRects.get(0).top-5;
-                Log.i(TAG, "改变字幕高度为："+subtitleHeight);
+                if (isCutSubtitleBottom) {
+                    subtitleBottom = subtitleTop+wordRects.get(0).bottom+subtitlePadding*2;
+                }
+                subtitleTop = subtitleTop+wordRects.get(0).top-subtitlePadding;
+                Log.i(TAG, "getOCRString: bitmap.height="+bitmap.getHeight());
+                //Fixme 检测是否溢出
+                Log.i(TAG, "改变字幕框高为"+subtitleTop+"字幕框底为："+subtitleBottom);
             } catch (IndexOutOfBoundsException e) {
                 Log.e(TAG, Log.getStackTraceString(e));
             }
@@ -181,21 +217,29 @@ public class CheckPictureText {
         return isSuccess[0];
     }
 
-    public int isSingleSubtitlePicture(Bitmap bitmap, Context context) {
+    public int isSingleSubtitlePictureByBaidu(Bitmap bitmap) {
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
-        if (subtitleHeight == 0) {
-            subtitleHeight = (int)(bitmap.getHeight() * 0.7);
+        if (subtitleTop == 0) {
+            subtitleTop = (int)(height * 0.7);
         }
-        bitmap = Bitmap.createBitmap(bitmap, 0, subtitleHeight, width, height-subtitleHeight);
+        if (subtitleBottom == 0) {
+            subtitleBottom = height;
+        }
+
+        Log.i(TAG, "字幕框高为"+subtitleTop+"字幕框底为："+subtitleBottom);
+
+        //预处理图片
+        bitmap = Bitmap.createBitmap(bitmap, 0, subtitleTop, width, subtitleBottom-subtitleTop);
         bitmap = getBinaryzationPicture(bitmap);
+
         File file=null;
         try {
             file = tool.saveBitmap2File(bitmap, "ocrCropCache", context.getExternalCacheDir());
         } catch (Exception e) {
             Log.e(TAG, "isSingleSubtitlePicture: ", e);
         }
-        String text = getOCRStringByBaidu(context, file);
+        String text = getOCRStringByBaidu(file);
 
         Log.i(TAG, "识别到文字："+text);
 
@@ -216,7 +260,7 @@ public class CheckPictureText {
 
         //使用带位置api再测一次（为了获取字幕位置）
         if (isFirstGetString) {
-            getOCRStringByBaiduWithPosition(context, file);
+            getOCRStringByBaiduWithPosition(file);
             isFirstGetString = false;
         }
 
@@ -225,7 +269,7 @@ public class CheckPictureText {
         return StateCutPicture;
     }
 
-    private String getOCRStringByBaidu(final Context context, File file) {
+    private String getOCRStringByBaidu(File file) {
         final String[] text = new String[1];
         final boolean[] isFinsh = {false};
         GeneralBasicParams param = new GeneralBasicParams();
@@ -249,7 +293,7 @@ public class CheckPictureText {
             }
             @Override
             public void onError(OCRError error) {
-                Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
                 Log.e(TAG, "getOCRStringByBaidu onError: ", error);
             }
         });
@@ -267,7 +311,7 @@ public class CheckPictureText {
     }
 
     @SuppressWarnings("UnusedReturnValue")
-    private String getOCRStringByBaiduWithPosition(final Context context, File file) {
+    private String getOCRStringByBaiduWithPosition(File file) {
         final String[] text = new String[1];
         final boolean[] isFinsh = {false};
         GeneralParams param = new GeneralParams();
@@ -281,12 +325,23 @@ public class CheckPictureText {
                 boolean isFirst = true;
                 for (WordSimple wordSimple : result.getWordList()) {
                     Word word = (Word) wordSimple;
-                    if (isFirst) {  //避免出现双语字幕时将高度调整到第二行字幕位置
+                    if (isFirst) {  //框高由第一行字幕确定
                         Location location = word.getLocation();
-                        subtitleHeight = subtitleHeight+location.getTop()-5;
+                        subtitleTop = subtitleTop+location.getTop()-subtitlePadding;
+                        if (isCutSubtitleBottom) {
+                            subtitleBottom = subtitleTop+location.getHeight();
+                        }
                         Log.i(TAG, "onResult: location.top="+ location.getTop());
-                        Log.i(TAG, "onResult: 改变字幕高度为 "+subtitleHeight);
+                        Log.i(TAG, "onResult: 改变字幕框高为 "+subtitleTop);
                         isFirst = false;
+                    }
+                    else {   //框底由最后一行字幕确定
+                        Location location = word.getLocation();
+                        if (isCutSubtitleBottom) {
+                            subtitleBottom = subtitleBottom+location.getHeight()+subtitlePadding*2;
+                        }
+                        Log.i(TAG, "onResult: location.bottom="+ location.getHeight());
+                        Log.i(TAG, "onResult: 改变字幕框底为 "+subtitleBottom);
                     }
                     sb.append(word.getWords());
                 }
@@ -295,7 +350,7 @@ public class CheckPictureText {
             }
             @Override
             public void onError(OCRError error) {
-                Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
                 Log.e(TAG, "getOCRStringByBaidu onError: ", error);
             }
         });

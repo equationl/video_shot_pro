@@ -30,8 +30,6 @@ ffmpeg-android-java：https://github.com/writingminds/ffmpeg-android-java
 ***
 GalleryPick：https://github.com/YancyYe/GalleryPick 
 ***
-Ucrop：https://github.com/jdamcd/android-crop 
-***
 glide：https://github.com/bumptech/glide   
 ***
 HandyGridView：https://github.com/huxq17/HandyGridView   
@@ -42,14 +40,21 @@ floatingactionbutton: https://github.com/futuresimple/android-floating-action-bu
 ***
 FancyShowCaseView: https://github.com/faruktoptas/FancyShowCaseView 
 ***
-ImageWatcher: https://github.com/iielse/ImageWatcher 
+BigImageViewPager: https://github.com/SherlockGougou/BigImageViewPager
 ***
 SwipeCardsView: https://github.com/huxq17/SwipeCardsView 
 ***
 AutoLoadmore: https://github.com/burgessjp/AutoLoadmore 
 ***
-特别感谢：
+GADownloading：https://github.com/Ajian-studio/GADownloading
 ***
+okdownload：https://github.com/lingochamp/okdownload
+***
+ImageCrop：https://github.com/guoyanqiu/ImageCrop
+***
+特别感谢：
 Bugly：https://bugly.qq.com   
 Material Design Icons：https://materialdesignicons.com    
+Iconfont：https://www.iconfont.cn
+Baidu AI：http://ai.baidu.com
 以及 tyanboot.pw 对本app的支持

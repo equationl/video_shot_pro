@@ -44,8 +44,9 @@
         </activity>
         <activity
             android:name=".MarkPictureActivity"
-            android:label="标记图片" />
-        <activity android:name=".BuildPictureActivity" />
+            android:label="@string/title_activity_markPicture" />
+        <activity android:name=".BuildPictureActivity"
+            android:label="@string/title_activity_buildPicture"/>
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings" />

@@ -445,10 +445,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 startActivity(intent);
                 break;
             case R.id.main_nav_autoBuild:
-                intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("video/*");
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                startActivityForResult(Intent.createChooser(intent, "请选择视频文件"),RequestCodeAutoBuild);
+                btn_AB();
                 break;
         }
 
@@ -664,7 +661,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         else {
-            Boolean result = true;
+            boolean result = true;
             if (Build.VERSION.SDK_INT >= 23) {
                 result =  Settings.canDrawOverlays(this);
             }
@@ -836,7 +833,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void showDeletePicDialog(Context context, final File f, final int pos, final boolean fromDir) {
         boolean isDeleteLocalPic = sp_init.getBoolean("isDeleteLocalPic", true);
-        boolean initChoiceSets[] = {isDeleteLocalPic};
+        boolean[] initChoiceSets = {isDeleteLocalPic};
         int title = isMultiSelect ? R.string.main_dialog_deleteAllPic_title : R.string.main_dialog_deletePic_title;
         Dialog dialog = new AlertDialog.Builder(context).setCancelable(false)
                 .setTitle(title)
@@ -876,6 +873,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         }
                         )
                 .create();
+        dialog.show();
+    }
+
+    private void showABDialog() {
+        Dialog dialog = new AlertDialog.Builder(this).setCancelable(false)
+                .setTitle(R.string.main_dialog_AB_title)
+                .setMessage(R.string.main_dialog_AB_content)
+                .setPositiveButton(res.getString(R.string.main_dialog_btn_ok),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                                intent.setType("video/*");
+                                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                                startActivityForResult(Intent.createChooser(intent, "请选择视频文件"),RequestCodeAutoBuild);
+                            }
+                        }).create();
         dialog.show();
     }
 
@@ -946,6 +960,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         dialog_copyFile.dismiss();
     }
 
+    private void btn_AB() {
+        if (sp_init.getBoolean("isFirstUseAB", true)) {
+            showABDialog();
+            SharedPreferences.Editor editor = sp_init.edit();
+            editor.putBoolean("isFirstUseAB", false);
+            editor.apply();
+        }
+        else {
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("video/*");
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            startActivityForResult(Intent.createChooser(intent, "请选择视频文件"),RequestCodeAutoBuild);
+        }
+    }
 
     private void btn_splicing() {
         if (sp_init.getBoolean("isFirstUseSplicing", true)) {
@@ -1414,7 +1442,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private String[] getFiles(String path) {
         String order = sp_init.getString("mainSort", "dateDest");
-        Boolean isDirFirst = sp_init.getBoolean("mainSortIsDirFirst", true);
+        boolean isDirFirst = sp_init.getBoolean("mainSortIsDirFirst", true);
         if (order != null) {
             switch (order) {
                 case "dateDest":
@@ -1559,10 +1587,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         builder.setItems(items, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                switch (i) {
-                                    case 0:
-                                        sharePicture(view.getContext(), image);
-                                        break;
+                                if (i == 0) {
+                                    sharePicture(view.getContext(), image);
                                 }
                             }
                         });

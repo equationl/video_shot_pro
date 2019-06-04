@@ -17,6 +17,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Layout;
@@ -25,13 +27,13 @@ import android.text.TextPaint;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.equationl.videoshotpro.Image.Tools;
+import com.equationl.videoshotpro.cropBox.CropImageView;
 import com.equationl.videoshotpro.utils.Share;
 import com.equationl.videoshotpro.utils.Utils;
 import com.tencent.bugly.crashreport.CrashReport;
@@ -48,18 +50,14 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 public class BuildPictureActivity extends AppCompatActivity {
-    Button btn_up, btn_down, btn_done;
-    TextView text_memory;
-    ImageView imageTest;
+    CropImageView imageViewPreview;
     String[] fileList;
-    Canvas canvas;
-    Paint paint;
     Bitmap bm_test;
     float startY, stopY;
     int bWidth,bHeight;
     ProgressDialog dialog;
-    int isDone=0;
-    int SubtitleHeight;
+    boolean isBuildDone = false;
+    int SubtitleTop, SubtitleBottom;
     File savePath=null;
     SharedPreferences settings, sp_init;
     Tools tool = new Tools();
@@ -93,15 +91,13 @@ public class BuildPictureActivity extends AppCompatActivity {
 
         instance = this;
 
-        btn_up      =   findViewById(R.id.button_up);
-        btn_down    =   findViewById(R.id.button_down);
-        btn_done    =   findViewById(R.id.button_final_done);
-        imageTest   =   findViewById(R.id.imageTest);
-        text_memory =   findViewById(R.id.buildPicture_text_memory);
+        init();
+    }
+
+    void init() {
+        imageViewPreview   =   findViewById(R.id.buildPicture_image_preview);
 
         res = getResources();
-
-        updateMemoryText();
 
         settings = PreferenceManager.getDefaultSharedPreferences(this);
         sp_init = getSharedPreferences("init", Context.MODE_PRIVATE);
@@ -111,14 +107,15 @@ public class BuildPictureActivity extends AppCompatActivity {
             fileList = bundle.getStringArray("fileList");
             isFromExtra = bundle.getBoolean("isFromExtra");   //FIXME 如果没有开启图片排序，岂不是就废了？
             isAutoBuild = bundle.getBoolean("isAutoBuild", false);
-            SubtitleHeight = bundle.getInt("SubtitleHeight", 0);
+            SubtitleTop = bundle.getInt("SubtitleTop", 0);
+            SubtitleBottom = bundle.getInt("SubtitleBottom", 0);
         }
         else {
             Toast.makeText(this, R.string.buildPicture_toast_getBundle_fail, Toast.LENGTH_SHORT).show();
             finish();
         }
 
-        t_2 = new Thread(new MyThread());
+        t_2 = new Thread(new BuildThread());
 
         mTencent = Tencent.createInstance("1106257597", this);
 
@@ -151,94 +148,80 @@ public class BuildPictureActivity extends AppCompatActivity {
         startY = (float) (bHeight*0.8);
         stopY = startY;
 
-        if (isAutoBuild) {
-            if (SubtitleHeight != 0) {
-                startY = SubtitleHeight;
-            }
-            t = new Thread(new MyThread());
+        if (isAutoBuild || isAllFullPicture) {
+            t = new Thread(new BuildThread());
             t.start();
             dialog.show();
             dialog.setProgress(0);
-        }
-        else if (!isAllFullPicture){
-            Toast.makeText(this,"请调整剪切字幕的位置", Toast.LENGTH_LONG).show();
-            canvas = new Canvas(bm_test);
-            paint = new Paint();
-            paint.setColor(Color.RED);
-            paint.setStrokeWidth((float) 5);
-            canvas.drawLine(0,startY,bWidth,stopY,paint);
         }
         else {
-            t = new Thread(new MyThread());
-            t.start();
-            dialog.show();
-            dialog.setProgress(0);
+            setTitle(R.string.title_activity_markSubtitle);
+            Toast.makeText(this,"请调整剪切字幕的位置", Toast.LENGTH_LONG).show();
         }
-        imageTest.setImageBitmap(bm_test);
+        imageViewPreview.setImageBitmap(bm_test);
 
-        btn_up.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (isDone == 0) {
-                    bm_test = getCutImg().copy(Bitmap.Config.ARGB_8888,true);
-                    canvas = new Canvas(bm_test);
-                    startY = startY-8;
-                    if (startY < 0) {
-                        startY = 0;
-                    }
-                    stopY = startY;
-                    canvas.drawLine(0,startY,bm_test.getWidth(),stopY,paint);
-                    imageTest.setImageBitmap(bm_test);
-                    updateMemoryText();
-                }
-                else {
-                    utils.finishActivity(PlayerActivity.instance);
-                    utils.finishActivity(MainActivity.instance);
-                    utils.finishActivity(ChooseActivity.instance);
-                    utils.finishActivity(MarkPictureActivity.instance);
-                    Intent intent = new Intent(BuildPictureActivity.this, MainActivity.class);
-                    startActivity(intent);
-                    finish();
-                }
-            }
-        });
-
-        btn_down.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (isDone == 0) {
-                    bm_test = getCutImg().copy(Bitmap.Config.ARGB_8888,true);
-                    canvas = new Canvas(bm_test);
-                    startY = startY+8;
-                    if (startY > bHeight) {
-                        startY = bHeight;
-                    }
-                    stopY = startY;
-                    canvas.drawLine(0,startY,bm_test.getWidth(),stopY,paint);
-                    imageTest.setImageBitmap(bm_test);
-                    updateMemoryText();
-                }
-            }
-        });
-
-        btn_done.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (isDone==1) {
-                    Share.showSharePictureDialog(BuildPictureActivity.this, savePath, shareListener, BuildPictureActivity.this);
-                }
-                else {
-                    t = new Thread(new MyThread());
-                    t.start();
-                    dialog.show();
-                    dialog.setProgress(0);
-                }
-            }
-        });
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+        else {
+            Log.i(TAG, "init: actionBar = null");
+        }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.acticity_build_picture, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        if (item.getItemId() == R.id.build_menu_next) {
+            if (isBuildDone) {
+                Share.showSharePictureDialog(BuildPictureActivity.this, savePath, shareListener, BuildPictureActivity.this);
+            }
+            else {
+                t = new Thread(new BuildThread());
+                t.start();
+                dialog.show();
+                dialog.setProgress(0);
+            }
+        }
+        else if (item.getItemId() == android.R.id.home) {
+            if (isBuildDone) {
+                utils.finishActivity(PlayerActivity.instance);
+                utils.finishActivity(MainActivity.instance);
+                utils.finishActivity(ChooseActivity.instance);
+                utils.finishActivity(MarkPictureActivity.instance);
+                Intent intent = new Intent(BuildPictureActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
+            }
+            else {
+                finish();
+            }
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (isBuildDone) {
+            menu.findItem(R.id.build_menu_next).setIcon(
+                    R.drawable.share_variant);
+            setTitle(R.string.title_activity_buildDone);
+        } else {
+            menu.findItem(R.id.build_menu_next).setIcon(R.drawable.check);
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-            if (isDone == 1) {
+            if (isBuildDone) {
                 utils.finishActivity(PlayerActivity.instance);
                 utils.finishActivity(MainActivity.instance);
                 utils.finishActivity(ChooseActivity.instance);
@@ -306,7 +289,7 @@ public class BuildPictureActivity extends AppCompatActivity {
     }
 
 
-    private class MyThread implements Runnable {
+    private class BuildThread implements Runnable {
         int delete_nums=0;
         Boolean isRunning = true;
         @Override
@@ -315,6 +298,7 @@ public class BuildPictureActivity extends AppCompatActivity {
             int len = fileList.length;
             final_bitmap = Bitmap.createBitmap(bWidth,1, getColorConfig());
             for (int i=0;i<len;i++) {
+                Log.i(TAG, "BuildThred run: "+i+" fileStatus:"+fileList[i]);
                 msg = Message.obtain();
                 msg.obj = "处理第"+i+"张图片";
                 msg.what = HandlerStatusBuildPictureNext;
@@ -440,9 +424,25 @@ public class BuildPictureActivity extends AppCompatActivity {
         }
     }
 
+    @Nullable
     private Bitmap cutBitmap(Bitmap bm) {
         //return Bitmap.createBitmap(bm, 0, (int)startY, bWidth, (int)(bm.getHeight()-startY));
-        return tool.cutBitmap(bm, (int)startY, bWidth);
+        if (isAutoBuild) {
+            if (SubtitleTop != 0 && SubtitleBottom != 0) {
+                return tool.cutBitmap(bm, 0, SubtitleTop, bm.getWidth(), SubtitleBottom-SubtitleTop);
+            }
+            return tool.cutBitmap(bm, (int)startY, bWidth);
+        }
+        else {
+            int[] cropBox = imageViewPreview.getCropBox();
+            if (cropBox == null) {
+                return null;
+            }
+            else {
+                return tool.cutBitmap(bm, cropBox[0], cropBox[1], cropBox[2], cropBox[3]);
+            }
+        }
+        //return tool.cutBitmap(bm, (int)startY, bWidth);
     }
 
     private Bitmap addBitmap(Bitmap first, Bitmap second) {
@@ -466,15 +466,6 @@ public class BuildPictureActivity extends AppCompatActivity {
                 savePath = tool.saveBitmap2File(bmp,bitName, new File(tool.getSaveRootPath()));
             }
             return true;
-    }
-
-
-    private void updateMemoryText() {
-        int maxMemory = ((int) Runtime.getRuntime().maxMemory())/1024/1024;
-        long totalMemory = ((int) Runtime.getRuntime().totalMemory())/1024/1024;
-        long freeMemory = ((int) Runtime.getRuntime().freeMemory())/1024/1024;
-        Log.i(TAG,"---> maxMemory="+maxMemory+"M,totalMemory="+totalMemory+"M,freeMemory="+freeMemory+"M");
-        text_memory.setText(String.format(res.getString(R.string.buildPicture_text_memory), totalMemory+"M", maxMemory+"M"));
     }
 
     private static class MyHandler extends Handler {
@@ -501,7 +492,6 @@ public class BuildPictureActivity extends AppCompatActivity {
                             activity.dialog.show();
                         }
                         else {
-                            activity.updateMemoryText();
                             activity.dialog.setProgress(activity.dialog.getProgress()+1);
                             activity.dialog.setMessage(msg.obj.toString());
                             System.gc();
@@ -509,12 +499,9 @@ public class BuildPictureActivity extends AppCompatActivity {
                         break;
 
                     case HandlerStatusBuildPictureDone:
-                        activity.updateMemoryText();
                         activity.dialog.dismiss();
-                        activity.btn_up.setText("返回");
-                        activity.btn_done.setText("分享");
-                        activity.btn_down.setVisibility(View.INVISIBLE);
-                        activity.isDone=1;
+                        activity.isBuildDone = true;
+                        activity.invalidateOptionsMenu();
                         String temp_path = activity.tool.getSaveRootPath()+"/"+msg.obj.toString();
                         temp_path += activity.settings.getBoolean("isReduce_switch", false) ? ".jpg":".png";
                         MediaScannerConnection.scanFile(activity, new String[]{temp_path}, null, null);
@@ -524,7 +511,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                     case HandlerStatusBuildPictureUpdateBitmap:
                         Boolean isShow = activity.settings.getBoolean("isMonitoredShow", false);
                         if (isShow) {
-                            activity.imageTest.setImageBitmap((Bitmap) msg.obj);
+                            activity.imageViewPreview.setImageBitmap((Bitmap) msg.obj);
                         }
                         else {
                             DisplayMetrics dm;
@@ -534,10 +521,10 @@ public class BuildPictureActivity extends AppCompatActivity {
                             Bitmap bm = (Bitmap) msg.obj;
                             if (bm.getHeight() > screenHeight) {
                                 Bitmap newbm = Bitmap.createBitmap(bm, 0, bm.getHeight()-screenHeight, bm.getWidth(), screenHeight);
-                                activity.imageTest.setImageBitmap(newbm);
+                                activity.imageViewPreview.setImageBitmap(newbm);
                             }
                             else {
-                                activity.imageTest.setImageBitmap(bm);
+                                activity.imageViewPreview.setImageBitmap(bm);
                             }
                         }
                         break;
@@ -549,10 +536,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                         } catch (IllegalArgumentException e) {
                             Log.i(TAG, "At HandlerStatusBuildPictureFail, dismiss dialog fail!");
                         }
-                        activity.isDone = 1;
-                        activity.btn_up.setText("退出");
-                        activity.btn_down.setVisibility(View.GONE);
-                        activity.btn_done.setVisibility(View.GONE);
+                        activity.isBuildDone = true;
                         break;
 
                     case HandlerGetBitmapFail:
@@ -636,7 +620,6 @@ public class BuildPictureActivity extends AppCompatActivity {
             int colorMode = Integer.parseInt(settings.getString("colorMode_value", "1"));
             switch (colorMode) {
                 case 1:
-                    //noinspection ConstantConditions
                     mode = Bitmap.Config.ARGB_8888;
                     break;
                 case 2:
