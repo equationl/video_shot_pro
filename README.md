@@ -55,6 +55,6 @@ ImageCrop：https://github.com/guoyanqiu/ImageCrop
 特别感谢：
 Bugly：https://bugly.qq.com   
 Material Design Icons：https://materialdesignicons.com    
-Iconfont：https://www.iconfont.cn
-Baidu AI：http://ai.baidu.com
+Iconfont：https://www.iconfont.cn    
+Baidu AI：http://ai.baidu.com    
 以及 tyanboot.pw 对本app的支持

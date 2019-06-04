@@ -269,7 +269,8 @@
     <string name="main_dialog_shotFrame_content">这个模式可以快速提取视频指定时间间隔的所有帧，方便用户从中选出满意的截图。\n
         使用方法：\n选择视频后点击按钮标记起始位置，再次点击按钮标记终止位置，这样app就会自动开始截取。 </string>
     <string name="main_dialog_AB_title">温馨提示</string>
-    <string name="main_dialog_AB_content">这个模式可以全自动识别视频中的字幕并截图，裁切，合成。如果使用离线引擎进行识别需要下载额外的识别数据包。     若使用默认的离线引擎识别率不理想，则建议在 设置-高级设置 中，启用云端引擎。</string>
+    <string name="main_dialog_AB_content">这个模式可以全自动识别视频中的字幕并截图，裁切，合成。如果使用离线引擎进行识别需要下载额外的识别数据包。     若使用默认的离线引擎识别率不理想，则建议在 设置-高级设置 中，启用云端引擎。\n
+    目前仅支持纯中文字幕或中英双语字幕。</string>
 
     <string name="main_floatBtn_menu_quick">快速开始</string>
     <string name="main_floatBtn_menu_splicing">合成截图</string>

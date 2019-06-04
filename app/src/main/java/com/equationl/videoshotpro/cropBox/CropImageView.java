@@ -2,7 +2,6 @@
 
 package com.equationl.videoshotpro.cropBox;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -48,8 +47,19 @@ public class CropImageView extends android.support.v7.widget.AppCompatImageView 
     //手指位置距离裁剪框的偏移量
     private PointF mTouchOffset = new PointF();
 
+    //是否绘制裁剪框
+    private boolean isDrawBox = true;
 
     private CropWindowEdgeSelector mPressedCropWindowEdgeSelector;
+
+    public void setDrawBox(boolean drawBox) {
+        isDrawBox = drawBox;
+        invalidate();
+    }
+
+    public boolean isDrawBox() {
+        return isDrawBox;
+    }
 
     public CropImageView(Context context) {
         super(context);
@@ -104,15 +114,22 @@ public class CropImageView extends android.support.v7.widget.AppCompatImageView 
     protected void onDraw(Canvas canvas) {
 
         super.onDraw(canvas);
-        //绘制九宫格引导线
-        drawGuidelines(canvas);
-        //绘制裁剪边框
-        drawBorder(canvas);
-        //绘制裁剪边框的四个角
-        drawCorners(canvas);
+
+        if (isDrawBox) {
+            //绘制九宫格引导线
+            drawGuidelines(canvas);
+            //绘制裁剪边框
+            drawBorder(canvas);
+            //绘制裁剪边框的四个角
+            drawCorners(canvas);
+        }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
+    @Override
+    public boolean performClick() {
+        return super.performClick();
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
@@ -127,6 +144,9 @@ public class CropImageView extends android.support.v7.widget.AppCompatImageView 
                 return true;
 
             case MotionEvent.ACTION_UP:
+                performClick();
+                break;
+
             case MotionEvent.ACTION_CANCEL:
                 getParent().requestDisallowInterceptTouchEvent(false);
                 onActionUp();
@@ -140,6 +160,7 @@ public class CropImageView extends android.support.v7.widget.AppCompatImageView 
             default:
                 return false;
         }
+        return super.onTouchEvent(event);
     }
 
     /**

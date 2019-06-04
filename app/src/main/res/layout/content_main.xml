@@ -31,7 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="10dp"
-            app:fab_icon="@drawable/play_circle"
+            app:fab_icon="@drawable/ic_begin"
             fab:fab_size="normal"
             fab:fab_title="@string/main_floatBtn_menu_quick" />
 
@@ -39,7 +39,7 @@
             android:id="@+id/main_floatBtn_splicing"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_icon="@drawable/image_multiple"
+            fab:fab_icon="@drawable/ic_splicing"
             fab:fab_size="normal"
             fab:fab_title="@string/main_floatBtn_menu_splicing" />
 
@@ -47,7 +47,7 @@
             android:id="@+id/main_floatBtn_shotScreen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_icon="@drawable/cellphone_screenshot"
+            fab:fab_icon="@drawable/ic_shotscreen"
             fab:fab_size="normal"
             fab:fab_title="@string/main_floatBtn_menu_shotScreen" />
 
@@ -55,7 +55,7 @@
             android:id="@+id/main_floatBtn_frameByFrame"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_icon="@drawable/animation_play"
+            fab:fab_icon="@drawable/ic_framebyframe"
             fab:fab_size="normal"
             fab:fab_title="@string/main_floatBtn_menu_frameByFrame" />
 

@@ -15,9 +15,9 @@
                           <map>
                             <entry key="assetSourceType" value="FILE" />
                             <entry key="height" value="200" />
-                            <entry key="outputName" value="ic_ai" />
+                            <entry key="outputName" value="ic_shotscreen" />
                             <entry key="overrideSize" value="true" />
-                            <entry key="sourceFile" value="C:\Users\lenovo\Downloads\ai.svg" />
+                            <entry key="sourceFile" value="C:\Users\lenovo\Downloads\shotScreen.svg" />
                             <entry key="width" value="200" />
                           </map>
                         </option>

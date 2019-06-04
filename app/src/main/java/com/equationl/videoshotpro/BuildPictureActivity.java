@@ -30,6 +30,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.equationl.videoshotpro.Image.Tools;
@@ -48,6 +49,9 @@ import java.io.File;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+
+import cc.shinichi.library.ImagePreview;
+import cc.shinichi.library.glide.ImageLoader;
 
 public class BuildPictureActivity extends AppCompatActivity {
     CropImageView imageViewPreview;
@@ -95,7 +99,7 @@ public class BuildPictureActivity extends AppCompatActivity {
     }
 
     void init() {
-        imageViewPreview   =   findViewById(R.id.buildPicture_image_preview);
+        imageViewPreview = findViewById(R.id.buildPicture_image_preview);
 
         res = getResources();
 
@@ -167,6 +171,23 @@ public class BuildPictureActivity extends AppCompatActivity {
         else {
             Log.i(TAG, "init: actionBar = null");
         }
+
+        imageViewPreview.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.i(TAG, "imageViewPreview onClick");
+                if (isBuildDone) {
+                    ImageLoader.cleanDiskCache(getApplicationContext());
+                    ImagePreview.getInstance()
+                            .setContext(BuildPictureActivity.this)
+                            .setEnableDragClose(true)
+                            .setShowDownButton(false)
+                            .setIndex(0)
+                            .setImage(savePath.toString())
+                            .start();
+                }
+            }
+        });
     }
 
     @Override
@@ -346,7 +367,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                         isRunning = false;
                         break;
                     }
-                    Boolean isShow = settings.getBoolean("isMonitoredShow", false);
+                    boolean isShow = settings.getBoolean("isMonitoredShow", false);
                     if (isShow) {
                         msg = Message.obtain();
                         msg.obj = final_bitmap;
@@ -408,6 +429,11 @@ public class BuildPictureActivity extends AppCompatActivity {
                         msg = Message.obtain();
                         msg.obj = date+"-by_EL";
                         msg.what = HandlerStatusBuildPictureDone;
+                        handler.sendMessage(msg);
+
+                        msg = Message.obtain();
+                        msg.obj = final_bitmap;
+                        msg.what = HandlerStatusBuildPictureUpdateBitmap;
                         handler.sendMessage(msg);
                     }
                 } catch (Exception e) {
@@ -501,6 +527,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                     case HandlerStatusBuildPictureDone:
                         activity.dialog.dismiss();
                         activity.isBuildDone = true;
+                        activity.imageViewPreview.setDrawBox(false);
                         activity.invalidateOptionsMenu();
                         String temp_path = activity.tool.getSaveRootPath()+"/"+msg.obj.toString();
                         temp_path += activity.settings.getBoolean("isReduce_switch", false) ? ".jpg":".png";
@@ -509,7 +536,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                         break;
 
                     case HandlerStatusBuildPictureUpdateBitmap:
-                        Boolean isShow = activity.settings.getBoolean("isMonitoredShow", false);
+                        boolean isShow = activity.settings.getBoolean("isMonitoredShow", false);
                         if (isShow) {
                             activity.imageViewPreview.setImageBitmap((Bitmap) msg.obj);
                         }
@@ -519,8 +546,15 @@ public class BuildPictureActivity extends AppCompatActivity {
                             int screenHeight = dm.heightPixels;
 
                             Bitmap bm = (Bitmap) msg.obj;
+
+                            Log.i(TAG, "buildPictureUpdateBitmap: bitmap.height="+bm.getHeight()+" screenHeight="+screenHeight);
                             if (bm.getHeight() > screenHeight) {
-                                Bitmap newbm = Bitmap.createBitmap(bm, 0, bm.getHeight()-screenHeight, bm.getWidth(), screenHeight);
+                                if (screenHeight*2 < bm.getHeight()) {
+                                    screenHeight = screenHeight * 2;
+                                }
+                                Bitmap newbm = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), screenHeight);    //FIXME 为啥显示不全呢？
+                                Log.i(TAG, "buildPictureUpdateBitmap: newbitmap.height="+newbm.getHeight()+" newbitmap.width="+newbm.getWidth());
+                                //activity.imageViewPreview.setScaleType(ImageView.ScaleType.FIT_START);
                                 activity.imageViewPreview.setImageBitmap(newbm);
                             }
                             else {
