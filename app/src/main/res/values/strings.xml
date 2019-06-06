@@ -496,6 +496,8 @@
 
     <string name="pref_category_title_checkBlankLines">检测截图中的黑边设置</string>
     <string name="pref_title_CheckBlankLines">开启除黑边</string>
+    <string name="pref_description_isRemoveLRBlackLines">是否在切边时切除左右黑边，不开启则仅切除上下黑边</string>
+    <string name="pref_title_isRemoveLRBlackLines">同时切除左右黑边</string>
     <string name="pref_description_CheckBlankLines">选择是否在非本地视频截图时自动去除黑边，如果截图不完整，请关闭此项</string>
     <string name="pref_edit_AllowNotBlackNums_title">单行允许最多非黑点数</string>
     <string name="pref_edit_AllowCheckBlackLines_title">最少连续黑边数</string>
@@ -656,10 +658,13 @@
 
     <string name="title_activity_about">关于</string>
     <string name="about_toast_checkUpdate">正在检查更新&#8230;</string>
+    <string name="about_toast_copyQRimg_fail">复制二维码图片失败！请重试！</string>
+    <string name="about_toast_gotoAlipay_fail">打开支付宝失败，请尝试手动打开！</string>
+    <string name="about_toast_gotoMmPay_fail">打开微信失败，请尝试手动打开！</string>
     <string name="about_text_history">更新历史</string>
     <string name="about_text_thanks">鸣谢</string>
     <string name="about_text_right">© 2016&#8211;2018 Equationl.com \nAll rights reserved</string>
-    <string name="about_text_support">请作者喝奶茶</string>
+    <string name="about_text_support">支持作者（捐赠）</string>
     <string name="about_guide_text_logo">点击LOGO给作者五星好评哦~</string>
     <string name="about_guide_text_update">点击版本可以检查更新哦~</string>
     <string name="about_guide_text_history">点击查看更新记录哦~</string>
@@ -668,9 +673,13 @@
     <string name="about_dialog_title_history">更新历史</string>
     <string name="about_dialog_title_support">支持作者</string>
     <string name="about_dialog_text_support">亲爱的使用者，本app能够得到您的青睐已经是我最大的荣幸了，如果想要支持我的工作，请将本app推荐给您的朋友吧~（在首页侧边栏点击 推荐给好友即可快速分享）\n
-        您的支持就是我最大的动力！如果您能给予我五星好评我会更高兴的哦~（在本页面点击logo就可以快速跳转到应用市场了）\n
-        本APP已开源，欢迎贡献代码或star~\n
-    开源地址：https://gitee.com/equation/video_shot_pro/</string>
+        如果您想要捐赠的话，点击下方的支付宝或微信按钮，本程序会自动将二维码保存至您的手机，并自动打开支付宝或微信，您只需打开支付宝或微信的扫一扫功能并扫描刚才保存的二维码即可。\n
+        重要提示：请认准转账账户是否为 支付宝：方程（*芳程）；微信：equationl（**程），避免转错造成不必要的麻烦。\n
+        同时，本APP已开源，欢迎贡献代码或star~\n
+    开源地址：https://github.com/equationl/video_shot_pro</string>
+    <string name="about_dialog_support_btn_alipay">支付宝</string>
+    <string name="about_dialog_support_btn_mm">微信</string>
+    <string name="about_dialog_support_btn_cancel">取消</string>
 
     <string name="title_activity_chooseBest">选择需要保存的图片</string>
     <string name="chooseBest_menu_save">保存</string>

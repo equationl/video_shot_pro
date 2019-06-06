@@ -6,12 +6,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,6 +26,8 @@ import com.equationl.videoshotpro.utils.Utils;
 import com.huxq17.swipecardsview.SwipeCardsView;
 import com.tencent.bugly.beta.Beta;
 
+import java.io.IOException;
+
 import me.toptas.fancyshowcase.FancyShowCaseQueue;
 import me.toptas.fancyshowcase.FancyShowCaseView;
 
@@ -34,6 +38,8 @@ public class AboutActivity extends AppCompatActivity {
     Resources res;
     SharedPreferences sp_init;
     Utils utils;
+
+    private static final String TAG = "EL,In AboutActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,7 +151,42 @@ public class AboutActivity extends AppCompatActivity {
     }
 
     private void clickSupport() {
-        showTextDialog(R.string.about_dialog_title_support, R.string.about_dialog_text_support);
+        final Dialog dialog = new AlertDialog.Builder(this).setCancelable(true)
+                .setTitle(R.string.about_dialog_title_support)
+                .setMessage(R.string.about_dialog_text_support)
+                .setPositiveButton(R.string.about_dialog_support_btn_alipay,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (copyQRcodeImg("alipay.jpg")) {
+                                    gotoAlipay();
+                                }
+                                else {
+                                    Toast.makeText(AboutActivity.this, R.string.about_toast_copyQRimg_fail, Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        })
+                .setNegativeButton(R.string.about_dialog_support_btn_mm,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                if (copyQRcodeImg("mmpay.png")) {
+                                    gotoMmpay();
+                                }
+                                else {
+                                    Toast.makeText(AboutActivity.this, R.string.about_toast_copyQRimg_fail, Toast.LENGTH_LONG).show();
+                                }
+                    }
+                })
+                .setNeutralButton(R.string.about_dialog_support_btn_cancel,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                    }
+                })
+                .create();
+        dialog.show();
     }
 
     @Override
@@ -156,6 +197,41 @@ public class AboutActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private boolean copyQRcodeImg(String name) {
+        try {
+            String savePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                    .toString()+"/videoshot_"+name;
+            utils.copyAssets2Local(this, name, savePath);
+            MediaScannerConnection.scanFile(this, new String[]{savePath}, null, null);
+            return true;
+        } catch (IOException e) {
+            Log.e(TAG, "copyQRcodeImg: ", e);
+            return false;
+        }
+    }
+
+    private void gotoAlipay() {
+        try {
+            Uri uri = Uri.parse("alipayqr://platformapi/startapp?saId=10000007");
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent);
+        } catch (Exception e) {
+            Log.e(TAG, "gotoAlipay: ", e);
+            Toast.makeText(this, R.string.about_toast_gotoAlipay_fail, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void gotoMmpay() {
+        try {
+            Uri uri = Uri.parse("weixin://");
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent);
+        } catch (Exception e) {
+            Log.e(TAG, "gotoMmpay: ", e);
+            Toast.makeText(this, "无法跳转到微信，请检查是否安装了微信", Toast.LENGTH_LONG).show();
+        }
     }
 
 }

@@ -704,11 +704,12 @@ public class Tools{
      *
      * @param  bitmap 源图片
      * @param isJpg 传入图片是否是jpg格式
+     * @param isRemoveLR 是否同时去除两边的黑边
      * @return 处理完成的bitmap
      * <p>如果处理失败则返回 null</p>
      *
      * */
-    public Bitmap removeImgBlackSide(Bitmap bitmap, Boolean isJpg) {
+    public Bitmap removeImgBlackSide(Bitmap bitmap, boolean isJpg, boolean isRemoveLR) {
         if (bitmap == null) {
             return null;
         }
@@ -727,27 +728,70 @@ public class Tools{
         if (area[1] > 0) {
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, bitmap.getHeight()-(height-area[1]));
         }
+
+        if (isRemoveLR) {
+            width = bitmap.getWidth();
+            height = bitmap.getHeight();
+            int[] area2 = getImgBlackAreaLR(bitmap, isJpg);
+            if (area2[0] > 0) {
+                bitmap = Bitmap.createBitmap(bitmap, area2[0], 0, width-area2[0], height);
+            }
+            if (area2[1] > 0) {
+                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth()-(width-area2[1]), height);
+            }
+        }
+
         return bitmap;
     }
 
 
     /**
-     * 检查指定行是否为无内容区域（仅检查横向）
+     * 检查指定行是否为无内容区域
      *
      * @param bitmap 源bitmap
      *@param y 欲检查的行的坐标
      * @return 是否为无内容区域
      *
      * */
-    private boolean checkLineColorIsBlack(Bitmap bitmap, int y, boolean isjpg) {
+    private boolean checkLineColorIsBlackHorizontal(Bitmap bitmap, int y, boolean isjpg) {
         int len = bitmap.getWidth();
         int NotBlackNum = 0;
         int color;
         for (int i=0;i<len;i+=2) {    //空一个像素检测一次，节省时间
             color = bitmap.getPixel(i, y);
-            //Log.i("nidaye", "i="+i+" y="+y);
-            //Log.i("nidaye", "color="+color);
-            //Log.i("el", "ALPHA="+Color.alpha(color));
+            if (isjpg) {
+                if (color != Color.BLACK || Color.alpha(color) != 255) {
+                    NotBlackNum++;
+                }
+            }
+            else {
+                if (Color.alpha(color) == 255 |   //不是透明边
+                        (color != Color.BLACK & Color.alpha(color) == 255)) {   //不是黑边
+                    NotBlackNum++;
+                }
+            }
+        }
+
+        if (NotBlackNum > AllowNotBlackNums) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 检查指定列是否为无内容区域
+     *
+     * @param bitmap 源bitmap
+     *@param x 欲检查的行的坐标
+     * @return 是否为无内容区域
+     *
+     * */
+    private boolean checkLineColorIsBlackVertical(Bitmap bitmap, int x, boolean isjpg) {
+        int len = bitmap.getHeight();
+        int NotBlackNum = 0;
+        int color;
+        for (int i=0;i<len;i+=2) {    //空一个像素检测一次，节省时间
+            color = bitmap.getPixel(x, i);
             if (isjpg) {
                 if (color != Color.BLACK || Color.alpha(color) != 255) {
                     NotBlackNum++;
@@ -776,7 +820,7 @@ public class Tools{
     private int[] getImgBlackArea(Bitmap bitmap, boolean isJpg) {
         int i = 0;
         int temp1, temp2, blackLineNums=0;
-        Boolean lineIsBlack = checkLineColorIsBlack(bitmap, i, isJpg);
+        Boolean lineIsBlack = checkLineColorIsBlackHorizontal(bitmap, i, isJpg);
         while (true) {
             if (i >= bitmap.getHeight()/2) {
                 Log.i(TAG, "i >= bitmap.getHeight()/2");
@@ -789,7 +833,7 @@ public class Tools{
             }
             if (blackLineNums >= AllowCheckBlackLines) break;
             i++;
-            lineIsBlack = checkLineColorIsBlack(bitmap, i, isJpg);
+            lineIsBlack = checkLineColorIsBlackHorizontal(bitmap, i, isJpg);
         }
         temp1 = i-AllowCheckBlackLines;
         temp2 = getImgBlackAreaDown(bitmap, isJpg);
@@ -797,13 +841,80 @@ public class Tools{
         return new int[]{temp1, temp2};
     }
 
+    private int[] getImgBlackAreaLR(Bitmap bitmap, boolean isJpg) {
+       int temp1 = getImgBlackAreaL(bitmap, isJpg);
+       int temp2 = getImgBlackAreaR(bitmap, isJpg);
+
+        return new int[]{temp1, temp2};
+    }
+
+    /**
+     * 获取左边的无内容区域
+     * */
+    private int getImgBlackAreaL(Bitmap bitmap, boolean isJpg) {
+        int i = 0;
+        int blackLineNums=0;
+        boolean lineIsBlack = checkLineColorIsBlackVertical(bitmap, i, isJpg);
+        while (true) {
+            if (i >= bitmap.getWidth()/2) {
+                Log.i(TAG, "i >= bitmap.getWidth()/2");
+                i = AllowCheckBlackLines;
+                break;
+            }
+            if (!lineIsBlack) blackLineNums++;
+            else {
+                blackLineNums = 0;
+            }
+            if (blackLineNums >= AllowCheckBlackLines) break;
+            i++;
+            lineIsBlack = checkLineColorIsBlackVertical(bitmap, i, isJpg);
+        }
+        return i-AllowCheckBlackLines;
+    }
+
+    /**
+     * 获取右边的无内容区域
+     * */
+    private int getImgBlackAreaR(Bitmap bitmap, boolean isJpg) {
+        int blackLineNums = 0;
+        boolean lineIsBlack;
+        int i = bitmap.getWidth()-1;   //FIXME 为什么要 -1  ？
+        Log.i("cao", "i="+i);
+        lineIsBlack = checkLineColorIsBlackVertical(bitmap, i, isJpg);
+        while (true) {
+            Log.i(TAG, "i="+i+" lineIsBlack="+lineIsBlack);
+            if (i <= bitmap.getWidth()/2) {
+                Log.i(TAG, "break case i out");
+                i = bitmap.getWidth();
+                break;
+            }
+            if (!lineIsBlack) {
+                blackLineNums++;
+                Log.i(TAG, "lineIsBlack:true");
+            }
+            else {
+                blackLineNums = 0;
+            }
+            if (blackLineNums >= AllowCheckBlackLines) {
+                Log.i(TAG, "break: blackLineNums="+blackLineNums+"AllowCheckBlackLines="+AllowCheckBlackLines);
+                break;
+            }
+            i--;
+            lineIsBlack = checkLineColorIsBlackVertical(bitmap, i, isJpg);
+        }
+        Log.i(TAG, "i="+i+" lineIsBlack="+lineIsBlack);
+
+        Log.i(TAG, "AllowCheckBlackLines="+AllowCheckBlackLines);
+        return i+AllowCheckBlackLines;
+    }
+
     private int getImgBlackAreaDown(Bitmap bitmap, boolean isJpg) {
         int blackLineNums = 0;
         boolean lineIsBlack;
-        int i = bitmap.getHeight()-1;
+        int i = bitmap.getHeight()-1;    //FIXME 为什么要 -1  ？
         //i = (int)((bitmap.getHeight())*0.6);
         Log.i("cao", "i="+i);
-        lineIsBlack = checkLineColorIsBlack(bitmap, i, isJpg);
+        lineIsBlack = checkLineColorIsBlackHorizontal(bitmap, i, isJpg);
         while (true) {
             Log.i(TAG, "i="+i+" lineIsBlack="+lineIsBlack);
             if (i <= bitmap.getHeight()/2) {
@@ -823,7 +934,7 @@ public class Tools{
                 break;
             }
             i--;
-            lineIsBlack = checkLineColorIsBlack(bitmap, i, isJpg);
+            lineIsBlack = checkLineColorIsBlackHorizontal(bitmap, i, isJpg);
         }
         Log.i(TAG, "i="+i+" lineIsBlack="+lineIsBlack);
 

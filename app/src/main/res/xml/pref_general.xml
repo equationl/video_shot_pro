@@ -166,6 +166,12 @@
                     android:key="isCheckBlankLines"
                     android:summary="@string/pref_description_CheckBlankLines"
                     android:title="@string/pref_title_CheckBlankLines" />
+                <SwitchPreference
+                    android:defaultValue="true"
+                    android:key="isRemoveLRBlackLines"
+                    android:dependency="isCheckBlankLines"
+                    android:summary="@string/pref_description_isRemoveLRBlackLines"
+                    android:title="@string/pref_title_isRemoveLRBlackLines" />
                 <EditTextPreference
                     android:defaultValue="@string/pref_edit_AllowNotBlackNums_default"
                     android:inputType="number"

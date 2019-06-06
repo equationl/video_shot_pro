@@ -369,7 +369,9 @@ public class MarkPictureActivity extends AppCompatActivity {
                 tool.AllowCheckBlackLines = Integer.valueOf(settings.getString("AllowCheckBlackLines", "10"));
                 tool.AllowNotBlackNums = Integer.valueOf(settings.getString("AllowNotBlackNums", "20"));
                 if (settings.getBoolean("isCheckBlankLines", true)) {
-                    bitmap = tool.removeImgBlackSide(getBitmapFromFile(file.split("\\.")[0]), isShotToJpg);
+                    bitmap = tool.removeImgBlackSide(getBitmapFromFile(file.split("\\.")[0]),
+                            isShotToJpg,
+                            settings.getBoolean("isRemoveLRBlackLines", true));
                 } else {
                     bitmap = getBitmapFromFile(file.split("\\.")[0]);
                 }

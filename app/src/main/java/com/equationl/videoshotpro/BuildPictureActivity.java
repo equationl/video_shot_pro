@@ -109,7 +109,7 @@ public class BuildPictureActivity extends AppCompatActivity {
         Bundle bundle = this.getIntent().getExtras();
         if (bundle != null) {
             fileList = bundle.getStringArray("fileList");
-            isFromExtra = bundle.getBoolean("isFromExtra");   //FIXME 如果没有开启图片排序，岂不是就废了？
+            isFromExtra = bundle.getBoolean("isFromExtra", false);
             isAutoBuild = bundle.getBoolean("isAutoBuild", false);
             SubtitleTop = bundle.getInt("SubtitleTop", 0);
             SubtitleBottom = bundle.getInt("SubtitleBottom", 0);
@@ -213,14 +213,19 @@ public class BuildPictureActivity extends AppCompatActivity {
         else if (item.getItemId() == android.R.id.home) {
             if (isBuildDone) {
                 utils.finishActivity(PlayerActivity.instance);
-                utils.finishActivity(MainActivity.instance);
                 utils.finishActivity(ChooseActivity.instance);
                 utils.finishActivity(MarkPictureActivity.instance);
-                Intent intent = new Intent(BuildPictureActivity.this, MainActivity.class);
-                startActivity(intent);
+                if (isFromExtra) {
+                    Intent intent = new Intent(BuildPictureActivity.this, MainActivity.class);
+                    startActivity(intent);
+                }
                 finish();
             }
             else {
+                if (isFromExtra) {
+                    Intent intent = new Intent(BuildPictureActivity.this, MainActivity.class);
+                    startActivity(intent);
+                }
                 finish();
             }
         }
@@ -243,6 +248,7 @@ public class BuildPictureActivity extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK)) {
             if (isBuildDone) {
+                //FIXME
                 utils.finishActivity(PlayerActivity.instance);
                 utils.finishActivity(MainActivity.instance);
                 utils.finishActivity(ChooseActivity.instance);
@@ -552,7 +558,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                                 if (screenHeight*2 < bm.getHeight()) {
                                     screenHeight = screenHeight * 2;
                                 }
-                                Bitmap newbm = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), screenHeight);    //FIXME 为啥显示不全呢？
+                                Bitmap newbm = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), screenHeight);
                                 Log.i(TAG, "buildPictureUpdateBitmap: newbitmap.height="+newbm.getHeight()+" newbitmap.width="+newbm.getWidth());
                                 //activity.imageViewPreview.setScaleType(ImageView.ScaleType.FIT_START);
                                 activity.imageViewPreview.setImageBitmap(newbm);
@@ -601,10 +607,12 @@ public class BuildPictureActivity extends AppCompatActivity {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         activity.utils.finishActivity(PlayerActivity.instance);
-                                        activity.utils.finishActivity(MainActivity.instance);
                                         activity.utils.finishActivity(MarkPictureActivity.instance);
-                                        Intent intent = new Intent(activity, MainActivity.class);
-                                        activity.startActivity(intent);
+                                        activity.utils.finishActivity(ChooseActivity.instance);
+                                        if (activity.isFromExtra) {
+                                            Intent intent = new Intent(activity, MainActivity.class);
+                                            activity.startActivity(intent);
+                                        }
                                         activity.finish();
                                     }
                                 }).setCancelable(false).show();

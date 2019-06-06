@@ -152,11 +152,7 @@ public class FloatWindowsService extends Service {
         mLayoutParams = new WindowManager.LayoutParams();
         mWindowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
 
-        DisplayMetrics metrics = new DisplayMetrics();
-        mWindowManager.getDefaultDisplay().getMetrics(metrics);
-        mScreenDensity = metrics.densityDpi;
-        mScreenWidth = metrics.widthPixels;
-        mScreenHeight = metrics.heightPixels;
+        initScreenSize();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             mLayoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -255,6 +251,7 @@ public class FloatWindowsService extends Service {
         Log.i(TAG, "call startScreenRecorder()");
         isOnScreenRecorder = true;
 
+        initScreenSize();
         setUpMediaProjection();
 
         if (mMediaProjection == null) {
@@ -278,14 +275,14 @@ public class FloatWindowsService extends Service {
             height = Integer.valueOf(videoSize[1]);
         }
 
-        Configuration mConfiguration = res.getConfiguration();
+        /*Configuration mConfiguration = res.getConfiguration();
         int ori = mConfiguration.orientation ;
         if(ori == Configuration.ORIENTATION_LANDSCAPE){ //横屏
             int temp = width;
             //noinspection SuspiciousNameCombination
             width = height;
             height = temp;
-        }
+        }   */
 
         Log.i(TAG, "width: "+width+" height: "+height);
         File file = new File(getExternalCacheDir(), "temp.mp4");
@@ -325,6 +322,7 @@ public class FloatWindowsService extends Service {
 
 
     private void createImageReader() {
+        initScreenSize();
         mImageReader = null;
         mImageReader = ImageReader.newInstance(mScreenWidth, mScreenHeight, PixelFormat.RGBA_8888, 1);
     }
@@ -355,6 +353,7 @@ public class FloatWindowsService extends Service {
     }
 
     private void virtualDisplay() {
+        initScreenSize();
         try {
             mVirtualDisplay = mMediaProjection.createVirtualDisplay("screen-mirror",
                     mScreenWidth, mScreenHeight, mScreenDensity, DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
@@ -419,7 +418,7 @@ public class FloatWindowsService extends Service {
     private void saveBitmapToFile(Bitmap bitmap) {
         File savePath = getExternalCacheDir();
         String fileName = ""+shot_num;
-        Boolean isReduce = settings.getBoolean("isShotToJpg", true);
+        boolean isReduce = settings.getBoolean("isShotToJpg", true);
         int quality = settings.getBoolean("isReduce_switch", false) ?
                 Integer.parseInt(settings.getString("reduce_value","100")): 100;
         try {
@@ -649,5 +648,13 @@ public class FloatWindowsService extends Service {
         } catch (FFmpegCommandAlreadyRunningException e) {
             Log.e(TAG, Log.getStackTraceString(e));
         }
+    }
+
+    private void initScreenSize() {
+        DisplayMetrics metrics = new DisplayMetrics();
+        mWindowManager.getDefaultDisplay().getMetrics(metrics);
+        mScreenDensity = metrics.densityDpi;
+        mScreenWidth = metrics.widthPixels;
+        mScreenHeight = metrics.heightPixels;
     }
 }

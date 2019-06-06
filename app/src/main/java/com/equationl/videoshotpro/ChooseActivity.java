@@ -267,9 +267,7 @@ public class ChooseActivity extends AppCompatActivity implements ChoosePictureAd
                 imagePaths = pictureAdapter.getImagePaths();
                 tool.sortCachePicture(imagePaths, this);
                 Intent intent = new Intent(ChooseActivity.this, MarkPictureActivity.class);
-                if (isFromExtra) {
-                    intent.putExtra("isFromExtra", true);
-                }
+                intent.putExtra("isFromExtra", isFromExtra);
                 startActivity(intent);
                 break;
             case R.id.choosePicture_menu_edit:

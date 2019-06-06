@@ -18,6 +18,8 @@ import android.widget.Toast;
 import com.yancy.gallerypick.utils.AppUtils;
 
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -233,6 +235,18 @@ public class Utils {
             return String.format(Locale.CHINA,"%.2fMB", bytes/1048576.0);
         }
         return String.format(Locale.CHINA,"%.2fGB", bytes/1073741824.0);
+    }
+
+    public void copyAssets2Local(Context context, String asset, String savePath) throws IOException {
+        InputStream is = context.getResources().getAssets().open(asset);
+        FileOutputStream fos = new FileOutputStream(savePath);
+        byte[] buffer = new byte[8192];
+        int count;
+        while ((count = is.read(buffer)) > 0){
+            fos.write(buffer, 0, count);
+        }
+        fos.close();
+        is.close();
     }
 
     private static String convertHashToString(byte[] md5Bytes) {

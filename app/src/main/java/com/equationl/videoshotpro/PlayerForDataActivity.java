@@ -573,9 +573,6 @@ public class PlayerForDataActivity extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK)) {
             if (Do.equals("FrameByFrame")) {
-                utils.finishActivity(MainActivity.instance);
-                Intent intent = new Intent(PlayerForDataActivity.this, MainActivity.class);
-                startActivity(intent);
                 finish();
             }
             return super.onKeyDown(keyCode, event);
