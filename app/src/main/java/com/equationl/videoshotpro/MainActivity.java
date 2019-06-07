@@ -178,6 +178,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tool = new Tools();
         res = getResources();
 
+        //FIXME 应该从根源入手。找到为何启动了MainActivity就打不开其他Activity的原因，而不是老是这样投机取巧
+        if (Utils.isServiceRunning(this, FloatWindowsService.class)) {
+            Log.i(TAG, "initLayout: FloatWindowsService are running");
+            Toast.makeText(this, R.string.main_toast_launcherWhenFloatServiceIsRunning, Toast.LENGTH_LONG).show();
+            finish();
+        }
+
         if (sp_init.getBoolean("isFirstBoot", true)) {
             //FIXME 显示警告某些应用商城审核就不给过？？？？
             //showAlertDialog();

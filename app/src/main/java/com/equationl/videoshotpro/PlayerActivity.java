@@ -24,9 +24,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.equationl.videoshotpro.Image.Tools;
+import com.equationl.videoshotpro.utils.Utils;
 import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
+import com.google.android.exoplayer.util.Util;
 import com.shuyu.gsyvideoplayer.GSYVideoManager;
 import com.shuyu.gsyvideoplayer.player.PlayerFactory;
 import com.shuyu.gsyvideoplayer.player.SystemPlayerManager;
@@ -128,6 +130,8 @@ public class PlayerActivity extends AppCompatActivity {
         ffmpeg = FFmpeg.getInstance(this);
         settings = PreferenceManager.getDefaultSharedPreferences(this);
         res = getResources();
+
+        Utils.finishActivity(ShortCutsActivity.instance);
 
         Uri uri = getIntent().getData();
         checkUri(uri);

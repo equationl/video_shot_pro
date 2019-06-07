@@ -57,7 +57,6 @@ public class MarkPictureActivity extends AppCompatActivity {
     SharedPreferences settings, sp_init;
     boolean isLongPress = false;
     TextView text_markStatus, text_markDoneTip;
-    Utils utils = new Utils();
     Thread checkPictureThread = new Thread(new CheckPictureThread());
 
 
@@ -302,7 +301,7 @@ public class MarkPictureActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-            utils.finishActivity(ChooseActivity.instance);
+            Utils.finishActivity(ChooseActivity.instance);
             finish();
             return true;
         }
@@ -331,6 +330,11 @@ public class MarkPictureActivity extends AppCompatActivity {
         }
         if (pic_num < 1) {
             Toast.makeText(this, R.string.markPicture_toast_readFile_fail, Toast.LENGTH_SHORT).show();
+            if (isFromExtra) {
+                Utils.finishActivity(MainActivity.instance);
+                Intent intent = new Intent(MarkPictureActivity.this, MainActivity.class);
+                startActivity(intent);
+            }
             finish();
         }
         else {
@@ -347,7 +351,7 @@ public class MarkPictureActivity extends AppCompatActivity {
             Message msg;
             int i = 0;
             File path = new File(getExternalCacheDir().toString());
-            Boolean isShotToJpg = settings.getBoolean("isShotToJpg", true);
+            boolean isShotToJpg = settings.getBoolean("isShotToJpg", true);
             String[] files = path.list();
             String name;
             Bitmap bitmap;

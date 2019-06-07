@@ -109,12 +109,12 @@ public class ScreenRecorder extends Thread {
     private void recordVirtualDisplay() {
         while (!mQuit.get()) {
             int index = mEncoder.dequeueOutputBuffer(mBufferInfo, TIMEOUT_US);
-            Log.i(TAG, "dequeue output buffer index=" + index);
+            //Log.i(TAG, "dequeue output buffer index=" + index);
             if (index == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
                 resetOutputFormat();
 
             } else if (index == MediaCodec.INFO_TRY_AGAIN_LATER) {
-                Log.d(TAG, "retrieving buffers time out!");
+                //Log.d(TAG, "retrieving buffers time out!");
                 try {
                     // wait 10ms
                     Thread.sleep(10);
@@ -177,6 +177,15 @@ public class ScreenRecorder extends Thread {
 
     @TargetApi(21)
     private void prepareEncoder() throws IOException {
+
+        //见： https://blog.csdn.net/zhang___yong/article/details/82760756
+        if ((mWidth & 1)  == 1) {
+            mWidth--;
+        }
+        if ((mHeight & 1) == 1) {
+            mHeight--;
+        }
+
         MediaFormat format = MediaFormat.createVideoFormat(MIME_TYPE, mWidth, mHeight);
         format.setInteger(MediaFormat.KEY_COLOR_FORMAT,
                 MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
@@ -209,6 +218,13 @@ public class ScreenRecorder extends Thread {
         if (mMuxer != null) {
             try {
                 mMuxer.stop();
+            } catch (IllegalStateException e) {
+                if (mMediaMuxerErrorListener != null) {
+                    mMediaMuxerErrorListener.onError(e);
+                }
+                Log.e(TAG, Log.getStackTraceString(e));
+            }
+            try {
                 mMuxer.release();
                 mMuxer = null;
             } catch (Exception e) {
@@ -216,5 +232,16 @@ public class ScreenRecorder extends Thread {
             }
 
         }
+    }
+
+
+
+    public interface onMediaMuxerErrorListener {
+        void onError(IllegalStateException e);
+    }
+    private onMediaMuxerErrorListener mMediaMuxerErrorListener;
+
+    public void setOnMediaMuxerErrorLister(onMediaMuxerErrorListener mMediaMuxerErrorListener) {
+        this.mMediaMuxerErrorListener = mMediaMuxerErrorListener;
     }
 }

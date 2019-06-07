@@ -12,7 +12,6 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -82,6 +81,7 @@ public class FloatWindowsService extends Service {
     boolean isOnScreenRecorder = false;
     boolean isOnBuildGif = false;
     boolean isOnBuildGifPalettePic = false;
+    boolean isScreenRecoderDone = false;
 
     private final MyHandler handler = new MyHandler(this);
     private static final String TAG = "el,In FWService";
@@ -90,6 +90,7 @@ public class FloatWindowsService extends Service {
     private static final int HandlerVideo2GifFail = 10002;
     private static final int HandlerVideo2GifSuccess = 10003;
     private static final int HandlerVideo2GifFinish = 10004;
+    private static final int HandlerRecorderScreenTimeTooShort = 20000;
 
     @Override
     public void onCreate() {
@@ -182,6 +183,9 @@ public class FloatWindowsService extends Service {
                 if (!isOnBuildGif) {
                     startScreenShot();
                 }
+                else {
+                    Log.w(TAG, "onClick: OnBuildGif, skip ClickListener");
+                }
             }
         });
 
@@ -193,6 +197,9 @@ public class FloatWindowsService extends Service {
                         settings.getBoolean("isShotGif", false)) {
                     mFloatView.setVisibility(View.INVISIBLE);
                     startScreenRecorder();
+                }
+                else {
+                    Log.w(TAG, "onLongClick: OnBuildGif or close shot gif, skip ClickListener");
                 }
                 return false;
             }
@@ -214,13 +221,16 @@ public class FloatWindowsService extends Service {
                         break;
                     case MotionEvent.ACTION_UP:
                         Log.i(TAG, "mFloatView -> up");
+                        isScreenRecoderDone = true;
                         if (isOnScreenRecorder) {
                             if (mRecorder != null) {
                                 mRecorder.quit();
                                 mRecorder = null;
                                 mFloatView.setVisibility(View.VISIBLE);
                                 tearDownMediaProjection();
-                                video2Gif();
+                                if (isScreenRecoderDone) {
+                                    video2Gif();
+                                }
                             }
                             isOnScreenRecorder = false;
                             return true;
@@ -244,6 +254,9 @@ public class FloatWindowsService extends Service {
         if (!video2gifThread.isAlive()) {
             video2gifThread= new Thread(new Video2GifThread());
             video2gifThread.start();
+        }
+        else {
+            Log.w(TAG, "video2Gif: 转换线程仍在运行中！");
         }
     }
 
@@ -275,15 +288,6 @@ public class FloatWindowsService extends Service {
             height = Integer.valueOf(videoSize[1]);
         }
 
-        /*Configuration mConfiguration = res.getConfiguration();
-        int ori = mConfiguration.orientation ;
-        if(ori == Configuration.ORIENTATION_LANDSCAPE){ //横屏
-            int temp = width;
-            //noinspection SuspiciousNameCombination
-            width = height;
-            height = temp;
-        }   */
-
         Log.i(TAG, "width: "+width+" height: "+height);
         File file = new File(getExternalCacheDir(), "temp.mp4");
         if (file.exists()) {
@@ -296,6 +300,13 @@ public class FloatWindowsService extends Service {
         Log.i(TAG, "video cache path: "+file.getAbsolutePath());
         //Log.i(TAG, "video_frameRate= "+video_frameRate);
         mRecorder = new ScreenRecorder(width, height, Integer.valueOf(video_frameRate), 1, mMediaProjection, file.getAbsolutePath());
+        mRecorder.setOnMediaMuxerErrorLister(new ScreenRecorder.onMediaMuxerErrorListener() {
+            @Override
+            public void onError(IllegalStateException e) {
+                isScreenRecoderDone = false;
+                handler.sendEmptyMessage(HandlerRecorderScreenTimeTooShort);
+            }
+        });
         mRecorder.start();
     }
 
@@ -529,6 +540,8 @@ public class FloatWindowsService extends Service {
                         activity.mFloatView.setVisibility(View.VISIBLE);
                         break;
                     case HandlerVideo2GifFail:
+                        activity.clearCacheFile();
+                        activity.isOnBuildGif = false;
                         Log.e(TAG, msg.obj.toString());
                         Toast.makeText(activity, R.string.floatWindowsService_toast_saveVideo2Gif_fail, Toast.LENGTH_SHORT).show();
                         //activity.mFloatView.setClickable(true);
@@ -539,22 +552,19 @@ public class FloatWindowsService extends Service {
                         break;
                     case HandlerVideo2GifSuccess:
                         if (!activity.isOnBuildGifPalettePic) {
+                            activity.clearCacheFile();
+                            activity.isOnBuildGif = false;
                             MediaScannerConnection.scanFile(activity, new String[]{msg.obj.toString()}, null, null);
                             Toast.makeText(activity, R.string.floatWindowsService_toast_saveVideo2Gif_success, Toast.LENGTH_SHORT).show();
                         }
                         //activity.mFloatView.setClickable(true);
                         break;
                     case HandlerVideo2GifFinish:
-                        File f = (File) msg.obj;
-                        if (!f.delete()) {
-                            Log.i(TAG, "delete cache file fail");
-                        }
-                        File palettePicFile = new File(activity.getExternalCacheDir(), "PalettePic.png");
-                        if (!palettePicFile.delete()) {
-                            Log.e(TAG, "delete palettePicFile fail");
-                        }
-                        activity.isOnBuildGif = false;
+                        Log.i(TAG, "handleMessage: HandlerVideo2GifFinish");
                         break;
+                    case HandlerRecorderScreenTimeTooShort:
+                        activity.isScreenRecoderDone = false;
+                        Toast.makeText(activity, R.string.floatWindowsService_toast_RecorderScreenTimeTooShort, Toast.LENGTH_LONG).show();
                 }
             }
         }
@@ -569,7 +579,7 @@ public class FloatWindowsService extends Service {
             String palettePicPath = new File(getExternalCacheDir(), "PalettePic.png").getAbsolutePath();
             final String save_path =  tool.getSaveRootPath() + "/" + date;
             final File video_path = new File(getExternalCacheDir(), "temp.mp4");
-            String cmd[];
+            String[] cmd;
             if (!isOnBuildGifPalettePic) {
                 if (settings.getBoolean("isShotHighQualityGif", false)) {
                     isOnBuildGifPalettePic = true;
@@ -600,6 +610,7 @@ public class FloatWindowsService extends Service {
 
                 @Override
                 public void onStart() {
+                    Log.i(TAG, "ffmpeg onStart");
                     handler.sendEmptyMessage(HandlerVideo2GifStart);
                 }
 
@@ -608,6 +619,8 @@ public class FloatWindowsService extends Service {
 
                 @Override
                 public void onFailure(String message) {
+                    Log.i(TAG, "ffmpeg onFailure");
+                    isOnBuildGifPalettePic = false;
                     Message msg = Message.obtain();
                     msg.obj = message;
                     msg.what = HandlerVideo2GifFail;
@@ -616,6 +629,7 @@ public class FloatWindowsService extends Service {
 
                 @Override
                 public void onSuccess(String message) {
+                    Log.i(TAG, "ffmpeg onSuccess:");
                     if (isOnBuildGifPalettePic) {
                         isOnBuildGifPalettePic = false;
                         String palettePicPath = new File(getExternalCacheDir(), "PalettePic.png").getAbsolutePath();
@@ -629,7 +643,7 @@ public class FloatWindowsService extends Service {
                     }
                     else {
                         Message msg = Message.obtain();
-                        msg.obj = save_path;
+                        msg.obj = video_path;
                         msg.what = HandlerVideo2GifSuccess;
                         handler.sendMessage(msg);
                     }
@@ -637,6 +651,7 @@ public class FloatWindowsService extends Service {
 
                 @Override
                 public void onFinish() {
+                    Log.i(TAG, "ffmpeg onFinish");
                     if (isOnBuildGifPalettePic) {
                         Message msg = Message.obtain();
                         msg.obj = video_path;
@@ -646,7 +661,12 @@ public class FloatWindowsService extends Service {
                 }
             });
         } catch (FFmpegCommandAlreadyRunningException e) {
+            Log.i(TAG, "ffmpeg executeShotGif fail");
             Log.e(TAG, Log.getStackTraceString(e));
+            Message msg = Message.obtain();
+            msg.obj = video_path;
+            msg.what = HandlerVideo2GifFinish;
+            handler.sendMessage(msg);
         }
     }
 
@@ -656,5 +676,17 @@ public class FloatWindowsService extends Service {
         mScreenDensity = metrics.densityDpi;
         mScreenWidth = metrics.widthPixels;
         mScreenHeight = metrics.heightPixels;
+    }
+
+    private void clearCacheFile() {
+        File f = new File(getExternalCacheDir(), "temp.mp4");
+        if (!f.delete()) {
+            Log.e(TAG, "delete cache file fail");
+        }
+        File palettePicFile = new File(getExternalCacheDir(), "PalettePic.png");
+        if (!palettePicFile.delete()) {
+            Log.e(TAG, "delete palettePicFile fail");
+        }
+        isOnBuildGif = false;
     }
 }

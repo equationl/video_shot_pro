@@ -70,7 +70,6 @@ public class BuildPictureActivity extends AppCompatActivity {
     Thread t, t_2;
     Tencent mTencent;
     Bitmap final_bitmap;
-    Utils utils = new Utils();
     boolean isAllFullPicture = false;
 
     private final MyHandler handler = new MyHandler(this);
@@ -212,10 +211,11 @@ public class BuildPictureActivity extends AppCompatActivity {
         }
         else if (item.getItemId() == android.R.id.home) {
             if (isBuildDone) {
-                utils.finishActivity(PlayerActivity.instance);
-                utils.finishActivity(ChooseActivity.instance);
-                utils.finishActivity(MarkPictureActivity.instance);
+                Utils.finishActivity(PlayerActivity.instance);
+                Utils.finishActivity(ChooseActivity.instance);
+                Utils.finishActivity(MarkPictureActivity.instance);
                 if (isFromExtra) {
+                    Utils.finishActivity(MainActivity.instance);
                     Intent intent = new Intent(BuildPictureActivity.this, MainActivity.class);
                     startActivity(intent);
                 }
@@ -223,6 +223,7 @@ public class BuildPictureActivity extends AppCompatActivity {
             }
             else {
                 if (isFromExtra) {
+                    Utils.finishActivity(MainActivity.instance);
                     Intent intent = new Intent(BuildPictureActivity.this, MainActivity.class);
                     startActivity(intent);
                 }
@@ -248,13 +249,14 @@ public class BuildPictureActivity extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK)) {
             if (isBuildDone) {
-                //FIXME
-                utils.finishActivity(PlayerActivity.instance);
-                utils.finishActivity(MainActivity.instance);
-                utils.finishActivity(ChooseActivity.instance);
-                utils.finishActivity(MarkPictureActivity.instance);
-                Intent intent = new Intent(BuildPictureActivity.this, MainActivity.class);
-                startActivity(intent);
+                Utils.finishActivity(PlayerActivity.instance);
+                Utils.finishActivity(ChooseActivity.instance);
+                Utils.finishActivity(MarkPictureActivity.instance);
+                if (isFromExtra) {
+                    Utils.finishActivity(MainActivity.instance);
+                    Intent intent = new Intent(BuildPictureActivity.this, MainActivity.class);
+                    startActivity(intent);
+                }
                 finish();
             }
             return false;
@@ -324,65 +326,67 @@ public class BuildPictureActivity extends AppCompatActivity {
             Message msg;
             int len = fileList.length;
             final_bitmap = Bitmap.createBitmap(bWidth,1, getColorConfig());
-            for (int i=0;i<len;i++) {
-                Log.i(TAG, "BuildThred run: "+i+" fileStatus:"+fileList[i]);
+            for (int i = 0; i < len; i++) {
+                Log.i(TAG, "BuildThred run: " + i + " fileStatus:" + fileList[i]);
                 msg = Message.obtain();
-                msg.obj = "处理第"+i+"张图片";
+                msg.obj = "处理第" + i + "张图片";
                 msg.what = HandlerStatusBuildPictureNext;
                 handler.sendMessage(msg);
-                if (fileList[i].equals("cut")) {
-                    try {
-                        final_bitmap = addBitmap(final_bitmap,cutBitmap(getBitmap(i+"")));
-                    }
-                    catch (OutOfMemoryError e) {
-                        showDialogOutOfMemory();
-                        isRunning = false;
+                switch (fileList[i]) {
+                    case "cut": {
+                        try {
+                            final_bitmap = addBitmap(final_bitmap, cutBitmap(getBitmap(i + "")));
+                        } catch (OutOfMemoryError e) {
+                            showDialogOutOfMemory();
+                            isRunning = false;
+                            break;
+                        }
+                        boolean isShow = settings.getBoolean("isMonitoredShow", false);
+                        if (isShow) {
+                            msg = Message.obtain();
+                            msg.obj = final_bitmap;
+                            msg.what = HandlerStatusBuildPictureUpdateBitmap;
+                            handler.sendMessage(msg);
+                        }
                         break;
                     }
-                    Boolean isShow = settings.getBoolean("isMonitoredShow", false);
-                    if (isShow) {
-                        msg = Message.obtain();
-                        msg.obj = final_bitmap;
-                        msg.what = HandlerStatusBuildPictureUpdateBitmap;
-                        handler.sendMessage(msg);
-                    }
-                }
-                else if (fileList[i].equals("all")) {
-                    try {
-                        final_bitmap = addBitmap(final_bitmap,getBitmap(i+""));
-                    }
-                    catch (OutOfMemoryError e) {
-                        showDialogOutOfMemory();
-                        isRunning = false;
+                    case "all": {
+                        try {
+                            final_bitmap = addBitmap(final_bitmap, getBitmap(i + ""));
+                        } catch (OutOfMemoryError e) {
+                            showDialogOutOfMemory();
+                            isRunning = false;
+                            break;
+                        }
+                        boolean isShow = settings.getBoolean("isMonitoredShow", false);
+                        if (isShow) {
+                            msg = Message.obtain();
+                            msg.obj = final_bitmap;
+                            msg.what = HandlerStatusBuildPictureUpdateBitmap;
+                            handler.sendMessage(msg);
+                        }
                         break;
                     }
-                    Boolean isShow = settings.getBoolean("isMonitoredShow", false);
-                    if (isShow) {
-                        msg = Message.obtain();
-                        msg.obj = final_bitmap;
-                        msg.what = HandlerStatusBuildPictureUpdateBitmap;
-                        handler.sendMessage(msg);
-                    }
-                }
-                else if (fileList[i].equals("text")) {
-                    try {
-                        final_bitmap = addBitmap(final_bitmap,getBitmap(i+"_t"));
-                    }
-                    catch (OutOfMemoryError e) {
-                        showDialogOutOfMemory();
-                        isRunning = false;
+                    case "text": {
+                        try {
+                            final_bitmap = addBitmap(final_bitmap, getBitmap(i + "_t"));
+                        } catch (OutOfMemoryError e) {
+                            showDialogOutOfMemory();
+                            isRunning = false;
+                            break;
+                        }
+                        boolean isShow = settings.getBoolean("isMonitoredShow", false);
+                        if (isShow) {
+                            msg = Message.obtain();
+                            msg.obj = final_bitmap;
+                            msg.what = HandlerStatusBuildPictureUpdateBitmap;
+                            handler.sendMessage(msg);
+                        }
                         break;
                     }
-                    boolean isShow = settings.getBoolean("isMonitoredShow", false);
-                    if (isShow) {
-                        msg = Message.obtain();
-                        msg.obj = final_bitmap;
-                        msg.what = HandlerStatusBuildPictureUpdateBitmap;
-                        handler.sendMessage(msg);
-                    }
-                }
-                else {
-                    delete_nums++;
+                    default:
+                        delete_nums++;
+                        break;
                 }
             }
             Boolean isAddWatermark = settings.getBoolean("isAddWatermark_switch",true);
@@ -606,10 +610,11 @@ public class BuildPictureActivity extends AppCompatActivity {
                                 .setNegativeButton(R.string.buildPicture_btn_oom_exit, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        activity.utils.finishActivity(PlayerActivity.instance);
-                                        activity.utils.finishActivity(MarkPictureActivity.instance);
-                                        activity.utils.finishActivity(ChooseActivity.instance);
+                                        Utils.finishActivity(PlayerActivity.instance);
+                                        Utils.finishActivity(MarkPictureActivity.instance);
+                                        Utils.finishActivity(ChooseActivity.instance);
                                         if (activity.isFromExtra) {
+                                            Utils.finishActivity(MainActivity.instance);
                                             Intent intent = new Intent(activity, MainActivity.class);
                                             activity.startActivity(intent);
                                         }

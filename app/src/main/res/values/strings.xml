@@ -295,6 +295,7 @@
     <string name="main_toast_unSelectedPic">你还没有选择任何图片哦</string>
     <string name="main_toast_deleteDirectory_fail">删除文件夹出错</string>
     <string name="main_toast_deleteFile_fail">删除文件出错</string>
+    <string name="main_toast_launcherWhenFloatServiceIsRunning">请勿直接启动APP，请从通知栏点击启动！</string>
 
     <string name="main_nav_text_autoBuild">智能合成（测试）</string>
     <string name="main_nav_text_ffmpeg">FFmpeg命令行</string>
@@ -419,6 +420,7 @@
     <string name="floatWindowsService_toast_saveVideo2Gif_fail">生成GIF失败！</string>
     <string name="floatWindowsService_toast_saveVideo2Gif_success">GIF已保存！</string>
     <string name="floatWindowsService_toast_deleteCacheFile_fail">清除缓存失败！</string>
+    <string name="floatWindowsService_toast_RecorderScreenTimeTooShort">录制时间过短！</string>
 
     <string name="title_activity_buildPicture">开始生成</string>
     <string name="title_activity_markSubtitle">调整字幕位置</string>
@@ -600,7 +602,7 @@
 
     <string name="pref_title_isShotGif">长按截取动图</string>
     <string name="pref_description_isShotGif">选择是否在截取图片时长按 截取按钮 截取GIF动图</string>
-    <string name="pref_title_gif_RP">动图分辨率</string>
+    <string name="pref_title_gif_RP">动图分辨率（对于高清视频和高分辨率手机不建议开启原图）</string>
     <string-array name="pref_gif_RP_titles">
         <item>缩放至1/2</item>
         <item>缩放至1/4</item>
@@ -613,7 +615,7 @@
         <item>8</item>
         <item>-1</item>
     </string-array>
-    <string name="pref_title_gif_frameRate">动图帧率</string>
+    <string name="pref_title_gif_frameRate">动图帧率（对于高清视频和高分辨率手机不建议开启原帧率）</string>
     <string-array name="pref_gif_frameRate_titles">
         <item>1</item>
         <item>14</item>
@@ -629,7 +631,7 @@
         <item>-1</item>
     </string-array>
 
-    <string name="pref_title_gif_MinTime">允许截取动图最短时间（谨慎修改）</string>
+    <string name="pref_title_gif_MinTime">允许截取动图最短时间</string>
     <string-array name="pref_gif_MinTime_titles">
         <item>1s</item>
         <item>2s</item>
@@ -655,6 +657,8 @@
 
     <string name="shortcut_float_ShortLabel">开始截图</string>
     <string name="shortcut_float_LongLabel">外部程序截图</string>
+    
+    <string name="shortcut_toast_unknownMode">非法访问！</string>
 
     <string name="title_activity_about">关于</string>
     <string name="about_toast_checkUpdate">正在检查更新&#8230;</string>

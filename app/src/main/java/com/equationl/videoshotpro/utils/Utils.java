@@ -2,6 +2,8 @@ package com.equationl.videoshotpro.utils;
 
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -50,7 +52,7 @@ public class Utils {
         return statusHeight;
     }
 
-    public void finishActivity(Activity context) {
+    public static void finishActivity(Activity context) {
         try {
             context.finish();
         } catch (NullPointerException e) {
@@ -247,6 +249,29 @@ public class Utils {
         }
         fos.close();
         is.close();
+    }
+
+    /**
+     * 判断某个service是否正在运行
+     *
+     * @param context context
+     * @param runService
+     *            要验证的service组件的类名
+     * @return 是否正在运行
+     */
+    public static boolean isServiceRunning(Context context,
+                                           Class<? extends Service> runService) {
+        ActivityManager am = (ActivityManager) context
+                .getSystemService(Context.ACTIVITY_SERVICE);
+        ArrayList<ActivityManager.RunningServiceInfo> runningService = (ArrayList<ActivityManager.RunningServiceInfo>) am
+                .getRunningServices(1024);
+        for (int i = 0; i < runningService.size(); ++i) {
+            if (runService.getName().equals(
+                    runningService.get(i).service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static String convertHashToString(byte[] md5Bytes) {

@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 import com.equationl.videoshotpro.Adapter.ChoosePictureAdapter;
 import com.equationl.videoshotpro.Image.Tools;
+import com.equationl.videoshotpro.utils.Utils;
 import com.huxq17.handygridview.HandyGridView;
 import com.huxq17.handygridview.listener.OnItemCapturedListener;
 import com.tencent.bugly.crashreport.CrashReport;
@@ -332,6 +333,11 @@ public class ChooseActivity extends AppCompatActivity implements ChoosePictureAd
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (isFromExtra) {
+                Utils.finishActivity(MainActivity.instance);
+                Intent intent = new Intent(ChooseActivity.this, MainActivity.class);
+                startActivity(intent);
+            }
             finish();
             return true;
         }

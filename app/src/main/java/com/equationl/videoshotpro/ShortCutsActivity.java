@@ -1,5 +1,6 @@
 package com.equationl.videoshotpro;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
@@ -17,18 +18,18 @@ import com.equationl.videoshotpro.utils.Utils;
 public class ShortCutsActivity extends AppCompatActivity {
     Tools tool;
 
+    @SuppressLint("StaticFieldLeak")
+    public static ShortCutsActivity instance = null;    //FIXME  暂时这样吧，实在找不到更好的办法了
+
     private static final int RequestCodeQuickStart = 1000;
     private static final int IntentResultCodeMediaProjection = 10;
-
-    Utils utils = new Utils();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_short_cuts);
 
-        //Toast.makeText(this, getIntent().getData().toString(), Toast.LENGTH_SHORT).show();
-
+        instance = this;
         tool = new Tools();
 
         String mode = getIntent().getData().toString();
@@ -36,11 +37,15 @@ public class ShortCutsActivity extends AppCompatActivity {
         if (mode.equals("quick")) {
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("video/*");
-            intent.addCategory(intent.CATEGORY_OPENABLE);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
             startActivityForResult(Intent.createChooser(intent, "请选择视频文件"),RequestCodeQuickStart);
         }
         else if (mode.equals("float")) {
             showFloatBtn();
+        }
+        else {
+            Toast.makeText(this, R.string.shortcut_toast_unknownMode, Toast.LENGTH_SHORT).show();
+            finish();
         }
 
     }
@@ -52,11 +57,12 @@ public class ShortCutsActivity extends AppCompatActivity {
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == IntentResultCodeMediaProjection) {
                 Log.i("EL", "try Start Service");
-                utils.finishActivity(BuildPictureActivity.instance);
+                Utils.finishActivity(BuildPictureActivity.instance);
 
                 FloatWindowsService.setResultData(data);
                 Intent startService = new Intent(this, FloatWindowsService.class);
                 startService(startService);
+                finish();
             }
 
             else if (requestCode == RequestCodeQuickStart){
@@ -66,10 +72,13 @@ public class ShortCutsActivity extends AppCompatActivity {
                 intent.setData(uri);
                 startActivity(intent);
             }
+            else {
+                finish();
+            }
         }
-        /*else {
-            Toast.makeText(getApplicationContext(),R.string.main_toast_chooseFile_fail,Toast.LENGTH_LONG).show();
-        }*/
+        else {
+            finish();
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -80,7 +89,7 @@ public class ShortCutsActivity extends AppCompatActivity {
         }
 
         MediaProjectionManager mediaProjectionManager = (MediaProjectionManager)
-                getSystemService(this.MEDIA_PROJECTION_SERVICE);
+                getSystemService(MEDIA_PROJECTION_SERVICE);
         startActivityForResult(
                 mediaProjectionManager.createScreenCaptureIntent(),
                 IntentResultCodeMediaProjection);
