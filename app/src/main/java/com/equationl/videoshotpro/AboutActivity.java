@@ -230,7 +230,7 @@ public class AboutActivity extends AppCompatActivity {
             startActivity(intent);
         } catch (Exception e) {
             Log.e(TAG, "gotoMmpay: ", e);
-            Toast.makeText(this, "无法跳转到微信，请检查是否安装了微信", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.about_toast_gotoMmPay_fail, Toast.LENGTH_LONG).show();
         }
     }
 

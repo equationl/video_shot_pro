@@ -6,6 +6,8 @@
     </string>
 
     <string name="about_right_text">
+        GSYVideoPlayer：https://github.com/CarGuo/GSYVideoPlayer  \n
+        -------------\n
         FloatWindowPermission：https://github.com/zhaozepeng/FloatWindowPermission  \n
         -------------\n
         ScreenCapture ： https://github.com/goodbranch/ScreenCapture  \n
@@ -13,8 +15,6 @@
         ffmpeg-android-java：https://github.com/writingminds/ffmpeg-android-java \n
          -------------\n
         GalleryPick：https://github.com/YancyYe/GalleryPick \n
-         -------------\n
-        Ucrop：https://github.com/jdamcd/android-crop \n
          -------------\n
         glide：https://github.com/bumptech/glide  \n
         --------------\n
@@ -28,17 +28,25 @@
         --------------\n
         FancyShowCaseView: https://github.com/faruktoptas/FancyShowCaseView \n
         --------------\n
-        ImageWatcher: https://github.com/iielse/ImageWatcher \n
+        BigImageViewPager: https://github.com/SherlockGougou/BigImageViewPager \n
         --------------\n
         SwipeCardsView: https://github.com/huxq17/SwipeCardsView \n
         --------------\n
         AutoLoadmore: https://github.com/burgessjp/AutoLoadmore \n
         --------------\n
-        特别感谢：\n
+        GADownloading：https://github.com/Ajian-studio/GADownloading  \n
+        --------------\n
+        okdownload：https://github.com/lingochamp/okdownload    \n
+        --------------\n
+        ImageCrop：https://github.com/guoyanqiu/ImageCrop   \n
+        --------------\n
+        Thanks：\n
         --------------\n
         Bugly：https://bugly.qq.com   \n
         Material Design Icons：https://materialdesignicons.com    \n
-        以及 tyanboot.pw 对本app的支持
+        Iconfont：https://www.iconfont.cn   \n
+        Baidu AI：http://ai.baidu.com    \n
+        And tyanboot.pw \'s support
     </string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -185,13 +193,7 @@
          <string name="floatWindowsService_notice_content">Click to start making</string>
          <string name="floatWindowsService_notice_title">Program running </string>
          <string name="floatWindowsService_toast_floatPermissionDenied">No floating window permissions! </string>
-
-
-    <string name="buildPicture_btn_up">Up</string>
-        <string name="buildPicture_btn_down">Down</string>
-        <string name="buildPicture_btn_done">OK</string>
-        <string name="buildPicture_text_memory">%1$s/%2$s</string>
-        <string name="buildPicture_dialog_oom_tittle">Out of memory!</string>
+    <string name="buildPicture_dialog_oom_tittle">Out of memory!</string>
         <string name="buildPicture_dialog_oom_content">Sorry, your device is out of memory and we are unable to continue working.\n        \nSelect Exit will exit this production. At this time, you can choose to reduce the number of pictures to make it again or go to settings - picture quality and performance. Reduce the quality of the exported picture and make it again.\n        \nSelect Continue will automatically reduce the quality of the exported image and try again. If the memory is still out of memory or the quality of the exported image is too low, please select EXIT then manually set the quality of the exported image after</string>
         <string name="buildPicture_btn_oom_exit">Exit</string>
         <string name="buildPicture_btn_oom_continue">Continue </string>
@@ -255,12 +257,6 @@
         <string name="pref_edit_AllowCheckBlackLines_title">The minimum number of consecutive black edges</string>
         <string name="pref_edit_AllowNotBlackNums_default">20</string>
         <string name="pref_edit_AllowCheckBlackLines_default">10</string>
-
-        <string name="pref_category_title_PlayVideo">Video play settings</string>
-        <string name="pref_edit_gestureSensibility_title">Gesture sensitivity</string>
-        <string name="pref_edit_gestureSensibility_default">10</string>
-
-
     <string name="pref_title_colorMode">Change the export image color mode </string>
         <string name="pref_description_colorMode">Select whether to change the color mode. The quality of the picture is decremented from top to bottom. If the memory is insufficient to flash back, please change to the latter option. (This option is not available for all images) </string>
         <string name="pref_colorMode_title">Color mode </string>

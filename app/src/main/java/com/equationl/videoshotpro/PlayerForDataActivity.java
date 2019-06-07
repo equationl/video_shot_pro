@@ -621,7 +621,6 @@ public class PlayerForDataActivity extends AppCompatActivity {
     }
 
     private void downloadFile(File file) {
-        //TODO 把下载实时进度（xx/45mb）也加上
         DownloadListener4WithSpeed listener = new DownloadListener4WithSpeed() {
             @Override
             public void taskStart(@NonNull DownloadTask task) {

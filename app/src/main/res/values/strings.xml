@@ -30,6 +30,19 @@
     </string>
     
     <string name="about_updateHistory_text" translatable="false">
+        2.0 finir：\n
+        \t*增加全新的智能合成模式\n
+        \t*更加自由的截取功能，现在已经支持完全的控制裁剪区域\n
+        \t*重构生成图片界面\n
+        \t*去除黑边现在支持同时检测上下左右四个方向的黑边\n
+        \t*优化部分UI，更换首页图标，更换整体配色方案\n
+        \t*优化图片预览方式，避免因图片太大而闪退\n
+        \t*优化首页瀑布流加载流程\n
+        \t*优化制作完成后的返回流程\n
+        \t*优化外部程序截图时截图尺寸判断\n
+        \t*优化 shortcuts\n
+        \t*优化外部程序截图模式，修复多个BUG\n
+        \t*其他细节的优化与大量BUG的修复\n
         1.5 léger Fix02:\n
         \t*优化删除文件\n
         \t*修复因为去除黑边失败导致闪退的问题\n
@@ -425,10 +438,6 @@
     <string name="title_activity_buildPicture">开始生成</string>
     <string name="title_activity_markSubtitle">调整字幕位置</string>
     <string name="title_activity_buildDone">生成完成</string>
-    <string name="buildPicture_btn_up">上调</string>
-    <string name="buildPicture_btn_down">下调</string>
-    <string name="buildPicture_btn_done">确定</string>
-    <string name="buildPicture_text_memory">%1$s/%2$s</string>
     <string name="buildPicture_dialog_oom_tittle">内存不足！</string>
     <string name="buildPicture_dialog_oom_content">非常抱歉，您的设备内存不足，我们无法继续工作。
         \n选择 退出 将退出本次制作，此时您可以选择减少图片数量再次制作亦或是进入 设置-图片质量与性能 降低导出图片质量后再次制作
@@ -511,11 +520,6 @@
     <string name="pref_title_ABUseCloudCore">启用云端引擎</string>
     <string name="pref_description_isABCutBottom">是否在合成时切除多余的底边，对于字幕较高的视频建议开启此项</string>
     <string name="pref_title_isABCutBottom">切除底边</string>
-
-
-    <string name="pref_category_title_PlayVideo">视频播放相关设置</string>
-    <string name="pref_edit_gestureSensibility_title">手势灵敏度</string>
-    <string name="pref_edit_gestureSensibility_default">10</string>
 
 
     <string name="pref_title_colorMode">更改导出图片颜色模式</string>
