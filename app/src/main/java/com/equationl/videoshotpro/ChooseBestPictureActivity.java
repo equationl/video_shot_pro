@@ -1,7 +1,9 @@
 package com.equationl.videoshotpro;
 
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
@@ -65,7 +67,7 @@ public class ChooseBestPictureActivity extends AppCompatActivity {
 
         final List<String> imageList = new ArrayList<>();
 
-        String fileNames[] = tool.getFileOrderByName(filePath, 1);
+        String[] fileNames = tool.getFileOrderByName(filePath, 1);
         for (String name : fileNames) {
             imgData.add(filePath+name);
             imgDataUri.add(Uri.parse(filePath+name));
@@ -139,6 +141,9 @@ public class ChooseBestPictureActivity extends AppCompatActivity {
                         Log.e(TAG, Log.getStackTraceString(e));
                     }
                 }
+                else {
+                    MediaScannerConnection.scanFile(this, new String[]{imgData.get(i)}, null, null);
+                }
             }
             exitActivity();
         }
@@ -147,6 +152,42 @@ public class ChooseBestPictureActivity extends AppCompatActivity {
     private void exitActivity() {
         PlayerForDataActivity.instance.finish();
         finish();
+    }
+
+    private void clickExit() {
+        final Dialog dialog = new AlertDialog.Builder(this).
+                setCancelable(true)
+                .setMessage(R.string.chooseBest_dialog_exit_content)
+                .setPositiveButton(R.string.chooseBest_dialog_exit_btn_save,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                String[] imgs = imgData.toArray(new String[0]);
+                                MediaScannerConnection.scanFile(ChooseBestPictureActivity.this, imgs, null, null);
+                                exitActivity();
+                            }
+                        })
+                .setNegativeButton(R.string.chooseBest_dialog_exit_btn_delect,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                try {
+                                    tool.deleteDirectory(new File(filePath));
+                                } catch (IOException e) {
+                                    Log.e(TAG, Log.getStackTraceString(e));
+                                }
+                                exitActivity();
+                            }
+                        })
+                .setNeutralButton(R.string.chooseBest_dialog_exit_btn_cancel,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                            }
+                        })
+                .create();
+        dialog.show();
     }
 
     @Override
@@ -161,7 +202,7 @@ public class ChooseBestPictureActivity extends AppCompatActivity {
 
         switch (id) {
             case android.R.id.home:
-                finish();
+                clickExit();
                 break;
             case R.id.chooseBest_menu_save:
                 clickSaveMenu();
@@ -174,7 +215,7 @@ public class ChooseBestPictureActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            finish();
+            clickExit();
             return true;
         }
         return super.onKeyDown(keyCode, event);

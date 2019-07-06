@@ -1105,6 +1105,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (isSuccess == 0) {
                 shareAPPSuccess();
             }
+            else {
+                Log.e(TAG, "share fail, and code is:" + isSuccess);
+            }
         }
     };
 
@@ -1520,12 +1523,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Log.i(TAG, "in deletePic, f= "+f.toString());
         if (!sp_init.getBoolean("isDeleteLocalPic", true)) {
             if (f.isDirectory()) {
+                String newPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()+"/"+f.getName();
                 try {
-                    tool.copyDir(f.toString(),
-                            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()+"/"+f.getName());
+                    tool.copyDir(f.toString(), newPath);
                 } catch (IOException e) {
                     Log.e(TAG, Log.getStackTraceString(e));
                 }
+                File filePath = new File(newPath);
+                File[] files = filePath.listFiles();
+                String[] filesl = new String[files.length];
+                int i=0;
+                for (File file:files) {
+                    filesl[i] = file.getAbsolutePath();
+                    i++;
+                }
+                MediaScannerConnection.scanFile(MainActivity.this, filesl, null, null);
             }
             else {
                 String saveTo = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()+"/"+f.getName();
@@ -1540,12 +1552,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         if (f.isDirectory()) {
+            File[] files = f.listFiles();
             try {
                 tool.deleteDirectory(f);
             } catch (IOException e) {
                 Toast.makeText(this, R.string.main_toast_deleteDirectory_fail, Toast.LENGTH_SHORT).show();
                 Log.e(TAG, Log.getStackTraceString(e));
             }
+            String[] filesl = new String[files.length];
+            int i=0;
+            for (File file:files) {
+                filesl[i] = file.getAbsolutePath();
+                i++;
+            }
+            MediaScannerConnection.scanFile(MainActivity.this, filesl, null, null);
         }
         else {
             try {
@@ -1554,6 +1574,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Toast.makeText(this, R.string.main_toast_deleteFile_fail, Toast.LENGTH_SHORT).show();
                 Log.e(TAG, Log.getStackTraceString(e));
             }
+            MediaScannerConnection.scanFile(MainActivity.this, new String[]{f.getAbsolutePath()}, null, null);
         }
     }
 

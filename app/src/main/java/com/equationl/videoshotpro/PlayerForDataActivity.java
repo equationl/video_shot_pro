@@ -543,7 +543,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
                         pictureState = cpt.isSingleSubtitlePicture(bitmap);
                     }
 
-                    if (pictureState == cpt.StateCutPicture) {
+                    if (pictureState == CheckPictureText.StateCutPicture) {
                         Log.i(TAG, fileList[i]+" is cut");
                         if (isFirst) {
                             fileList[i] = "all";
@@ -553,7 +553,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
                             fileList[i] = "cut";
                         }
                     }
-                    else if (pictureState == cpt.StateDelPicture){
+                    else if (pictureState == CheckPictureText.StateDelPicture){
                         Log.i(TAG, fileList[i]+" is del");
                         fileList[i] = "del";
                     }
@@ -667,7 +667,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
             @Override
             public void taskEnd(@NonNull DownloadTask task, @NonNull EndCause cause, @Nullable Exception realCause, @NonNull SpeedCalculator taskSpeed) {
                 File data = new File(getExternalFilesDir("tessdata"), "chi_sim.traineddata");
-                if (!utils.fileToMD5(data.getPath()).equals(cpt.TessDataMD5)) {
+                if (!utils.fileToMD5(data.getPath()).equals(CheckPictureText.TessDataMD5)) {
                     handler.sendEmptyMessage(HandlerDownLoadStatusOnError);
                 }
                 else {
@@ -677,7 +677,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
         };
 
 
-        DownloadTask task = new DownloadTask.Builder(cpt.DownloadTessdataUrl, file.getParentFile())
+        DownloadTask task = new DownloadTask.Builder(CheckPictureText.DownloadTessdataUrl, file.getParentFile())
                 .setFilename(file.getName())
                 // the minimal interval millisecond for callback progress
                 .setMinIntervalMillisCallbackProcess(30)
@@ -732,7 +732,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
             Log.i(TAG, "need download tessdata");
             initDownloadView();
         }
-        else if (!utils.fileToMD5(data.getPath()).equals(cpt.TessDataMD5)) {
+        else if (!utils.fileToMD5(data.getPath()).equals(CheckPictureText.TessDataMD5)) {
             Log.i(TAG, "checkTessData: file imperfect");
             try {
                 tool.deleteFile(data);

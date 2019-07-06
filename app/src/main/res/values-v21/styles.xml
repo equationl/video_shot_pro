@@ -1,1 +1,7 @@
-<resources></resources>
+<resources>
+
+    <style name="CheckBox_checkPicture" parent="@android:style/Widget.Material.CompoundButton.CheckBox">
+        <item name="android:colorControlActivated">@color/colorAccent</item>
+        <item name="android:colorControlNormal">@color/colorPrimary</item>
+    </style>
+</resources>

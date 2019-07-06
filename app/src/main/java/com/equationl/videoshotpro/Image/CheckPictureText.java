@@ -25,11 +25,11 @@ import java.io.File;
 import java.util.ArrayList;
 
 public class CheckPictureText {
-    public final String DownloadTessdataUrl = "https://raw.githubusercontent.com/" +
+    public final static String TessDataMD5 = "6965CB3213EDD961CB16264E2EA45F5C";
+    public final static String DownloadTessdataUrl = "https://raw.githubusercontent.com/" +
             "tesseract-ocr/tessdata/master/chi_sim.traineddata";
-    public final String TessDataMD5 = "6965CB3213EDD961CB16264E2EA45F5C";
-    public final int StateCutPicture = 1000;
-    public final int StateDelPicture = 1001;
+    public final static int StateCutPicture = 1000;
+    public final static int StateDelPicture = 1001;
 
 
     /**

@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -103,7 +102,7 @@ public class Share {
     }
 
     public static void shareAppSuccess(Context context) {
-        SharedPreferences sp_init = context.getSharedPreferences("init", Context.MODE_PRIVATE);
+        //SharedPreferences sp_init = context.getSharedPreferences("init", Context.MODE_PRIVATE);
         Toast.makeText(context, "分享成功！", Toast.LENGTH_SHORT).show();
         /*SharedPreferences.Editor editor = sp_init.edit();
         editor.putBoolean("isCloseAd", true);

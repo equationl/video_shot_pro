@@ -491,11 +491,16 @@
     <string name="about_dialog_support_btn_cancel">Cancel</string>
     <string name="about_dialog_support_btn_mm">Wechat</string>
     <string name="about_toast_copyQRimg_fail">Copy QR picture fail! Please try again!</string>
-    <string name="about_toast_gotoAlipay_fail">Launcher Alipay fail  !</string>
     <string name="about_toast_gotoMmPay_fail">Launcher Wechat fail  !</string>
     <string name="main_toast_launcherWhenFloatServiceIsRunning">Please do not launch the app directly, please click on the notification to start!</string>
     <string name="pref_description_isRemoveLRBlackLines">"Whether to cut the left and right black edges when trimming, and only the upper and lower black edges when not cutting "</string>
     <string name="pref_title_isRemoveLRBlackLines">Simultaneously</string>
     <string name="shortcut_toast_unknownMode">Unauthorized access!</string>
     <string name="floatWindowsService_toast_RecorderScreenTimeTooShort">Recording time is too short!</string>
+    <string name="about_toast_unstallAlipay">Can\'t find Alipay in your device</string>
+    <string name="chooseBest_dialog_exit_btn_cancel">Cancel</string>
+    <string name="chooseBest_dialog_exit_btn_delect">Delete</string>
+    <string name="chooseBest_dialog_exit_btn_save">Save</string>
+    <string name="title_activity_buildFail">Build Fail</string>
+    <string name="chooseBest_dialog_exit_content">" I have detected that you have not saved any images. Do you want to save them all or delete them all?"</string>
 </resources>

@@ -16,7 +16,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/chooseBest_item_imageView"
-        android:layout_alignRight="@id/chooseBest_item_imageView"
+        android:layout_alignEnd="@id/chooseBest_item_imageView"
+        android:theme="@style/CheckBox_checkPicture"
         android:clickable="false" />
 
 </RelativeLayout>

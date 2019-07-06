@@ -60,7 +60,7 @@ public class BuildPictureActivity extends AppCompatActivity {
     float startY, stopY;
     int bWidth,bHeight;
     ProgressDialog dialog;
-    boolean isBuildDone = false;
+    boolean isBuildDone = false, isBuildFail = false;
     int SubtitleTop, SubtitleBottom;
     File savePath=null;
     SharedPreferences settings, sp_init;
@@ -68,7 +68,6 @@ public class BuildPictureActivity extends AppCompatActivity {
     Boolean isFromExtra, isAutoBuild;
     Resources res;
     Thread t, t_2;
-    Tencent mTencent;
     Bitmap final_bitmap;
     boolean isAllFullPicture = false;
 
@@ -118,9 +117,7 @@ public class BuildPictureActivity extends AppCompatActivity {
             finish();
         }
 
-        t_2 = new Thread(new BuildThread());
-
-        mTencent = Tencent.createInstance("1106257597", this);
+        t_2 = new Thread(new BuildThread());;
 
         dialog = new ProgressDialog(this);
         dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);// 设置样式
@@ -175,7 +172,7 @@ public class BuildPictureActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Log.i(TAG, "imageViewPreview onClick");
-                if (isBuildDone) {
+                if (isBuildDone && !isBuildFail) {
                     ImageLoader.cleanDiskCache(getApplicationContext());
                     ImagePreview.getInstance()
                             .setContext(BuildPictureActivity.this)
@@ -200,7 +197,9 @@ public class BuildPictureActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item){
         if (item.getItemId() == R.id.build_menu_next) {
             if (isBuildDone) {
-                Share.showSharePictureDialog(BuildPictureActivity.this, savePath, shareListener, BuildPictureActivity.this);
+                if (!isBuildFail) {
+                    Share.showSharePictureDialog(BuildPictureActivity.this, savePath, shareListener, BuildPictureActivity.this);
+                }
             }
             else {
                 t = new Thread(new BuildThread());
@@ -236,10 +235,17 @@ public class BuildPictureActivity extends AppCompatActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         if (isBuildDone) {
-            menu.findItem(R.id.build_menu_next).setIcon(
-                    R.drawable.share_variant);
-            setTitle(R.string.title_activity_buildDone);
-        } else {
+            if (isBuildFail) {
+                imageViewPreview.setDrawBox(false);
+                setTitle(R.string.title_activity_buildFail);
+            }
+            else {
+                menu.findItem(R.id.build_menu_next).setIcon(
+                        R.drawable.share_variant);
+                setTitle(R.string.title_activity_buildDone);
+            }
+        }
+        else {
             menu.findItem(R.id.build_menu_next).setIcon(R.drawable.check);
         }
         return super.onPrepareOptionsMenu(menu);
@@ -581,6 +587,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                             Log.i(TAG, "At HandlerStatusBuildPictureFail, dismiss dialog fail!");
                         }
                         activity.isBuildDone = true;
+                        activity.isBuildFail = true;
                         break;
 
                     case HandlerGetBitmapFail:

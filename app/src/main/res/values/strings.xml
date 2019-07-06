@@ -30,6 +30,12 @@
     </string>
     
     <string name="about_updateHistory_text" translatable="false">
+        2.0 finir Fix01：\n
+        \t*优化捐赠逻辑\n
+        \t*优化逐帧选优使用逻辑\n
+        \t*修复删除文件时未刷新相册的问题\n
+        \t*修复AB模式下载识别库校验时概率性闪退的BUG\n
+        \t*修复合成图片时全部标记为删除时预览图片闪退的BUG\n
         2.0 finir：\n
         \t*增加全新的智能合成模式\n
         \t*更加自由的截取功能，现在已经支持完全的控制裁剪区域\n
@@ -438,6 +444,7 @@
     <string name="title_activity_buildPicture">开始生成</string>
     <string name="title_activity_markSubtitle">调整字幕位置</string>
     <string name="title_activity_buildDone">生成完成</string>
+    <string name="title_activity_buildFail">生成失败</string>
     <string name="buildPicture_dialog_oom_tittle">内存不足！</string>
     <string name="buildPicture_dialog_oom_content">非常抱歉，您的设备内存不足，我们无法继续工作。
         \n选择 退出 将退出本次制作，此时您可以选择减少图片数量再次制作亦或是进入 设置-图片质量与性能 降低导出图片质量后再次制作
@@ -666,9 +673,9 @@
 
     <string name="title_activity_about">关于</string>
     <string name="about_toast_checkUpdate">正在检查更新&#8230;</string>
+    <string name="about_toast_unstallAlipay">您没有安装支付宝哦</string>
     <string name="about_toast_copyQRimg_fail">复制二维码图片失败！请重试！</string>
-    <string name="about_toast_gotoAlipay_fail">打开支付宝失败，请尝试手动打开！</string>
-    <string name="about_toast_gotoMmPay_fail">打开微信失败，请尝试手动打开！</string>
+    <string name="about_toast_gotoMmPay_fail">您没有安装微信哦</string>
     <string name="about_text_history">更新历史</string>
     <string name="about_text_thanks">鸣谢</string>
     <string name="about_text_right">© 2016&#8211;2018 Equationl.com \nAll rights reserved</string>
@@ -681,7 +688,8 @@
     <string name="about_dialog_title_history">更新历史</string>
     <string name="about_dialog_title_support">支持作者</string>
     <string name="about_dialog_text_support">亲爱的使用者，本app能够得到您的青睐已经是我最大的荣幸了，如果想要支持我的工作，请将本app推荐给您的朋友吧~（在首页侧边栏点击 推荐给好友即可快速分享）\n
-        如果您想要捐赠的话，点击下方的支付宝或微信按钮，本程序会自动将二维码保存至您的手机，并自动打开支付宝或微信，您只需打开支付宝或微信的扫一扫功能并扫描刚才保存的二维码即可。\n
+        如果您想要捐赠的话，点击下方的支付宝按钮即可自动跳转至支付宝界面\n
+        点击微信按钮，本程序会自动将二维码保存至您的手机，并自动打开微信扫一扫，您只需从相册选择刚才保存的二维码即可。\n
         重要提示：请认准转账账户是否为 支付宝：方程（*芳程）；微信：equationl（**程），避免转错造成不必要的麻烦。\n
         同时，本APP已开源，欢迎贡献代码或star~\n
     开源地址：https://github.com/equationl/video_shot_pro</string>
@@ -694,4 +702,8 @@
     <string name="chooseBest_dialog_deleteAll_content">您确定一张都不保存吗？</string>
     <string name="chooseBest_dialog_deleteAll_btn_ok">是的</string>
     <string name="chooseBest_dialog_deleteAll_btn_cancel">不是</string>
+    <string name="chooseBest_dialog_exit_content">检测到您还没有保存任何图片，请问您想要全部保存还是全部删除？</string>
+    <string name="chooseBest_dialog_exit_btn_delect">删除</string>
+    <string name="chooseBest_dialog_exit_btn_save">保存</string>
+    <string name="chooseBest_dialog_exit_btn_cancel">取消</string>
 </resources>

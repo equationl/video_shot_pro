@@ -1,6 +1,7 @@
 package com.equationl.videoshotpro;
 
 import android.app.Dialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -22,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.equationl.videoshotpro.Image.Tools;
+import com.equationl.videoshotpro.utils.AlipayZeroSdk;
 import com.equationl.videoshotpro.utils.Utils;
 import com.huxq17.swipecardsview.SwipeCardsView;
 import com.tencent.bugly.beta.Beta;
@@ -158,11 +160,11 @@ public class AboutActivity extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                if (copyQRcodeImg("alipay.jpg")) {
-                                    gotoAlipay();
+                                if (AlipayZeroSdk.hasInstalledAlipayClient(AboutActivity.this)) {
+                                    AlipayZeroSdk.startAlipayClient(AboutActivity.this, "fkx07332ns1pb55do8sohec");
                                 }
                                 else {
-                                    Toast.makeText(AboutActivity.this, R.string.about_toast_copyQRimg_fail, Toast.LENGTH_LONG).show();
+                                    Toast.makeText(AboutActivity.this, R.string.about_toast_unstallAlipay, Toast.LENGTH_SHORT).show();
                                 }
                             }
                         })
@@ -170,7 +172,7 @@ public class AboutActivity extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                if (copyQRcodeImg("mmpay.png")) {
+                                if (copyQRcodeImg("aip.licenses")) {
                                     gotoMmpay();
                                 }
                                 else {
@@ -202,7 +204,7 @@ public class AboutActivity extends AppCompatActivity {
     private boolean copyQRcodeImg(String name) {
         try {
             String savePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-                    .toString()+"/videoshot_"+name;
+                    .toString()+"/videoshot_"+"mmpay.jpg";
             utils.copyAssets2Local(this, name, savePath);
             MediaScannerConnection.scanFile(this, new String[]{savePath}, null, null);
             return true;
@@ -212,25 +214,17 @@ public class AboutActivity extends AppCompatActivity {
         }
     }
 
-    private void gotoAlipay() {
-        try {
-            Uri uri = Uri.parse("alipayqr://platformapi/startapp?saId=10000007");
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            startActivity(intent);
-        } catch (Exception e) {
-            Log.e(TAG, "gotoAlipay: ", e);
-            Toast.makeText(this, R.string.about_toast_gotoAlipay_fail, Toast.LENGTH_LONG).show();
-        }
-    }
-
     private void gotoMmpay() {
+        Intent intent = new Intent("com.tencent.mm.action.BIZSHORTCUT");
+        intent.setPackage("com.tencent.mm");
+        intent.putExtra("LauncherUI.From.Scaner.Shortcut", true);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
         try {
-            Uri uri = Uri.parse("weixin://");
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
             startActivity(intent);
-        } catch (Exception e) {
-            Log.e(TAG, "gotoMmpay: ", e);
-            Toast.makeText(this, R.string.about_toast_gotoMmPay_fail, Toast.LENGTH_LONG).show();
+        }catch (ActivityNotFoundException e){
+            Toast.makeText(this, R.string.about_toast_gotoMmPay_fail, Toast.LENGTH_SHORT).show();
         }
     }
 
