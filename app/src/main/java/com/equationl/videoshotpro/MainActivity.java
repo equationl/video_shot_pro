@@ -243,12 +243,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Bugly.init(getApplicationContext(), "41a66442fd", false);
         CrashReport.setUserId(sp_init.getInt("userFlagID", 0)+"");
 
-        galleryConfig = new GalleryConfig.Builder()
-                .imageLoader(new GlideImageLoader())
-                .iHandlerCallBack(iHandlerCallBack)
-                .provider("com.equationl.videoshotpro.fileprovider")
-                .multiSelect(true, 100)
-                .build();
     }
 
     @Override
@@ -909,6 +903,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
+                                galleryConfig = new GalleryConfig.Builder()
+                                        .imageLoader(new GlideImageLoader())
+                                        .iHandlerCallBack(iHandlerCallBack)
+                                        .provider("com.equationl.videoshotpro.fileprovider")
+                                        .multiSelect(true, 100)
+                                        .build();
                                 GalleryPick.getInstance().setGalleryConfig(galleryConfig).open(MainActivity.this);
                             }
                         }).create();
@@ -990,6 +990,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             editor.apply();
         }
         else {
+            galleryConfig = new GalleryConfig.Builder()
+                    .imageLoader(new GlideImageLoader())
+                    .iHandlerCallBack(iHandlerCallBack)
+                    .provider("com.equationl.videoshotpro.fileprovider")
+                    .multiSelect(true, 100)
+                    .build();
             GalleryPick.getInstance().setGalleryConfig(galleryConfig).open(MainActivity.this);
         }
     }

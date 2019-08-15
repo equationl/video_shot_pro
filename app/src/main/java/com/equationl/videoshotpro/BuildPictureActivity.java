@@ -65,7 +65,7 @@ public class BuildPictureActivity extends AppCompatActivity {
     File savePath=null;
     SharedPreferences settings, sp_init;
     Tools tool = new Tools();
-    Boolean isFromExtra, isAutoBuild;
+    Boolean isFromExtra, isAutoBuild, isCutAllPicture;
     Resources res;
     Thread t, t_2;
     Bitmap final_bitmap;
@@ -103,6 +103,8 @@ public class BuildPictureActivity extends AppCompatActivity {
 
         settings = PreferenceManager.getDefaultSharedPreferences(this);
         sp_init = getSharedPreferences("init", Context.MODE_PRIVATE);
+
+        isCutAllPicture = settings.getBoolean("isCutAllPicture", false);
 
         Bundle bundle = this.getIntent().getExtras();
         if (bundle != null) {
@@ -327,6 +329,7 @@ public class BuildPictureActivity extends AppCompatActivity {
     private class BuildThread implements Runnable {
         int delete_nums=0;
         Boolean isRunning = true;
+        boolean isFirstAllPic = true;
         @Override
         public void run() {
             Message msg;
@@ -358,7 +361,19 @@ public class BuildPictureActivity extends AppCompatActivity {
                     }
                     case "all": {
                         try {
-                            final_bitmap = addBitmap(final_bitmap, getBitmap(i + ""));
+                            if (isCutAllPicture) {
+                                final_bitmap = addBitmap(final_bitmap, cutBottomBitmap(getBitmap(i + "")));
+                            }
+                            else {
+                                if (isFirstAllPic) {
+                                    //第一张全图一定是要切掉的
+                                    final_bitmap = addBitmap(final_bitmap, cutBottomBitmap(getBitmap(i + "")));
+                                    isFirstAllPic = false;
+                                }
+                                else {
+                                    final_bitmap = addBitmap(final_bitmap, getBitmap(i + ""));
+                                }
+                            }
                         } catch (OutOfMemoryError e) {
                             showDialogOutOfMemory();
                             isRunning = false;
@@ -487,6 +502,28 @@ public class BuildPictureActivity extends AppCompatActivity {
         //return tool.cutBitmap(bm, (int)startY, bWidth);
     }
 
+    @Nullable
+    private Bitmap cutBottomBitmap(Bitmap bm) {
+        //return Bitmap.createBitmap(bm, 0, (int)startY, bWidth, (int)(bm.getHeight()-startY));
+        if (isAutoBuild) {
+            if (SubtitleTop != 0 && SubtitleBottom != 0) {
+                Log.i(TAG, "cutBottomBitmap: subtitleBottom= " + SubtitleBottom);
+                return tool.cutBitmap(bm, 0, 0, bm.getWidth(), SubtitleBottom);
+            }
+            return bm;
+        }
+        else {
+            int[] cropBox = imageViewPreview.getCropBox();
+            if (cropBox == null) {
+                return null;
+            }
+            else {
+                return tool.cutBitmap(bm, 0, 0, bm.getWidth(), cropBox[1]+cropBox[3]);
+            }
+        }
+        //return tool.cutBitmap(bm, (int)startY, bWidth);
+    }
+
     private Bitmap addBitmap(Bitmap first, Bitmap second) {
         Bitmap bitmap = tool.jointBitmap(first, second);
         if (bitmap != null) {
@@ -605,7 +642,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                                         activity.reduceQuality();
                                         Bitmap bm_temp = activity.getCutImg();
                                         activity.bWidth = bm_temp.getWidth();
-                                        if (activity.t.isAlive()) {
+                                        if (activity.t != null && activity.t.isAlive()) {
                                             activity.t.interrupt();
                                             activity.t = null;
                                         }

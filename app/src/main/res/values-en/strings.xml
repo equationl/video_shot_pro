@@ -503,4 +503,6 @@
     <string name="chooseBest_dialog_exit_btn_save">Save</string>
     <string name="title_activity_buildFail">Build Fail</string>
     <string name="chooseBest_dialog_exit_content">" I have detected that you have not saved any images. Do you want to save them all or delete them all?"</string>
+    <string name="pref_description_cut_all_picture">Choose whether to adjust the cropped image according to the position of the line. When this option is enabled, even if the full image is retained, it will be automatically cropped to make the produced picture more beautiful</string>
+    <string name="pref_title_cut_all_picture">Crop the image based on the position of the line</string>
 </resources>

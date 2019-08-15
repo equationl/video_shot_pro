@@ -577,6 +577,9 @@ public class Tools{
         Paint paint= new Paint();
         int width = base.getWidth();
         int height = base.getHeight();
+        if (width < 3 || height < 3) {
+            return base;
+        }
 
         paint.setColor(base.getPixel(1,0));
         canvas.drawPoint(0, 0, paint);   //0
@@ -726,7 +729,12 @@ public class Tools{
             bitmap = Bitmap.createBitmap(bitmap, 0, area[0], width, height-area[0]);
         }
         if (area[1] > 0) {
-            bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, bitmap.getHeight()-(height-area[1]));
+            int temp_height = bitmap.getHeight()-(height-area[1]);
+            if (temp_height > bitmap.getHeight()) {
+                temp_height = bitmap.getHeight();
+                Log.w(TAG, "removeImgBlackSide: y + height >= bitmap.height()");
+            }
+            bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, temp_height);
         }
 
         if (isRemoveLR) {
@@ -820,7 +828,7 @@ public class Tools{
     private int[] getImgBlackArea(Bitmap bitmap, boolean isJpg) {
         int i = 0;
         int temp1, temp2, blackLineNums=0;
-        Boolean lineIsBlack = checkLineColorIsBlackHorizontal(bitmap, i, isJpg);
+        boolean lineIsBlack = checkLineColorIsBlackHorizontal(bitmap, i, isJpg);
         while (true) {
             if (i >= bitmap.getHeight()/2) {
                 Log.i(TAG, "i >= bitmap.getHeight()/2");

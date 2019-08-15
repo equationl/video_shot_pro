@@ -30,6 +30,11 @@
     </string>
     
     <string name="about_updateHistory_text" translatable="false">
+        2.0 finir Fix02：\n
+        \t*新增生成图片时自动裁剪第一张全图\n
+        \t*新增选项是否裁剪所有全图\n
+        \t*修复第二次使用合成截图模式时图片选择未清空的问题\n
+        \t*修复若干BUG\n
         2.0 finir Fix01：\n
         \t*优化捐赠逻辑\n
         \t*优化逐帧选优使用逻辑\n
@@ -508,6 +513,9 @@
 
     <string name="pref_title_sort_picture">开启排序</string>
     <string name="pref_description_sort_picture">选择是否在截取完成后对图片进行排序</string>
+
+    <string name="pref_title_cut_all_picture">根据台词位置裁剪图片</string>
+    <string name="pref_description_cut_all_picture">选择是否根据台词位置调整裁剪图片，开启该选项后即使是保留全图也会自动裁剪使制作的图片更加美观</string>
 
     <string name="pref_screen_title_professional">高级设置</string>
     <string name="pref_screen_description_professional">如您不知道其中设置有何作用，请勿更改此项设置，避免因设置不当导致app无法正常运行</string>
