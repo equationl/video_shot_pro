@@ -65,6 +65,15 @@
                 android:resource="@xml/filepaths" />
         </provider>
         <provider
+            android:name=".utils.FeedBackFileProvider"
+            android:authorities="com.equationl.videoshotpro.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/lc_fileprovider_path" />
+        </provider>
+        <provider
             android:name=".utils.BuglyFileProvider"
             android:authorities="${applicationId}.fileProvider"
             android:exported="false"
@@ -129,6 +138,9 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.Fullscreen"
             />
+        <activity
+            android:name="com.avos.avoscloud.feedback.ThreadActivity" >
+        </activity>
     </application>
 
 </manifest>

@@ -104,9 +104,16 @@ public class CheckPictureText {
 
         Log.i(TAG, "字幕框高为"+subtitleTop+"字幕框底为："+subtitleBottom);
 
-        //预裁剪，减少遍历数
-        //bitmap = Bitmap.createBitmap(bitmap, (int)(width*0.35), subtitleTop, width-(int)(width*0.35)*2, height-subtitleTop);
-        bitmap = Bitmap.createBitmap(bitmap, 0, subtitleTop, width, subtitleBottom-subtitleTop);
+        //y + height must be <= bitmap.height()
+        //see: https://bugly.qq.com/v2/crash-reporting/crashes/41a66442fd/32405?pid=1
+        if (subtitleBottom > height) {
+            Log.e(TAG, "isSingleSubtitlePicture: y+height > bitmap.height()");
+        }
+        else {
+            //预裁剪，减少遍历数
+            //bitmap = Bitmap.createBitmap(bitmap, (int)(width*0.35), subtitleTop, width-(int)(width*0.35)*2, height-subtitleTop);
+            bitmap = Bitmap.createBitmap(bitmap, 0, subtitleTop, width, subtitleBottom - subtitleTop);
+        }
         bitmap = getBinaryzationPicture(bitmap);
 
         Log.i(TAG, "origin bitmap width="+bitmap.getWidth()+", height="+bitmap.getHeight());

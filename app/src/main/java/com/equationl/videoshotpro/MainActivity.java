@@ -46,6 +46,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import com.avos.avoscloud.AVOSCloud;
+import com.avos.avoscloud.feedback.FeedbackAgent;
 import com.equationl.videoshotpro.Adapter.MainWaterFallAdapter;
 import com.equationl.videoshotpro.Image.Tools;
 import com.equationl.videoshotpro.rom.HuaweiUtils;
@@ -104,7 +106,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Boolean isFirstBoot = false;
     boolean isTranslucentStatus = false;
     boolean isMultiSelect = false;
-    Utils utils = new Utils();
     FloatingActionsMenu main_floatBtn_menu;
     FloatingActionButton main_floatBtn_quick;
     FloatingActionButton main_floatBtn_splicing;
@@ -243,6 +244,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Bugly.init(getApplicationContext(), "41a66442fd", false);
         CrashReport.setUserId(sp_init.getInt("userFlagID", 0)+"");
 
+
+        int bootTimes = sp_init.getInt("bootTimes", 0);
+        SharedPreferences.Editor editor = sp_init.edit();
+        editor.putInt("bootTimes", bootTimes+1);
+        editor.apply();
+        if (bootTimes > 5 && bootTimes%5 == 0) {
+            Utils.showSupportDialog(this, sp_init);
+        }
     }
 
     @Override
@@ -367,7 +376,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (requestCode == IntentResultCodeMediaProjection) {
                 //外部程序截图
                 Log.i("EL", "try Start Service");
-                utils.finishActivity(BuildPictureActivity.instance);
+                Utils.finishActivity(BuildPictureActivity.instance);
                 FloatWindowsService.setResultData(data);
                 Intent startService = new Intent(this, FloatWindowsService.class);
                 startService(startService);
@@ -549,10 +558,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         public void run() {
             loadLib();
-            utils.finishActivity(MarkPictureActivity.instance);
-            utils.finishActivity(ChooseActivity.instance);
-            utils.finishActivity(BuildPictureActivity.instance);
-            utils.finishActivity(PlayerActivity.instance);
+            Utils.finishActivity(MarkPictureActivity.instance);
+            Utils.finishActivity(ChooseActivity.instance);
+            Utils.finishActivity(BuildPictureActivity.instance);
+            Utils.finishActivity(PlayerActivity.instance);
             try {
                 String pkName = getApplicationContext().getPackageName();
                 if (!pkName.equals("com.equationl.videoshotpro")) {
@@ -1030,8 +1039,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void btn_feedback() {
-        Intent intent = new Intent(MainActivity.this, FeedbackActivity.class);
-        startActivity(intent);
+        /*Intent intent = new Intent(MainActivity.this, FeedbackActivity.class);
+        startActivity(intent);  */
+        AVOSCloud.initialize(this,"a5naECbAexgSMUzsSMY5OnAs-gzGzoHsz","h6qYEWUGEGfFkVNcIS5IMb2l");
+        FeedbackAgent agent = new FeedbackAgent(this);
+        agent.startDefaultThreadActivity();
     }
 
     private void btn_shotFrame() {
@@ -1075,6 +1087,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         activity.dialog_copyFile.dismiss();
                         if (activity.settings.getBoolean("isSortPicture", true)) {
                             Intent intent = new Intent(activity, ChooseActivity.class);
+                            intent.putExtra("isFromExtra", true);
                             activity.startActivity(intent);
                         }
                         else {

@@ -70,6 +70,8 @@ public class BuildPictureActivity extends AppCompatActivity {
     Thread t, t_2;
     Bitmap final_bitmap;
     boolean isAllFullPicture = false;
+    boolean drawDone = false;
+    boolean isShowingOOMDialog = false;
 
     private final MyHandler handler = new MyHandler(this);
 
@@ -83,7 +85,8 @@ public class BuildPictureActivity extends AppCompatActivity {
     private static final int HandlerStatusBuildPictureDone = 10088;
     private static final int HandlerStatusBuildPictureUpdateBitmap = 10089;
     private static final int HandlerStatusBuildPictureFail = 10090;
-    private static final int HandlerGetBitmapFail = 10091;
+    private static final int HandlerStatusBuildPictureAddFail = 10091;
+    private static final int HandlerGetBitmapFail = 10092;
 
 
     @Override
@@ -119,7 +122,7 @@ public class BuildPictureActivity extends AppCompatActivity {
             finish();
         }
 
-        t_2 = new Thread(new BuildThread());;
+        t_2 = new Thread(new BuildThread());
 
         dialog = new ProgressDialog(this);
         dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);// 设置样式
@@ -145,10 +148,28 @@ public class BuildPictureActivity extends AppCompatActivity {
             Toast.makeText(this, R.string.buildPicture_toast_copyPreview_fail, Toast.LENGTH_SHORT).show();
             finish();
         }
-        bHeight = bm_test.getHeight();
-        bWidth = bm_test.getWidth();
+        //see: https://bugly.qq.com/v2/crash-reporting/crashes/41a66442fd/33904?pid=1
+        try {
+            bHeight = bm_test.getHeight();
+            bWidth = bm_test.getWidth();
+        } catch (NullPointerException e) {
+            Log.e(TAG, "init: get bitmap height and width:", e);
+            Toast.makeText(this, R.string.buildPicture_toast_getBitmapSize_fail, Toast.LENGTH_LONG).show();
+            finish();
+        }
         startY = (float) (bHeight*0.8);
         stopY = startY;
+
+
+        imageViewPreview.setImageBitmap(bm_test);
+
+        imageViewPreview.post(new Runnable() {
+            @Override
+            public void run() {
+                Log.i(TAG, "imageViewPreview.post: draw done!");
+                drawDone = true;
+            }
+        });
 
         if (isAutoBuild || isAllFullPicture) {
             t = new Thread(new BuildThread());
@@ -160,7 +181,6 @@ public class BuildPictureActivity extends AppCompatActivity {
             setTitle(R.string.title_activity_markSubtitle);
             Toast.makeText(this,"请调整剪切字幕的位置", Toast.LENGTH_LONG).show();
         }
-        imageViewPreview.setImageBitmap(bm_test);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -294,7 +314,7 @@ public class BuildPictureActivity extends AppCompatActivity {
             try {
                 bm = tool.getBitmapFromFile(no, getExternalCacheDir(),extension, options);
             } catch (Exception e) {
-                Log.e("EL", "获取截图失败："+e.toString());
+                Log.e("EL", "获取截图失败：", e);
                 CrashReport.postCatchedException(e);
             }
         }
@@ -303,7 +323,7 @@ public class BuildPictureActivity extends AppCompatActivity {
             try {
                 bm = tool.getBitmapFromFile(no, getExternalCacheDir(),extension);
             } catch (Exception e) {
-                Log.e("EL", "获取截图失败："+e.toString());
+                Log.e("EL", "获取截图失败：", e);
                 CrashReport.postCatchedException(e);
             }
         }
@@ -332,6 +352,12 @@ public class BuildPictureActivity extends AppCompatActivity {
         boolean isFirstAllPic = true;
         @Override
         public void run() {
+            //当全部保留全图时，堵塞等待view绘制完成
+            while (!drawDone && isCutAllPicture) {
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException ignored) {}
+            }
             Message msg;
             int len = fileList.length;
             final_bitmap = Bitmap.createBitmap(bWidth,1, getColorConfig());
@@ -348,6 +374,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                         } catch (OutOfMemoryError e) {
                             showDialogOutOfMemory();
                             isRunning = false;
+                            stopThread1(t);
                             break;
                         }
                         boolean isShow = settings.getBoolean("isMonitoredShow", false);
@@ -377,6 +404,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                         } catch (OutOfMemoryError e) {
                             showDialogOutOfMemory();
                             isRunning = false;
+                            stopThread1(t);
                             break;
                         }
                         boolean isShow = settings.getBoolean("isMonitoredShow", false);
@@ -394,6 +422,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                         } catch (OutOfMemoryError e) {
                             showDialogOutOfMemory();
                             isRunning = false;
+                            stopThread1(t);
                             break;
                         }
                         boolean isShow = settings.getBoolean("isMonitoredShow", false);
@@ -476,6 +505,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                 }
                 catch (OutOfMemoryError e) {
                     showDialogOutOfMemory();
+                    stopThread1(t);
                 }
             }
         }
@@ -496,7 +526,21 @@ public class BuildPictureActivity extends AppCompatActivity {
                 return null;
             }
             else {
-                return tool.cutBitmap(bm, cropBox[0], cropBox[1], cropBox[2], cropBox[3]);
+                Log.i(TAG, "cutBitmap: "+String.format("%d %d %d %d %d %d", cropBox[0], cropBox[1], cropBox[2], cropBox[3], cropBox[4], cropBox[5]));
+                if (isFromExtra) {
+                    //当图片来自不可确定来源时，长度可能不一致，因此需要重新确定裁剪高度
+                    int y = (int)((float)cropBox[1]/cropBox[5]*bm.getHeight());
+                    int h = (int)((float)cropBox[3]/cropBox[5]*bm.getHeight());
+                    Log.i(TAG, "cutBitmap: "+String.format("y=%d h=%d", y, h));
+                    //return tool.cutBitmap(bm, cropBox[0], y, cropBox[2], h);
+                    //避免因为内存不足修改图片尺寸后宽度不一致导致闪退
+                    return tool.cutBitmap(bm, 0, y, bm.getWidth(), h);
+                }
+                else {
+                    //return tool.cutBitmap(bm, cropBox[0], cropBox[1], cropBox[2], cropBox[3]);
+                    //避免因为内存不足修改图片尺寸后宽度不一致导致闪退
+                    return tool.cutBitmap(bm, 0, cropBox[1], bm.getWidth(), cropBox[3]);
+                }
             }
         }
         //return tool.cutBitmap(bm, (int)startY, bWidth);
@@ -504,7 +548,11 @@ public class BuildPictureActivity extends AppCompatActivity {
 
     @Nullable
     private Bitmap cutBottomBitmap(Bitmap bm) {
-        //return Bitmap.createBitmap(bm, 0, (int)startY, bWidth, (int)(bm.getHeight()-startY));
+        if (bm == null) {
+            Log.e(TAG, "cutBottomBitmap: bitmap is null");
+            return null;
+        }
+
         if (isAutoBuild) {
             if (SubtitleTop != 0 && SubtitleBottom != 0) {
                 Log.i(TAG, "cutBottomBitmap: subtitleBottom= " + SubtitleBottom);
@@ -515,10 +563,21 @@ public class BuildPictureActivity extends AppCompatActivity {
         else {
             int[] cropBox = imageViewPreview.getCropBox();
             if (cropBox == null) {
+                Log.e(TAG, "cutBottomBitmap: cropBox is null!");
                 return null;
             }
             else {
-                return tool.cutBitmap(bm, 0, 0, bm.getWidth(), cropBox[1]+cropBox[3]);
+                Log.i(TAG, "cutBottomBitmap: "+String.format("%d %d %d %d %d %d", cropBox[0], cropBox[1], cropBox[2], cropBox[3], cropBox[4], cropBox[5]));
+                if (isFromExtra) {
+                    //当图片来自不可确定来源时，长度可能不一致，因此需要重新确定裁剪高度
+                    int y = (int)((float)cropBox[1]/cropBox[5]*bm.getHeight());
+                    int h = (int)((float)cropBox[3]/cropBox[5]*bm.getHeight());
+                    Log.i(TAG, "cutBottomBitmap: "+String.format("y=%d h=%d", y, h));
+                    return tool.cutBitmap(bm, 0, 0, bm.getWidth(), y+h);
+                }
+                else {
+                    return tool.cutBitmap(bm, 0, 0, bm.getWidth(), cropBox[1]+cropBox[3]);
+                }
             }
         }
         //return tool.cutBitmap(bm, (int)startY, bWidth);
@@ -532,6 +591,8 @@ public class BuildPictureActivity extends AppCompatActivity {
          else {
             //避免因为拼接失败直接返回错误，如果拼接失败就只返回第一个bitmap
             Log.e(TAG, "joint bitmap fail, just return first bitmap");
+            //Toast.makeText(this, "joint bitmap fail, just return first bitmap", Toast.LENGTH_LONG).show();
+            handler.sendEmptyMessage(HandlerStatusBuildPictureAddFail);
             return first;
         }
     }
@@ -559,6 +620,9 @@ public class BuildPictureActivity extends AppCompatActivity {
             final BuildPictureActivity activity = mActivity.get();
             if (activity != null) {
                 switch (msg.what) {
+                    case HandlerStatusBuildPictureAddFail:
+                        Toast.makeText(activity, R.string.buildPicture_toast_addPic_fail, Toast.LENGTH_SHORT).show();
+                        break;
                     case HandlerStatusBuildPictureNext:
                         if (msg.obj.toString().equals(activity.res.getString(R.string.buildPicture_ProgressDialog_msg_export))) {
                             activity.dialog.dismiss();
@@ -585,7 +649,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                         String temp_path = activity.tool.getSaveRootPath()+"/"+msg.obj.toString();
                         temp_path += activity.settings.getBoolean("isReduce_switch", false) ? ".jpg":".png";
                         MediaScannerConnection.scanFile(activity, new String[]{temp_path}, null, null);
-                        Toast.makeText(activity,R.string.buildPicture_toast_buildPicture_done, Toast.LENGTH_LONG).show();
+                        //Toast.makeText(activity,R.string.buildPicture_toast_buildPicture_done, Toast.LENGTH_LONG).show();
                         break;
 
                     case HandlerStatusBuildPictureUpdateBitmap:
@@ -649,6 +713,7 @@ public class BuildPictureActivity extends AppCompatActivity {
                                         activity.t_2.start();
                                         activity.dialog.show();
                                         activity.dialog.setProgress(0);
+                                        activity.isShowingOOMDialog = false;
                                     }
                                 })
                                 .setNegativeButton(R.string.buildPicture_btn_oom_exit, new DialogInterface.OnClickListener() {
@@ -672,7 +737,10 @@ public class BuildPictureActivity extends AppCompatActivity {
     }
 
     private void showDialogOutOfMemory() {
-        handler.sendEmptyMessage(HandlerStatusOutOfMemory);
+        if (!isShowingOOMDialog) {
+            handler.sendEmptyMessage(HandlerStatusOutOfMemory);
+            isShowingOOMDialog = true;
+        }
     }
 
     private void reduceQuality() {
@@ -766,4 +834,9 @@ public class BuildPictureActivity extends AppCompatActivity {
         }
     }
 
+    private void stopThread1(Thread t) {
+        if (t != null && t.isAlive()) {
+            t.interrupt();
+        }
+    }
 }

@@ -3,20 +3,27 @@ package com.equationl.videoshotpro.utils;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.Dialog;
 import android.app.Service;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.equationl.videoshotpro.AboutActivity;
+import com.equationl.videoshotpro.R;
 import com.yancy.gallerypick.utils.AppUtils;
 
 import java.io.FileInputStream;
@@ -198,6 +205,7 @@ public class Utils {
         }
     }
 
+    @Nullable
     public String fileToMD5(String filePath) {
         InputStream inputStream = null;
         try {
@@ -213,7 +221,8 @@ public class Utils {
             }
             byte[] md5Bytes = digest.digest();
             return convertHashToString(md5Bytes);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            Log.e(TAG, "fileToMD5: get md5 fail:", e);
             return null;
         } finally {
             if (inputStream != null) {
@@ -272,6 +281,41 @@ public class Utils {
             }
         }
         return false;
+    }
+
+    public static void showSupportDialog(final Context context, final SharedPreferences sharedPreferences) {
+        final Dialog dialog = new AlertDialog.Builder(context).setCancelable(true)
+                .setMessage(R.string.main_dialog_text_support)
+                .setPositiveButton(R.string.main_dialog_support_btn_ok,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent intent = new Intent(context, AboutActivity.class);
+                                context.startActivity(intent);
+                            }
+                        })
+                .setNegativeButton(R.string.main_dialog_support_btn_cancel,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                            }
+                        })
+                .setNeutralButton(R.string.main_dialog_support_btn_close,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.putBoolean("isShowSupportInMainActivity", false);
+                                editor.apply();
+                            }
+                        })
+                .create();
+        boolean isShow = sharedPreferences.getBoolean("isShowSupportInMainActivity", true);
+        if (isShow) {
+            dialog.show();
+        }
     }
 
     private static String convertHashToString(byte[] md5Bytes) {

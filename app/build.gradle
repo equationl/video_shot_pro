@@ -15,8 +15,8 @@ android {
         applicationId "com.equationl.videoshotpro"
         minSdkVersion 17
         targetSdkVersion 26
-        versionCode 33
-        versionName "2.0 finir Fix01"
+        versionCode 35
+        versionName "2.0 finir Fix03"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         ndk {
             //设置支持的SO库架构
@@ -75,5 +75,7 @@ dependencies {
     //implementation 'com.shuyu:gsyVideoPlayer-armv7a:6.0.3'
     implementation 'com.github.Ajian-studio:GADownloading:v1.0.2'
     implementation 'com.liulishuo.okdownload:okdownload:1.0.5'
+    implementation 'cn.leancloud.android:avoscloud-sdk:4.7.15'
+    implementation 'cn.leancloud.android:avoscloud-feedback:4.7.10@aar'
     testImplementation 'junit:junit:4.12'
 }

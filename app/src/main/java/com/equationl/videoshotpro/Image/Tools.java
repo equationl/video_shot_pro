@@ -116,7 +116,12 @@ public class Tools{
      * @return Bitmap 返回拼接后的Bitmap, 如果拼接失败返回 null
      * */
     public Bitmap jointBitmap(Bitmap first, Bitmap second) {
-        if (first == null || second == null){
+        if (first == null){
+            Log.e(TAG, "jointBitmap: first bitmap is null");
+            return null;
+        }
+        if (second == null) {
+            Log.e(TAG, "jointBitmap: second bitmap is null");
             return null;
         }
         int width = Math.max(first.getWidth(),second.getWidth());
@@ -726,6 +731,11 @@ public class Tools{
         Log.i(TAG, "area="+area[0]+" "+area[1]);
 
         if (area[0] > 0) {
+            //y + height must be <= bitmap.height()
+            //see: https://bugly.qq.com/v2/crash-reporting/crashes/41a66442fd/23102?pid=1
+            if (height > bitmap.getHeight()) {
+                return null;
+            }
             bitmap = Bitmap.createBitmap(bitmap, 0, area[0], width, height-area[0]);
         }
         if (area[1] > 0) {
@@ -745,6 +755,11 @@ public class Tools{
                 bitmap = Bitmap.createBitmap(bitmap, area2[0], 0, width-area2[0], height);
             }
             if (area2[1] > 0) {
+                //x + width must be <= bitmap.width()
+                //see: https://bugly.qq.com/v2/crash-reporting/crashes/41a66442fd/48004?pid=1
+                if (bitmap.getWidth()-(width-area2[1]) > bitmap.getWidth()) {
+                    return null;
+                }
                 bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth()-(width-area2[1]), height);
             }
         }

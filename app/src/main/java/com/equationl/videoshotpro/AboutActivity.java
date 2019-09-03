@@ -223,6 +223,7 @@ public class AboutActivity extends AppCompatActivity {
                 Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
         try {
             startActivity(intent);
+            Toast.makeText(this, R.string.about_toast_scanQR, Toast.LENGTH_LONG).show();
         }catch (ActivityNotFoundException e){
             Toast.makeText(this, R.string.about_toast_gotoMmPay_fail, Toast.LENGTH_SHORT).show();
         }

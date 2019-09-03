@@ -30,6 +30,14 @@
     </string>
     
     <string name="about_updateHistory_text" translatable="false">
+        2.0 finir Fix03：\n
+        \t*修改意见反馈方式(因个人服务器到期，无力继续支持，故改为接入第三方反馈服务)\n
+        \t*修复使用 ShortCuts 时未授予权限导致闪退的问题\n
+        \t*修复因为图片尺寸不均等问题导致的合成图片高度和数量不对的问题\n
+        \t*修复除黑边时尺寸问题导致闪退的BUG\n
+        \t*修复因为文件损坏导致闪退的问题\n
+        \t*修复校验数据包失败导致闪退的问题\n
+        \t*修复因内存不足自动降低生成图片质量导致闪退的问题\n
         2.0 finir Fix02：\n
         \t*新增生成图片时自动裁剪第一张全图\n
         \t*新增选项是否裁剪所有全图\n
@@ -241,6 +249,7 @@
         Material Design Icons：https://materialdesignicons.com    \n
         Iconfont：https://www.iconfont.cn   \n
         Baidu AI：http://ai.baidu.com    \n
+        LeanCloud：https://leancloud.cn   \n
         以及 tyanboot.pw 对本app的支持
     </string>
 
@@ -295,6 +304,10 @@
     <string name="main_dialog_AB_title">温馨提示</string>
     <string name="main_dialog_AB_content">这个模式可以全自动识别视频中的字幕并截图，裁切，合成。如果使用离线引擎进行识别需要下载额外的识别数据包。     若使用默认的离线引擎识别率不理想，则建议在 设置-高级设置 中，启用云端引擎。\n
     目前仅支持纯中文字幕或中英双语字幕。</string>
+    <string name="main_dialog_text_support">如果你喜欢这个APP的话，欢迎给个五星好评或者捐赠哦</string>
+    <string name="main_dialog_support_btn_ok">好滴</string>
+    <string name="main_dialog_support_btn_cancel">不要了</string>
+    <string name="main_dialog_support_btn_close">不再提示</string>
 
     <string name="main_floatBtn_menu_quick">快速开始</string>
     <string name="main_floatBtn_menu_splicing">合成截图</string>
@@ -471,6 +484,8 @@
     <string name="buildPicture_toast_sharePicture_fail">分享失败，请尝试在 分享->更多 中选择 微信 进行分享</string>
     <string name="buildPicture_toast_buildPicture_done">导出成功！</string>
     <string name="buildPicture_toast_getBundle_fail">获取数据出错：非法访问！</string>
+    <string name="buildPicture_toast_addPic_fail">合成图片失败，返回第一张图！</string>
+    <string name="buildPicture_toast_getBitmapSize_fail">获取图片尺寸出错！请重试！</string>
 
     <string name="buildPicture_menu_next">下一步</string>
 
@@ -678,12 +693,15 @@
     <string name="shortcut_float_LongLabel">外部程序截图</string>
     
     <string name="shortcut_toast_unknownMode">非法访问！</string>
+    <string name="shortcut_toast_needPermission">请允许权限！</string>
+    <string name="shortcut_toast_PermissionDenied">请先打开应用进行初始化后再使用该功能！</string>
 
     <string name="title_activity_about">关于</string>
     <string name="about_toast_checkUpdate">正在检查更新&#8230;</string>
     <string name="about_toast_unstallAlipay">您没有安装支付宝哦</string>
     <string name="about_toast_copyQRimg_fail">复制二维码图片失败！请重试！</string>
     <string name="about_toast_gotoMmPay_fail">您没有安装微信哦</string>
+    <string name="about_toast_scanQR">请从相册选择第一张二维码</string>
     <string name="about_text_history">更新历史</string>
     <string name="about_text_thanks">鸣谢</string>
     <string name="about_text_right">© 2016&#8211;2018 Equationl.com \nAll rights reserved</string>

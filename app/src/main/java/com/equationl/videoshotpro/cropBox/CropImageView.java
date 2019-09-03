@@ -166,7 +166,7 @@ public class CropImageView extends android.support.v7.widget.AppCompatImageView 
     /**
     * 获取裁剪图片的边界
      *
-     * @return 返回裁剪边界框，失败返回 NULL
+     * @return 返回裁剪边界框以及原始bitmap大小，失败返回 NULL
     * */
     @Nullable
     public int[] getCropBox() {
@@ -193,11 +193,16 @@ public class CropImageView extends android.support.v7.widget.AppCompatImageView 
         final float cropWidth = originalBitmap.getWidth(); //Math.min(Edge.getWidth() / scaleX, originalBitmap.getWidth() - cropX);
         final float cropHeight = Math.min(Edge.getHeight() / scaleY, originalBitmap.getHeight() - cropY);
 
+        int originalWidth = originalBitmap.getWidth();
+        int originalHeight = originalBitmap.getHeight();
+
         return new int[]{
                 (int) cropX,
                 (int) cropY,
                 (int) cropWidth,
-                (int) cropHeight
+                (int) cropHeight,
+                      originalWidth,
+                      originalHeight
         };
 
     }

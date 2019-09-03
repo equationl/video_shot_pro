@@ -667,11 +667,18 @@ public class PlayerForDataActivity extends AppCompatActivity {
             @Override
             public void taskEnd(@NonNull DownloadTask task, @NonNull EndCause cause, @Nullable Exception realCause, @NonNull SpeedCalculator taskSpeed) {
                 File data = new File(getExternalFilesDir("tessdata"), "chi_sim.traineddata");
-                if (!utils.fileToMD5(data.getPath()).equals(CheckPictureText.TessDataMD5)) {
+                String fileMD5 = utils.fileToMD5(data.getPath());
+                if (fileMD5 == null) {
+                    Log.e(TAG, "taskEnd: get fileMD5 fail!");
                     handler.sendEmptyMessage(HandlerDownLoadStatusOnError);
                 }
                 else {
-                    handler.sendEmptyMessage(HandlerDownLoadStatusOnCompleted);
+                    if (!fileMD5.equals(CheckPictureText.TessDataMD5)) {
+                        handler.sendEmptyMessage(HandlerDownLoadStatusOnError);
+                    }
+                    else {
+                        handler.sendEmptyMessage(HandlerDownLoadStatusOnCompleted);
+                    }
                 }
             }
         };
@@ -732,7 +739,17 @@ public class PlayerForDataActivity extends AppCompatActivity {
             Log.i(TAG, "need download tessdata");
             initDownloadView();
         }
-        else if (!utils.fileToMD5(data.getPath()).equals(CheckPictureText.TessDataMD5)) {
+        String fileMd5 = utils.fileToMD5(data.getPath());
+        if (fileMd5 == null) {
+            Log.i(TAG, "checkTessData: file imperfect");
+            try {
+                tool.deleteFile(data);
+            } catch (IOException e) {
+                Log.e(TAG, "checkTessData: ", e);
+            }
+            initDownloadView();
+        }
+        else if (!fileMd5.equals(CheckPictureText.TessDataMD5)) {
             Log.i(TAG, "checkTessData: file imperfect");
             try {
                 tool.deleteFile(data);
