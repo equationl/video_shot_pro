@@ -22,10 +22,11 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.equationl.ffmpeg.ExecuteBinaryResponseHandler;
+import com.equationl.ffmpeg.FFmpeg;
+import com.equationl.ffmpeg.FFtask;
 import com.equationl.videoshotpro.Image.Tools;
-import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
-import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
-import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
+import com.equationl.videoshotpro.utils.Utils;
 
 public class CommandActivity extends AppCompatActivity {
     Button btn;
@@ -33,6 +34,8 @@ public class CommandActivity extends AppCompatActivity {
     EditText edittext;
     Tools tool;
     ScrollView sv;
+    FFmpeg ffmpeg;
+    FFtask fftask;
     int ResultDo=1;
 
     private static final int ActivityResultCodeAddPath = 1;
@@ -42,16 +45,26 @@ public class CommandActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_command);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.command_toolbar);
+        Toolbar toolbar = findViewById(R.id.command_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        btn = (Button) findViewById(R.id.command_button);
-        textview = (TextView) findViewById(R.id.command_text);
-        edittext = (EditText) findViewById(R.id.command_editText);
-        sv = (ScrollView) findViewById(R.id.command_scroll);
+        btn = findViewById(R.id.command_button);
+        textview = findViewById(R.id.command_text);
+        edittext = findViewById(R.id.command_editText);
+        sv = findViewById(R.id.command_scroll);
 
         tool = new Tools();
+
+        try {
+            ffmpeg = Utils.getFFmpeg(this);
+            if (ffmpeg == null) {
+                Toast.makeText(this, R.string.toast_ffmpeg_not_support, Toast.LENGTH_LONG).show();
+                finish();
+            }
+        } catch (Exception e) {
+            ffmpeg = FFmpeg.getInstance(this);
+        }
 
 
         /*
@@ -71,7 +84,6 @@ public class CommandActivity extends AppCompatActivity {
                 int heightDifference = screenHeight - r.bottom;
                 if (heightDifference > 0) {
                     scrollToBottom(sv, textview);
-                } else {
                 }
             }
         });
@@ -82,46 +94,41 @@ public class CommandActivity extends AppCompatActivity {
                 String text = edittext.getText().toString();
                 textview.setText("");
                 Log.i("el_test", text);
-                FFmpeg ffmpeg = FFmpeg.getInstance(getApplicationContext());
-                if (!ffmpeg.isFFmpegCommandRunning()) {
-                    String cmd[] = text.split(" ");
-                    try {
-                        ffmpeg.execute(cmd, new ExecuteBinaryResponseHandler() {
-                            @Override
-                            public void onStart() {
-                                btn.setClickable(false);
-                                hintKeyBoard();
-                            }
-                            @Override
-                            public void onFailure(String message) {
-                                message = blank2n(message);
-                                textview.setText(message+"\n执行失败");
-                                //sv.fullScroll(ScrollView.FOCUS_DOWN);
-                                scrollToBottom(sv, textview);
-                            }
-                            @Override
-                            public void onSuccess(String message) {
-                                message = blank2n(message);
-                                Log.i("el_test", message);
-                                textview.setText(message+"\n执行成功");
-                                //sv.fullScroll(ScrollView.FOCUS_DOWN);
-                                scrollToBottom(sv, textview);
-                            }
-                            @Override
-                            public void onProgress(String message) {
-                                message = blank2n(message);
-                                textview.setText(textview.getText().toString()+message);
-                                //sv.fullScroll(ScrollView.FOCUS_DOWN);
-                                scrollToBottom(sv, textview);
-                            }
-                            @Override
-                            public void onFinish() {
-                                btn.setClickable(true);
-                            }
-                        });
-                        } catch (FFmpegCommandAlreadyRunningException e) {
-                        textview.setText("运行错误");
-                    }
+                if (!ffmpeg.isCommandRunning(fftask)) {
+                    String[] cmd = text.split(" ");
+                    fftask = ffmpeg.execute(cmd, new ExecuteBinaryResponseHandler() {
+                        @Override
+                        public void onStart() {
+                            btn.setClickable(false);
+                            hintKeyBoard();
+                        }
+                        @Override
+                        public void onFailure(String message) {
+                            message = blank2n(message);
+                            textview.setText(message+"\n执行失败");
+                            //sv.fullScroll(ScrollView.FOCUS_DOWN);
+                            scrollToBottom(sv, textview);
+                        }
+                        @Override
+                        public void onSuccess(String message) {
+                            message = blank2n(message);
+                            Log.i("el_test", message);
+                            textview.setText(message+"\n执行成功");
+                            //sv.fullScroll(ScrollView.FOCUS_DOWN);
+                            scrollToBottom(sv, textview);
+                        }
+                        @Override
+                        public void onProgress(String message) {
+                            message = blank2n(message);
+                            textview.setText(textview.getText().toString()+message);
+                            //sv.fullScroll(ScrollView.FOCUS_DOWN);
+                            scrollToBottom(sv, textview);
+                        }
+                        @Override
+                        public void onFinish() {
+                            btn.setClickable(true);
+                        }
+                    });
                 }
             }
         });
@@ -146,7 +153,7 @@ public class CommandActivity extends AppCompatActivity {
             ResultDo = ActivityResultCodeAddPath;
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("*/*");
-            intent.addCategory(intent.CATEGORY_OPENABLE);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
             startActivityForResult(Intent.createChooser(intent, "请选择文件"),1);
             return true;
         }
@@ -154,7 +161,7 @@ public class CommandActivity extends AppCompatActivity {
             ResultDo = ActivityResultCodeAddTime;
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("video/*");
-            intent.addCategory(intent.CATEGORY_OPENABLE);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
             startActivityForResult(Intent.createChooser(intent, "请选择文件"),1);
             return true;
         }

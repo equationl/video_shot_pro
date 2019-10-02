@@ -514,4 +514,12 @@
     <string name="main_dialog_text_support">If you like us, please give us 5 stars and donation</string>
     <string name="shortcut_toast_PermissionDenied">You need launch app to initialization before use this!</string>
     <string name="shortcut_toast_needPermission">Need permission!</string>
+    <string name="downloadActivity_dialog_askDownload_btn_cancel">NO</string>
+    <string name="downloadActivity_dialog_askDownload_btn_ok">Download</string>
+    <string name="downloadActivity_dialog_askDownload_message">To use this feature, you need to download additional packets of up to 20MB. Do you want to download them now?</string>
+    <string name="downloadActivity_dialog_askDownload_title">Download data</string>
+    <string name="downloadActivity_text_download_progress">%1$s/%2$s</string>
+    <string name="downloadActivity_toast_downloadData_download_success">Download finsh!</string>
+    <string name="downloadActivity_toast_downloadData_fileImperfect">" File verification failed!"</string>
+    <string name="toast_ffmpeg_not_support">" Sorry, this feature is not supported on your phone!"</string>
 </resources>

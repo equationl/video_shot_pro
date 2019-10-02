@@ -28,13 +28,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.equationl.ffmpeg.ExecuteBinaryResponseHandler;
+import com.equationl.ffmpeg.FFmpeg;
+import com.equationl.ffmpeg.FFtask;
 import com.equationl.videoshotpro.Image.CheckPictureText;
 import com.equationl.videoshotpro.Image.Tools;
 import com.equationl.videoshotpro.utils.Utils;
 import com.gastudio.downloadloadding.library.GADownloadingView;
-import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
-import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
-import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
 import com.liulishuo.okdownload.DownloadTask;
 import com.liulishuo.okdownload.SpeedCalculator;
 import com.liulishuo.okdownload.core.breakpoint.BlockInfo;
@@ -63,8 +63,8 @@ public class PlayerForDataActivity extends AppCompatActivity {
     ProgressDialog dialog;
     Resources res;
     Tools tool;
-    Utils utils = new Utils();
     FFmpeg ffmpeg;
+    FFtask fftask;
     Uri video_uri;
     File externalCacheDir;
     CheckPictureText cpt;
@@ -89,7 +89,6 @@ public class PlayerForDataActivity extends AppCompatActivity {
     private static final int HandlerFBFonProgress = 10000;
     private static final int HandlerFBFonSuccess = 10001;
     private static final int HandlerFBFonFail = 10002;
-    private static final int HandlerFBFRunningFail = 10003;
     private static final int HandlerFBFRunningFinish = 10004;
     private static final int HandlerABonProgress = 20001;
     private static final int HandlerABonSuccess = 20002;
@@ -134,7 +133,15 @@ public class PlayerForDataActivity extends AppCompatActivity {
         }
 
         tool = new Tools();
-        ffmpeg = FFmpeg.getInstance(this);
+        try {
+            ffmpeg = Utils.getFFmpeg(this);
+            if (ffmpeg == null) {
+                Toast.makeText(this, R.string.toast_ffmpeg_not_support, Toast.LENGTH_LONG).show();
+                finish();
+            }
+        } catch (Exception e) {
+            ffmpeg = FFmpeg.getInstance(this);
+        }
         settings = PreferenceManager.getDefaultSharedPreferences(this);
         sp_init = getSharedPreferences("init", Context.MODE_PRIVATE);
         res = getResources();
@@ -331,45 +338,40 @@ public class PlayerForDataActivity extends AppCompatActivity {
         }
 
         Log.i(TAG, "cmd="+text);
-        FFmpeg ffmpeg = FFmpeg.getInstance(getApplicationContext());
-        if (!ffmpeg.isFFmpegCommandRunning()) {
+        if (!ffmpeg.isCommandRunning(fftask)) {
             String[] cmd = text.split(" ");
             if (isVideoPathHaveSpace) {   //FIXME 现在的索引确定是5，小心以后变化啊
                 cmd[5] = cmd[5].replaceAll("_eltemp_", " ");
             }
-            try {
-                ffmpeg.execute(cmd, new ExecuteBinaryResponseHandler() {
-                    @Override
-                    public void onStart() {}
-                    @Override
-                    public void onFailure(String message) {
-                        Message msg = Message.obtain();
-                        msg.obj = message;
-                        msg.what = HandlerFBFonFail;
-                        handler.sendMessage(msg);
-                    }
-                    @Override
-                    public void onSuccess(String message) {
-                        Message msg = Message.obtain();
-                        msg.obj = save_path;
-                        msg.what = HandlerFBFonSuccess;
-                        handler.sendMessage(msg);
-                    }
-                    @Override
-                    public void onProgress(String message) {
-                        Message msg = Message.obtain();
-                        msg.obj = message;
-                        msg.what = HandlerFBFonProgress;
-                        handler.sendMessage(msg);
-                    }
-                    @Override
-                    public void onFinish() {
-                        handler.sendEmptyMessage(HandlerFBFRunningFinish);
-                    }
-                });
-            } catch (FFmpegCommandAlreadyRunningException e) {
-                handler.sendEmptyMessage(HandlerFBFRunningFail);
-            }
+            fftask = ffmpeg.execute(cmd, new ExecuteBinaryResponseHandler() {
+                @Override
+                public void onStart() {}
+                @Override
+                public void onFailure(String message) {
+                    Message msg = Message.obtain();
+                    msg.obj = message;
+                    msg.what = HandlerFBFonFail;
+                    handler.sendMessage(msg);
+                }
+                @Override
+                public void onSuccess(String message) {
+                    Message msg = Message.obtain();
+                    msg.obj = save_path;
+                    msg.what = HandlerFBFonSuccess;
+                    handler.sendMessage(msg);
+                }
+                @Override
+                public void onProgress(String message) {
+                    Message msg = Message.obtain();
+                    msg.obj = message;
+                    msg.what = HandlerFBFonProgress;
+                    handler.sendMessage(msg);
+                }
+                @Override
+                public void onFinish() {
+                    handler.sendEmptyMessage(HandlerFBFRunningFinish);
+                }
+            });
         }
     }
 
@@ -457,8 +459,8 @@ public class PlayerForDataActivity extends AppCompatActivity {
                         int progress = (int)(currentOffset*100.0/dataTotalLength);
                         String progressText = String.format(
                                 activity.res.getString(R.string.player_text_download_progress),
-                                activity.utils.bytesBeHuman(currentOffset),
-                                activity.utils.bytesBeHuman(dataTotalLength));
+                                Utils.bytesBeHuman(currentOffset),
+                                Utils.bytesBeHuman(dataTotalLength));
                         activity.gaDownloadingView.updateProgress(progress);
                         activity.downloadViewText.setText(progressText);
                         Log.i(TAG, "progress="+progress);
@@ -667,7 +669,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
             @Override
             public void taskEnd(@NonNull DownloadTask task, @NonNull EndCause cause, @Nullable Exception realCause, @NonNull SpeedCalculator taskSpeed) {
                 File data = new File(getExternalFilesDir("tessdata"), "chi_sim.traineddata");
-                String fileMD5 = utils.fileToMD5(data.getPath());
+                String fileMD5 = Utils.fileToMD5(data.getPath());
                 if (fileMD5 == null) {
                     Log.e(TAG, "taskEnd: get fileMD5 fail!");
                     handler.sendEmptyMessage(HandlerDownLoadStatusOnError);
@@ -739,7 +741,7 @@ public class PlayerForDataActivity extends AppCompatActivity {
             Log.i(TAG, "need download tessdata");
             initDownloadView();
         }
-        String fileMd5 = utils.fileToMD5(data.getPath());
+        String fileMd5 = Utils.fileToMD5(data.getPath());
         if (fileMd5 == null) {
             Log.i(TAG, "checkTessData: file imperfect");
             try {

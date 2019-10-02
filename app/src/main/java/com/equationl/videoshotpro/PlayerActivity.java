@@ -23,12 +23,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.equationl.ffmpeg.ExecuteBinaryResponseHandler;
+import com.equationl.ffmpeg.FFmpeg;
+import com.equationl.ffmpeg.FFtask;
 import com.equationl.videoshotpro.Image.Tools;
 import com.equationl.videoshotpro.utils.Utils;
-import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
-import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
-import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
-import com.google.android.exoplayer.util.Util;
 import com.shuyu.gsyvideoplayer.GSYVideoManager;
 import com.shuyu.gsyvideoplayer.player.PlayerFactory;
 import com.shuyu.gsyvideoplayer.player.SystemPlayerManager;
@@ -51,6 +50,7 @@ public class PlayerActivity extends AppCompatActivity {
     Resources res;
     Tools tool;
     FFmpeg ffmpeg;
+    FFtask fftask;
 
     ImageView btn_shot, btn_done;
     TextView text_play_status;
@@ -127,7 +127,15 @@ public class PlayerActivity extends AppCompatActivity {
         videoPlayer =  findViewById(R.id.video_player);
 
         tool = new Tools();
-        ffmpeg = FFmpeg.getInstance(this);
+        try {
+            ffmpeg = Utils.getFFmpeg(this);
+            if (ffmpeg == null) {
+                Toast.makeText(this, R.string.toast_ffmpeg_not_support, Toast.LENGTH_LONG).show();
+                finish();
+            }
+        } catch (Exception e) {
+            ffmpeg = FFmpeg.getInstance(this);
+        }
         settings = PreferenceManager.getDefaultSharedPreferences(this);
         res = getResources();
 
@@ -292,7 +300,7 @@ public class PlayerActivity extends AppCompatActivity {
         public void run() {
             Long time;
             while ((time = mark_time.peek()) != null) {
-                if (!ffmpeg.isFFmpegCommandRunning()) {
+                if (!ffmpeg.isCommandRunning(fftask)) {
                     isShotFinish = false;
                     String outPathName;
                     File externalCacheDir = getExternalCacheDir();
@@ -310,40 +318,33 @@ public class PlayerActivity extends AppCompatActivity {
                         outPathName = externalCacheDir.toString()+"/"+shot_count+".png";
                     }
 
-                    String cmd[] = {"-ss", ""+(time/1000.0), "-t", "0.001", "-i", video_path, "-update", "1", "-y", "-f", "image2", outPathName};
-                    try {
-                        Log.i(TAG, "cmd="+Arrays.toString(cmd));
-                        ffmpeg.execute(cmd, new ExecuteBinaryResponseHandler() {
-                            @Override
-                            public void onFailure(String message) {
-                                Log.i("el_test: onFailure", message);
-                                Message msg = Message.obtain();
-                                msg.obj = R.string.player_text_savePicture_fail+message;
-                                msg.what = HandlerShotFail;
-                                handler.sendMessage(msg);
-                            }
-                            @Override
-                            public void onSuccess(String message) {
-                                shot_count++;
-                                mark_time.poll();
-                                Log.i("TAG", "onSuccess:");
-                                Log.i(TAG, message);
-                                Message msg = Message.obtain();
-                                msg.obj = String.format(res.getString(R.string.player_text_shotStatus),mark_count, shot_count);
-                                msg.what = HandlerShotSuccess;
-                                handler.sendMessage(msg);
-                            }
-                            @Override
-                            public void onFinish() {
-                                isShotFinish = true;
-                            }
-                        });
-                    } catch (FFmpegCommandAlreadyRunningException e) {
-                        Message msg = Message.obtain();
-                        msg.obj = res.getString(R.string.player_text_savePicture_fail)+e;
-                        msg.what = HandlerShotFail;
-                        handler.sendMessage(msg);
-                    }
+                    String[] cmd = {"-ss", "" + (time / 1000.0), "-t", "0.001", "-i", video_path, "-update", "1", "-y", "-f", "image2", outPathName};
+                    Log.i(TAG, "cmd="+Arrays.toString(cmd));
+                    fftask = ffmpeg.execute(cmd, new ExecuteBinaryResponseHandler() {
+                        @Override
+                        public void onFailure(String message) {
+                            Log.i("el_test: onFailure", message);
+                            Message msg = Message.obtain();
+                            msg.obj = R.string.player_text_savePicture_fail+message;
+                            msg.what = HandlerShotFail;
+                            handler.sendMessage(msg);
+                        }
+                        @Override
+                        public void onSuccess(String message) {
+                            shot_count++;
+                            mark_time.poll();
+                            Log.i("TAG", "onSuccess:");
+                            Log.i(TAG, message);
+                            Message msg = Message.obtain();
+                            msg.obj = String.format(res.getString(R.string.player_text_shotStatus),mark_count, shot_count);
+                            msg.what = HandlerShotSuccess;
+                            handler.sendMessage(msg);
+                        }
+                        @Override
+                        public void onFinish() {
+                            isShotFinish = true;
+                        }
+                    });
                     //阻塞等待截取结果
                     while (!isShotFinish) {
                         try {
@@ -411,11 +412,11 @@ public class PlayerActivity extends AppCompatActivity {
                 ((gif_end_time-gif_start_time)/1000.0),
                 video_path_no_space,
                 palettePicPath,
-                gif_frameRate.equals("-1")? "24":gif_frameRate,
+                (gif_frameRate != null && gif_frameRate.equals("-1")) ? "24":gif_frameRate,
                 "100k",
                 gif_RP.equals("-1")?"-1:-1":gif_RP.replace("x", ":"),
                 save_path);
-        String gif_cmd[] = cmd.split(" ");
+        String[] gif_cmd = cmd.split(" ");
         if (isVideoPathHaveSpace) {   //FIXME 现在的索引确定是5，小心以后变化啊
             gif_cmd[5] = gif_cmd[5].replaceAll("_", " ");
         }
@@ -442,9 +443,9 @@ public class PlayerActivity extends AppCompatActivity {
         Log.i(TAG, "gif start time(s)="+(gif_start_time/1000.0)+" time(ms)="+gif_start_time+" all="+((gif_end_time-gif_start_time)/1000.0));
         cmd += gif_RP.equals("-1")?"":" -s "+gif_RP;
         cmd += " -f gif";
-        cmd += gif_frameRate.equals("-1")?"":" -r "+gif_frameRate;
+        cmd += (gif_frameRate != null && gif_frameRate.equals("-1")) ?"":" -r "+gif_frameRate;
         cmd += " "+save_path;
-        String gif_cmd[] = cmd.split(" ");
+        String[] gif_cmd = cmd.split(" ");
         if (isVideoPathHaveSpace) {   //FIXME 现在的索引确定是5，小心以后变化啊
             gif_cmd[5] = gif_cmd[5].replaceAll("_", " ");
         }
@@ -454,7 +455,7 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     private void executeBuildGif(String[] gif_cmd, final String save_path) {
-        while (ffmpeg.isFFmpegCommandRunning()) {
+        while (ffmpeg.isCommandRunning(fftask)) {
             //阻塞等待执行结束
             try {
                 Thread.sleep(100);
@@ -462,45 +463,40 @@ public class PlayerActivity extends AppCompatActivity {
                 Log.e(TAG, Log.getStackTraceString(e));
             }
         }
-        try {
-            ffmpeg.execute(gif_cmd, new ExecuteBinaryResponseHandler() {
+        fftask = ffmpeg.execute(gif_cmd, new ExecuteBinaryResponseHandler() {
 
-                @Override
-                public void onStart() {
-                    handler.sendEmptyMessage(HandlerShotGifRunning);
+            @Override
+            public void onStart() {
+                handler.sendEmptyMessage(HandlerShotGifRunning);
+            }
+
+            @Override
+            public void onProgress(String message) {}
+
+            @Override
+            public void onFailure(String message) {
+                Log.e(TAG, "截取GIF失败："+message);
+                handler.sendEmptyMessage(HandlerShotGifFail);
+            }
+
+            @Override
+            public void onSuccess(String message) {
+                if (isOnBuildGifPalettePic) {
+                    isOnBuildGifPalettePic = false;
+                    String[] cmd = getShotGifCmdHigh(save_path);
+                    executeBuildGif(cmd, save_path);
                 }
-
-                @Override
-                public void onProgress(String message) {}
-
-                @Override
-                public void onFailure(String message) {
-                    Log.e(TAG, "截取GIF失败："+message);
-                    handler.sendEmptyMessage(HandlerShotGifFail);
+                else {
+                    Message msg = Message.obtain();
+                    msg.what = HandlerShotGifSuccess;
+                    msg.obj = save_path;
+                    handler.sendMessage(msg);
                 }
+            }
 
-                @Override
-                public void onSuccess(String message) {
-                    if (isOnBuildGifPalettePic) {
-                        isOnBuildGifPalettePic = false;
-                        String[] cmd = getShotGifCmdHigh(save_path);
-                        executeBuildGif(cmd, save_path);
-                    }
-                    else {
-                        Message msg = Message.obtain();
-                        msg.what = HandlerShotGifSuccess;
-                        msg.obj = save_path;
-                        handler.sendMessage(msg);
-                    }
-                }
-
-                @Override
-                public void onFinish() {}
-            });
-        } catch (FFmpegCommandAlreadyRunningException e) {
-            Log.e(TAG, Log.getStackTraceString(e));
-            handler.sendEmptyMessage(HandlerShotGifFail);
-        }
+            @Override
+            public void onFinish() {}
+        });
     }
 
     private static class MyHandler extends Handler {

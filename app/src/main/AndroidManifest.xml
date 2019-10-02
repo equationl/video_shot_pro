@@ -23,7 +23,10 @@
         android:largeHeap="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"> <!-- 申请更大的内存 -->
+        android:theme="@style/AppTheme">
+        <activity android:name=".DownloadActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />
+        <!-- 申请更大的内存 -->
         <activity
             android:name="com.tencent.bugly.beta.ui.BetaActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|locale"
@@ -45,8 +48,9 @@
         <activity
             android:name=".MarkPictureActivity"
             android:label="@string/title_activity_markPicture" />
-        <activity android:name=".BuildPictureActivity"
-            android:label="@string/title_activity_buildPicture"/>
+        <activity
+            android:name=".BuildPictureActivity"
+            android:label="@string/title_activity_buildPicture" />
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings" />
@@ -133,14 +137,12 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.Fullscreen" />
-        <activity android:name=".PlayerForDataActivity"
+        <activity
+            android:name=".PlayerForDataActivity"
             android:configChanges="keyboard|orientation|screenSize"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.Fullscreen"
-            />
-        <activity
-            android:name="com.avos.avoscloud.feedback.ThreadActivity" >
-        </activity>
+            android:theme="@style/AppTheme.Fullscreen" />
+        <activity android:name="com.avos.avoscloud.feedback.ThreadActivity"></activity>
     </application>
 
 </manifest>

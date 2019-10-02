@@ -20,11 +20,11 @@ import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import com.equationl.videoshotpro.AboutActivity;
+import com.equationl.videoshotpro.DownloadActivity;
 import com.equationl.videoshotpro.R;
-import com.yancy.gallerypick.utils.AppUtils;
+import com.equationl.ffmpeg.FFmpeg;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -206,7 +206,7 @@ public class Utils {
     }
 
     @Nullable
-    public String fileToMD5(String filePath) {
+    public static String fileToMD5(String filePath) {
         InputStream inputStream = null;
         try {
             inputStream = new FileInputStream(filePath);
@@ -235,7 +235,7 @@ public class Utils {
         }
     }
 
-    public String bytesBeHuman(Long bytes) {
+    public static String bytesBeHuman(Long bytes) {
         if (bytes <= 1024) {
             return bytes+"BB";
         }
@@ -318,10 +318,61 @@ public class Utils {
         }
     }
 
+    /**
+     * <p>获取 ffmpeg 对象</p>
+     * <p>如果 ffmpeg 可用且存在则返回 ffmpeg 对象</p>
+     * <p>如果 ffmpeg 不可用则返回 null</p>
+     * <p>如果 ffmpeg 不存在则弹框提示下载，确定后跳转至下载页面<，并抛出异常/p>
+     * */
+    public static FFmpeg getFFmpeg(final Context context)throws Exception{
+        FFmpeg fFmpeg = FFmpeg.getInstance(context);
+        if (fFmpeg.isSupported()) {
+            if (fFmpeg.isFFmpegExist()) {
+                return fFmpeg;
+            }
+            else {
+                String prefix = fFmpeg.getPrefix();
+                showNeedDownloadDialog(context, prefix);
+                throw new Exception("ffmpeg not exist");
+                /*File downFile = downloadFile(prefix);
+                fFmpeg.setFFmpegFile(downFile);
+                if (fFmpeg.isFFmpegExist()) {
+                    return fFmpeg;
+                }
+                else {
+                    return null;
+                }   */
+            }
+        }
+        else {
+            return null;
+        }
+    }
+
+    private static void showNeedDownloadDialog(final Context context, final String prefix) {
+        new AlertDialog.Builder(context)
+                .setTitle(R.string.downloadActivity_dialog_askDownload_title)
+                .setMessage(R.string.downloadActivity_dialog_askDownload_message)
+                .setCancelable(false)
+                .setNegativeButton(R.string.downloadActivity_dialog_askDownload_btn_cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) { }
+                })
+                .setPositiveButton(R.string.downloadActivity_dialog_askDownload_btn_ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Intent intent = new Intent(context, DownloadActivity.class);
+                        intent.putExtra("prefix", prefix);
+                        context.startActivity(intent);
+                    }
+                })
+                .show();
+    }
+
     private static String convertHashToString(byte[] md5Bytes) {
-        StringBuffer buf = new StringBuffer();
-        for (int i = 0; i < md5Bytes.length; i++) {
-            buf.append(Integer.toString((md5Bytes[i] & 0xff) + 0x100, 16).substring(1));
+        StringBuilder buf = new StringBuilder();
+        for (byte md5Byte : md5Bytes) {
+            buf.append(Integer.toString((md5Byte & 0xff) + 0x100, 16).substring(1));
         }
         return buf.toString().toUpperCase();
     }

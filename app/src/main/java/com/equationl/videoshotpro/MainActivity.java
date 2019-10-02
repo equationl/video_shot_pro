@@ -48,6 +48,7 @@ import android.widget.Toast;
 
 import com.avos.avoscloud.AVOSCloud;
 import com.avos.avoscloud.feedback.FeedbackAgent;
+    import com.equationl.ffmpeg.FFmpeg;
 import com.equationl.videoshotpro.Adapter.MainWaterFallAdapter;
 import com.equationl.videoshotpro.Image.Tools;
 import com.equationl.videoshotpro.rom.HuaweiUtils;
@@ -60,9 +61,6 @@ import com.equationl.videoshotpro.utils.Utils;
 import com.equationl.videoshotpro.utils.WaterFallData;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
-import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
-import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
-import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.crashreport.CrashReport;
 import com.tencent.tauth.IUiListener;
@@ -136,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final int RequestCodeGoToSetting = 1002;
 
     private static final int SnackBarOnClickDoSure = 200;
-    private static final int SnackBarOnClickDoReloadFFmpeg = 201;
+    //private static final int SnackBarOnClickDoReloadFFmpeg = 201;
     private static final int SnackBarOnClickDoFeedback = 203;
 
     private static final String TAG = "el,In MainActivity";
@@ -540,7 +538,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         startActivityForResult(intent, RequestCodeGoToSetting);
     }
 
-    private void loadLib() {
+    /*private void loadLib() {
         FFmpeg ffmpeg = FFmpeg.getInstance(this);
         try {
             ffmpeg.loadBinary(new LoadBinaryResponseHandler() {
@@ -552,12 +550,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } catch (FFmpegNotSupportedException e) {
             handler.sendEmptyMessage(HandlerStatusFFmpegNotSupported);
         }
-    }
+    }  */
 
     private class InitThread implements Runnable {
         @Override
         public void run() {
-            loadLib();
+            //loadLib();
             Utils.finishActivity(MarkPictureActivity.instance);
             Utils.finishActivity(ChooseActivity.instance);
             Utils.finishActivity(BuildPictureActivity.instance);
@@ -829,9 +827,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 switch (from) {
                                     case SnackBarOnClickDoSure:
                                         break;
-                                    case SnackBarOnClickDoReloadFFmpeg:
+                                    /*case SnackBarOnClickDoReloadFFmpeg:
                                         loadLib();
-                                        break;
+                                        break;  */
                                     case SnackBarOnClickDoFeedback:
                                         startActivity(new Intent(MainActivity.this, FeedbackActivity.class));
                                         break;
@@ -1074,9 +1072,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             final MainActivity activity = mActivity.get();
             if (activity != null) {
                 switch (msg.what) {
-                    case HandlerStatusLoadLibsFailure:
+                    /*case HandlerStatusLoadLibsFailure:
                         activity.showCommonDialog(R.string.main_snackbar_loadSo_fail, R.string.main_snackbar_btn_retry, SnackBarOnClickDoReloadFFmpeg);
-                        break;
+                        break;  */
                     case HandlerStatusFFmpegNotSupported:
                         activity.showCommonDialog(R.string.main_snackbar_so_notAble, R.string.main_snackbar_btn_contact, SnackBarOnClickDoFeedback);
                         break;

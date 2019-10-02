@@ -28,7 +28,7 @@
         \t推荐直接直接使用系统图库查看\n
         \n\n\n
     </string>
-    
+
     <string name="about_updateHistory_text" translatable="false">
         2.0 finir Fix03：\n
         \t*修改意见反馈方式(因个人服务器到期，无力继续支持，故改为接入第三方反馈服务)\n
@@ -215,7 +215,7 @@
         -------------\n
         ScreenCapture ： https://github.com/goodbranch/ScreenCapture  \n
          -------------\n
-        ffmpeg-android-java：https://github.com/writingminds/ffmpeg-android-java \n
+        FFmpeg-Android：https://github.com/equationl/FFmpeg-Android \n
          -------------\n
         GalleryPick：https://github.com/YancyYe/GalleryPick \n
          -------------\n
@@ -691,7 +691,7 @@
 
     <string name="shortcut_float_ShortLabel">开始截图</string>
     <string name="shortcut_float_LongLabel">外部程序截图</string>
-    
+
     <string name="shortcut_toast_unknownMode">非法访问！</string>
     <string name="shortcut_toast_needPermission">请允许权限！</string>
     <string name="shortcut_toast_PermissionDenied">请先打开应用进行初始化后再使用该功能！</string>
@@ -732,4 +732,19 @@
     <string name="chooseBest_dialog_exit_btn_delect">删除</string>
     <string name="chooseBest_dialog_exit_btn_save">保存</string>
     <string name="chooseBest_dialog_exit_btn_cancel">取消</string>
+
+
+    <string name="downloadActivity_dialog_askDownload_title">下载数据</string>
+    <string name="downloadActivity_dialog_askDownload_message">使用该功能需要下载不超过20MB的额外数据包，是否立即下载？</string>
+    <string name="downloadActivity_dialog_askDownload_btn_cancel">否</string>
+    <string name="downloadActivity_dialog_askDownload_btn_ok">下载</string>
+
+    <string name="downloadActivity_toast_downloadData_download_success">下载完成！</string>
+    <string name="downloadActivity_toast_downloadData_fileImperfect">文件校验失败！</string>
+    
+    <string name="downloadActivity_text_download_progress">%1$s/%2$s</string>
+
+    
+    
+    <string name="toast_ffmpeg_not_support">很抱歉，您的手机不支持该功能！</string>
 </resources>
